@@ -779,11 +779,17 @@ let selectedEpColor=PROJECT_PALETTE[0];
 function populateAllProjectSelects(){
 const opts=projects.map(p=>`<option value="${esc(p.name)}">${esc(p.name)}</option>`).join('');
 const allOpts='<option value="">All projects</option>'+opts;
-const el=(id,inner)=>{const e=document.getElementById(id);if(e)e.innerHTML=inner;};
-el('lf-project',allOpts);
-el('f-project',opts);
-el('e-project',opts);
-el('a-project',opts);
+// preserve current selection so a background refresh doesn't wipe user's choice
+const setEl=(id,inner,preserve)=>{
+  const e=document.getElementById(id);if(!e)return;
+  const prev=e.value;
+  e.innerHTML=inner;
+  if(preserve&&prev&&e.querySelector(`option[value="${prev.replace(/"/g,'\\"')}"]`))e.value=prev;
+};
+setEl('lf-project',allOpts,true);
+setEl('f-project',opts,true);
+setEl('e-project',opts,true);
+setEl('a-project',opts,true);
 }
 function renderProjectNavTabs(){
 const el=document.getElementById('project-nav-tabs');if(!el)return;
@@ -1194,6 +1200,9 @@ const fo=document.getElementById('bf-owner').value;
 let list=tasks;
 if(activeProj!=='All') list=list.filter(t=>t.project===activeProj);
 if(fo) list=list.filter(t=>t.owner===fo);
+// sync sidebar project dropdown to active project filter
+const fp=document.getElementById('f-project');
+if(fp&&activeProj!=='All'&&fp.querySelector(`option[value="${activeProj.replace(/"/g,'\\"')}"]`))fp.value=activeProj;
 document.getElementById('kanban').innerHTML=STAGES.map((stage,si)=>{
 const cards=list.filter(t=>t.stage===stage);
 const key=SKEY(stage);
