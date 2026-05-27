@@ -1182,8 +1182,9 @@ if(fo) list=list.filter(t=>t.owner===fo);
 document.getElementById('kanban').innerHTML=STAGES.map((stage,si)=>{
 const cards=list.filter(t=>t.stage===stage);
 const key=SKEY(stage);
-return `<div class="kcol" ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropTask(event,${si})"><div class="kcol-head"><div style="display:flex;align-items:center;gap:6px"><div style="width:7px;height:7px;border-radius:50%;flex-shrink:0" class="d-${key}"></div><span class="kcol-ttl">${stage==='AW Release / Event Live'?'AW Release':stage}</span></div><span class="kcol-cnt">${cards.length}</span></div><div class="kcol-body" style="min-height:60px">${cards.length===0?`<div class="kcol-empty"><i class="ti ti-inbox"></i>Empty</div>`:cards.map(t=>kcardHTML(t,stage,si)).join('')}</div></div>`;
+return `<div class="kcol" data-si="${si}"><div class="kcol-head"><div style="display:flex;align-items:center;gap:6px"><div style="width:7px;height:7px;border-radius:50%;flex-shrink:0" class="d-${key}"></div><span class="kcol-ttl">${stage==='AW Release / Event Live'?'AW Release':stage}</span></div><span class="kcol-cnt">${cards.length}</span></div><div class="kcol-body" style="min-height:80px">${cards.length===0?'<div class="kcol-empty">Empty</div>':cards.map(t=>kcardHTML(t,stage,si)).join('')}</div></div>`;
 }).join('');
+setupDragDrop();
 renderSbStats();
 }
 function kcardHTML(t,stage,si){
@@ -1198,7 +1199,7 @@ const cls=diff<0?'hot':diff<=3?'warn':'';
 const lbl=diff<0?`${Math.abs(diff)}d late`:diff===0?'Today':diff===1?'Tomorrow':`${d.getDate()} ${d.toLocaleString('en',{month:'short'})}`;
 dueHTML=`<span class="due-tag ${cls}">${lbl}</span>`;
 }
-return `<div class="kcard" data-id="${t.id}" draggable="true" ondragstart="dragStart(event,${t.id})" ondragend="dragEnd(event)" onclick="openEdit(${t.id})"><div class="kcard-proj"><span style="width:6px;height:6px;border-radius:50%;background:${pc};flex-shrink:0;display:inline-block"></span>${esc(t.project)}</div><div class="kcard-title">${esc(t.title)}</div>${t.note?`<div class="kcard-note">${esc(t.note)}</div>`:''}<div class="kcard-foot"><span class="owner-pip o-${ok}">${t.owner}</span>${dueHTML}</div><div class="kcard-actions">${canL?`<button class="cta" title="Move to previous stage" onclick="moveTask(event,${t.id},-1)">&#8592;</button>`:''}<button class="cta" title="Edit" onclick="openEdit(${t.id});event.stopPropagation()">Edit</button>${canR?`<button class="cta" title="Move to next stage" onclick="moveTask(event,${t.id},1)">&#8594;</button>`:''}<button class="cta del" title="Delete" onclick="delKanban(event,${t.id})">&#x2715;</button></div></div>`;
+return `<div class="kcard" data-id="${t.id}" onclick="openEdit(${t.id})"><div class="kcard-proj"><span style="width:6px;height:6px;border-radius:50%;background:${pc};flex-shrink:0;display:inline-block"></span>${esc(t.project)}</div><div class="kcard-title">${esc(t.title)}</div>${t.note?`<div class="kcard-note">${esc(t.note)}</div>`:''}<div class="kcard-foot"><span class="owner-pip o-${ok}">${t.owner}</span>${dueHTML}</div><div class="kcard-actions">${canL?`<button class="cta" onclick="moveTask(event,${t.id},-1)">&#8592; Prev</button>`:''}<button class="cta" onclick="openEdit(${t.id});event.stopPropagation()">&#9998; Edit</button>${canR?`<button class="cta" onclick="moveTask(event,${t.id},1)">Next &#8594;</button>`:''}<button class="cta del" onclick="delKanban(event,${t.id})">&#x2715; Del</button></div></div>`;
 }
 function renderSbStats(){
 const list=activeProj==='All'?tasks:tasks.filter(t=>t.project===activeProj);
@@ -1224,41 +1225,47 @@ tasks=tasks.filter(t=>t.id!==id);renderKanban();
 }
 // ═════════════ DRAG & DROP ═════════════
 let _dragId=null;
-function dragStart(e,id){
-_dragId=id;
+function setupDragDrop(){
+document.querySelectorAll('.kcard').forEach(card=>{
+card.setAttribute('draggable','true');
+card.addEventListener('dragstart',e=>{
+_dragId=parseInt(card.dataset.id);
 e.dataTransfer.effectAllowed='move';
-e.dataTransfer.setData('text/plain',String(id));
-setTimeout(()=>{const c=document.querySelector('.kcard[data-id="'+id+'"]');if(c)c.classList.add('dragging');},0);
-}
-function dragEnd(e){
-document.querySelectorAll('.kcard.dragging').forEach(el=>el.classList.remove('dragging'));
+e.dataTransfer.setData('text/plain',card.dataset.id);
+setTimeout(()=>card.classList.add('dragging'),0);
+e.stopPropagation();
+});
+card.addEventListener('dragend',()=>{
+card.classList.remove('dragging');
 document.querySelectorAll('.kcol.drag-over').forEach(el=>el.classList.remove('drag-over'));
-}
-function dragOver(e){
+});
+});
+document.querySelectorAll('.kcol').forEach(col=>{
+const si=parseInt(col.dataset.si);
+col.addEventListener('dragover',e=>{
 e.preventDefault();
-e.stopPropagation();
 e.dataTransfer.dropEffect='move';
-const col=e.currentTarget.closest('.kcol');
-if(col){document.querySelectorAll('.kcol.drag-over').forEach(el=>el.classList.remove('drag-over'));col.classList.add('drag-over');}
-}
-function dragLeave(e){
-const col=e.currentTarget;
+document.querySelectorAll('.kcol.drag-over').forEach(el=>el.classList.remove('drag-over'));
+col.classList.add('drag-over');
+});
+col.addEventListener('dragleave',e=>{
 if(!col.contains(e.relatedTarget))col.classList.remove('drag-over');
-}
-async function dropTask(e,stageIdx){
+});
+col.addEventListener('drop',async e=>{
 e.preventDefault();
-e.stopPropagation();
 document.querySelectorAll('.kcol.drag-over').forEach(el=>el.classList.remove('drag-over'));
 const id=_dragId!==null?_dragId:parseInt(e.dataTransfer.getData('text/plain'));
 _dragId=null;
 if(!id)return;
 const t=tasks.find(t=>t.id===id);
 if(!t)return;
-const newStage=STAGES[stageIdx];
+const newStage=STAGES[si];
 if(t.stage===newStage)return;
 t.stage=newStage;
-try{await window._sb.from('mkt_tasks').update({stage:newStage}).eq('id',t.id);}catch(err){console.error('stage update failed',err);}
+try{await window._sb.from('mkt_tasks').update({stage:newStage}).eq('id',t.id);}catch(err){console.error('drop update failed',err);}
 renderKanban();
+});
+});
 }
 // ═════════════ EDIT MODAL ═════════════
 function openEdit(id){
