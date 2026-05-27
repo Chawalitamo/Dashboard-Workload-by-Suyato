@@ -761,6 +761,19 @@ renderProjTabs();
 renderKanban();
 renderDash();
 }
+async function quickDeleteProject(name){
+const p=projects.find(x=>x.name===name);if(!p)return;
+const taskCount=tasks.filter(t=>t.project===name).length;
+const msg=taskCount>0
+?`Delete "${name}"?\nThis will also delete ${taskCount} task${taskCount!==1?'s':''}.\nThis cannot be undone.`
+:`Delete "${name}"? This cannot be undone.`;
+if(!confirm(msg))return;
+try{await Promise.all([window._sb.from('mkt_projects').delete().eq('name',name),window._sb.from('mkt_tasks').delete().eq('project',name)]);}catch(err){console.error(err);}
+tasks=tasks.filter(t=>t.project!==name);
+projects=projects.filter(x=>x.name!==name);
+if(activeProj===name)activeProj='All';
+populateAllProjectSelects();renderProjectNavTabs();renderProjTabs();renderKanban();renderDash();
+}
 let editingProjectName=null;
 let selectedEpColor=PROJECT_PALETTE[0];
 function populateAllProjectSelects(){
@@ -775,8 +788,9 @@ el('a-project',opts);
 function renderProjectNavTabs(){
 const el=document.getElementById('project-nav-tabs');if(!el)return;
 el.innerHTML=projects.map(p=>`<div style="display:flex;align-items:center;gap:0">
-<button class="pnav-tab" onclick="quickSwitchProject('${esc(p.name)}')" title="${esc(p.name)}" style="border-radius:var(--rsm) 0 0 var(--rsm);border-right:none"><div class="pnav-dot" style="background:${p.color}"></div>${esc(p.name.length>16?p.name.substring(0,16)+'…':p.name)}</button>
-<button onclick="openEditProject('${esc(p.name)}')" title="Edit project" style="display:flex;align-items:center;justify-content:center;padding:5px 7px;background:none;border:1px solid var(--b1);border-left:none;border-radius:0 var(--rsm) var(--rsm) 0;color:var(--t3);cursor:pointer;font-size:12px;transition:all .15s;margin:6px 0" onmouseover="this.style.background='var(--surf2)';this.style.color='var(--t1)'" onmouseout="this.style.background='none';this.style.color='var(--t3)'"><i class="ti ti-dots-vertical" aria-hidden="true"></i></button>
+<button class="pnav-tab" onclick="quickSwitchProject('${esc(p.name)}')" title="${esc(p.name)}" style="border-radius:var(--rsm) 0 0 var(--rsm);border-right:none"><div class="pnav-dot" style="background:${p.color}"></div>${esc(p.name.length>14?p.name.substring(0,14)+'…':p.name)}</button>
+<button onclick="openEditProject('${esc(p.name)}')" title="Edit project" style="display:flex;align-items:center;justify-content:center;padding:5px 7px;background:none;border:1px solid var(--b1);border-left:none;border-right:none;color:var(--t3);cursor:pointer;font-size:12px;transition:all .15s;margin:6px 0" onmouseover="this.style.background='var(--surf2)';this.style.color='var(--t1)'" onmouseout="this.style.background='none';this.style.color='var(--t3)'">&#9998;</button>
+<button onclick="quickDeleteProject('${esc(p.name)}')" title="Delete project" style="display:flex;align-items:center;justify-content:center;padding:5px 7px;background:none;border:1px solid var(--b1);border-left:none;border-radius:0 var(--rsm) var(--rsm) 0;color:#f07070;cursor:pointer;font-size:12px;font-weight:700;transition:all .15s;margin:6px 0" onmouseover="this.style.background='rgba(240,112,112,0.12)'" onmouseout="this.style.background='none'">&#x2715;</button>
 </div>`).join('');
 }
 function quickSwitchProject(name){
@@ -1168,7 +1182,8 @@ function renderProjTabs(){
 const projs=['All',...projects.map(p=>p.name)];
 document.getElementById('proj-tabs').innerHTML=projs.map(p=>{
 const col=p==='All'?null:projColor(p);
-return `<button class="pjtab${p===activeProj?' active':''}" onclick="switchProj('${esc(p)}',this)">${p==='All'?'All projects':`<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${col};margin-right:5px;vertical-align:middle"></span>${p}`}</button>`;
+if(p==='All') return `<button class="pjtab${activeProj==='All'?' active':''}" onclick="switchProj('All',this)">All projects</button>`;
+return `<div style="display:inline-flex;align-items:center;gap:0;margin-right:2px"><button class="pjtab${p===activeProj?' active':''}" onclick="switchProj('${esc(p)}',this)" style="border-radius:var(--rsm) 0 0 var(--rsm);border-right:none"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${col};margin-right:5px;vertical-align:middle"></span>${esc(p)}</button><button onclick="quickDeleteProject('${esc(p)}')" title="Delete project" style="display:flex;align-items:center;justify-content:center;height:100%;padding:0 7px;background:none;border:1px solid var(--b1);border-left:none;border-radius:0 var(--rsm) var(--rsm) 0;color:#f07070;cursor:pointer;font-size:11px;font-weight:700;transition:all .15s" onmouseover="this.style.background='rgba(240,112,112,0.12)'" onmouseout="this.style.background='none'">&#x2715;</button></div>`;
 }).join('');
 }
 function switchProj(p,el){
