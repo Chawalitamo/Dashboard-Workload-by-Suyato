@@ -7,7 +7,7 @@
 <link href="./Marketing Workload — CEO Dashboard_files/css2" rel="stylesheet">
 <link href="./Marketing Workload — CEO Dashboard_files/css2" rel="stylesheet"><style>@font-face{font-family:'DBHeavent';font-weight:400;src:local('DB Heavent'),local('DBHeavent')}@font-face{font-family:'DBHeavent';font-weight:500;src:local('DB Heavent Med'),local('DBHeaventMed')}@font-face{font-family:'DBHeavent';font-weight:700;src:local('DB Heavent Bd'),local('DBHeaventBd')}</style>
 <script src="./Marketing Workload — CEO Dashboard_files/chart.umd.min.js"></script>
-<link rel="stylesheet" href="./Marketing Workload — CEO Dashboard_files/tabler-icons.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.9.0/tabler-icons.min.css">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -1198,7 +1198,7 @@ const cls=diff<0?'hot':diff<=3?'warn':'';
 const lbl=diff<0?`${Math.abs(diff)}d late`:diff===0?'Today':diff===1?'Tomorrow':`${d.getDate()} ${d.toLocaleString('en',{month:'short'})}`;
 dueHTML=`<span class="due-tag ${cls}">${lbl}</span>`;
 }
-return `<div class="kcard" draggable="true" ondragstart="dragStart(event,${t.id})" ondragend="dragEnd(event)" onclick="openEdit(${t.id})"><div class="kcard-proj"><span style="width:6px;height:6px;border-radius:50%;background:${pc};flex-shrink:0;display:inline-block"></span>${esc(t.project)}</div><div class="kcard-title">${esc(t.title)}</div>${t.note?`<div class="kcard-note">${esc(t.note)}</div>`:''}<div class="kcard-foot"><span class="owner-pip o-${ok}">${t.owner}</span>${dueHTML}</div><div class="kcard-actions"><button class="cta" onclick="openEdit(${t.id});event.stopPropagation()"><i class="ti ti-edit" aria-hidden="true"></i></button><button class="cta del" onclick="delKanban(event,${t.id})"><i class="ti ti-trash" aria-hidden="true"></i></button></div></div>`;
+return `<div class="kcard" draggable="true" ondragstart="dragStart(event,${t.id})" ondragend="dragEnd(event)" onclick="openEdit(${t.id})"><div class="kcard-proj"><span style="width:6px;height:6px;border-radius:50%;background:${pc};flex-shrink:0;display:inline-block"></span>${esc(t.project)}</div><div class="kcard-title">${esc(t.title)}</div>${t.note?`<div class="kcard-note">${esc(t.note)}</div>`:''}<div class="kcard-foot"><span class="owner-pip o-${ok}">${t.owner}</span>${dueHTML}</div><div class="kcard-actions">${canL?`<button class="cta" title="Move left" onclick="moveTask(event,${t.id},-1)"><i class="ti ti-arrow-left"></i></button>`:''}<button class="cta" title="Edit" onclick="openEdit(${t.id});event.stopPropagation()"><i class="ti ti-edit"></i></button>${canR?`<button class="cta" title="Move right" onclick="moveTask(event,${t.id},1)"><i class="ti ti-arrow-right"></i></button>`:''}<button class="cta del" title="Delete" onclick="delKanban(event,${t.id})"><i class="ti ti-trash"></i></button></div></div>`;
 }
 function renderSbStats(){
 const list=activeProj==='All'?tasks:tasks.filter(t=>t.project===activeProj);
@@ -1227,15 +1227,18 @@ let _dragId=null;
 function dragStart(e,id){
 _dragId=id;
 e.dataTransfer.effectAllowed='move';
-setTimeout(()=>e.target.closest('.kcard').classList.add('dragging'),0);
+e.dataTransfer.setData('text/plain',String(id));
+const card=e.currentTarget;
+setTimeout(()=>card.classList.add('dragging'),0);
 }
 function dragEnd(e){
-e.target.closest('.kcard').classList.remove('dragging');
-document.querySelectorAll('.kcol-body').forEach(el=>el.classList.remove('drag-over'));
+document.querySelectorAll('.kcard.dragging').forEach(el=>el.classList.remove('dragging'));
+document.querySelectorAll('.kcol-body.drag-over').forEach(el=>el.classList.remove('drag-over'));
 }
 function dragOver(e){
 e.preventDefault();
 e.dataTransfer.dropEffect='move';
+document.querySelectorAll('.kcol-body.drag-over').forEach(el=>el.classList.remove('drag-over'));
 e.currentTarget.classList.add('drag-over');
 }
 function dragLeave(e){
@@ -1243,10 +1246,12 @@ if(!e.currentTarget.contains(e.relatedTarget))e.currentTarget.classList.remove('
 }
 async function dropTask(e,stageIdx){
 e.preventDefault();
-document.querySelectorAll('.kcol-body').forEach(el=>el.classList.remove('drag-over'));
-if(_dragId===null)return;
-const t=tasks.find(t=>t.id===_dragId);
+e.stopPropagation();
+document.querySelectorAll('.kcol-body.drag-over').forEach(el=>el.classList.remove('drag-over'));
+const id=_dragId!==null?_dragId:parseInt(e.dataTransfer.getData('text/plain'));
 _dragId=null;
+if(!id)return;
+const t=tasks.find(t=>t.id===id);
 if(!t)return;
 const newStage=STAGES[stageIdx];
 if(t.stage===newStage)return;
