@@ -1199,7 +1199,7 @@ const cls=diff<0?'hot':diff<=3?'warn':'';
 const lbl=diff<0?`${Math.abs(diff)}d late`:diff===0?'Today':diff===1?'Tomorrow':`${d.getDate()} ${d.toLocaleString('en',{month:'short'})}`;
 dueHTML=`<span class="due-tag ${cls}">${lbl}</span>`;
 }
-return `<div class="kcard" data-id="${t.id}" onclick="openEdit(${t.id})"><div class="kcard-proj"><span style="width:6px;height:6px;border-radius:50%;background:${pc};flex-shrink:0;display:inline-block"></span>${esc(t.project)}</div><div class="kcard-title">${esc(t.title)}</div>${t.note?`<div class="kcard-note">${esc(t.note)}</div>`:''}<div class="kcard-foot"><span class="owner-pip o-${ok}">${t.owner}</span>${dueHTML}</div><div class="kcard-actions">${canL?`<button class="cta" onclick="moveTask(event,${t.id},-1)">&#8592; Prev</button>`:''}<button class="cta" onclick="openEdit(${t.id});event.stopPropagation()">&#9998; Edit</button>${canR?`<button class="cta" onclick="moveTask(event,${t.id},1)">Next &#8594;</button>`:''}<button class="cta del" onclick="delKanban(event,${t.id})">&#x2715; Del</button></div></div>`;
+return `<div class="kcard" data-id="${t.id}" data-can-l="${canL?1:0}" data-can-r="${canR?1:0}"><div class="kcard-proj"><span style="width:6px;height:6px;border-radius:50%;background:${pc};flex-shrink:0;display:inline-block"></span>${esc(t.project)}</div><div class="kcard-title">${esc(t.title)}</div>${t.note?`<div class="kcard-note">${esc(t.note)}</div>`:''}<div class="kcard-foot"><span class="owner-pip o-${ok}">${t.owner}</span>${dueHTML}</div><div class="kcard-actions">${canL?'<button class="cta k-prev">&#8592; Prev</button>':''}<button class="cta k-edit">&#9998; Edit</button>${canR?'<button class="cta k-next">Next &#8594;</button>':''}<button class="cta del k-del">&#x2715; Del</button></div></div>`;
 }
 function renderSbStats(){
 const list=activeProj==='All'?tasks:tasks.filter(t=>t.project===activeProj);
@@ -1209,63 +1209,77 @@ const k=SKEY(s);
 return `<div style="display:flex;align-items:center;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--b0)"><div style="display:flex;align-items:center;gap:6px"><div style="width:6px;height:6px;border-radius:50%" class="d-${k}"></div><span style="font-size:11px">${s==='AW Release / Event Live'?'AW Release':s}</span></div><span style="font-family:'DBHeavent',monospace;font-size:11px;color:var(--t3)">${g[s]}</span></div>`;
 }).join('');
 }
-async function moveTask(e,id,dir){
-e.stopPropagation();
-const t=tasks.find(t=>t.id===id);if(!t)return;
-const si=STAGES.indexOf(t.stage);const ni=si+dir;
-if(ni<0||ni>=STAGES.length)return;
-t.stage=STAGES[ni];
-await window._sb.from('mkt_tasks').update({stage:t.stage}).eq('id',id);
-renderKanban();
-}
-async function delKanban(e,id){
-e.stopPropagation();if(!confirm('Delete?'))return;
-await window._sb.from('mkt_tasks').delete().eq('id',id);
-tasks=tasks.filter(t=>t.id!==id);renderKanban();
-}
-// ═════════════ DRAG & DROP ═════════════
+// ═════════════ DRAG & DROP & CARD ACTIONS ═════════════
 let _dragId=null;
 function setupDragDrop(){
-document.querySelectorAll('.kcard').forEach(card=>{
-card.setAttribute('draggable','true');
-card.addEventListener('dragstart',e=>{
-_dragId=parseInt(card.dataset.id);
-e.dataTransfer.effectAllowed='move';
-e.dataTransfer.setData('text/plain',card.dataset.id);
-setTimeout(()=>card.classList.add('dragging'),0);
-e.stopPropagation();
-});
-card.addEventListener('dragend',()=>{
-card.classList.remove('dragging');
-document.querySelectorAll('.kcol.drag-over').forEach(el=>el.classList.remove('drag-over'));
-});
-});
-document.querySelectorAll('.kcol').forEach(col=>{
-const si=parseInt(col.dataset.si);
-col.addEventListener('dragover',e=>{
-e.preventDefault();
-e.dataTransfer.dropEffect='move';
-document.querySelectorAll('.kcol.drag-over').forEach(el=>el.classList.remove('drag-over'));
-col.classList.add('drag-over');
-});
-col.addEventListener('dragleave',e=>{
-if(!col.contains(e.relatedTarget))col.classList.remove('drag-over');
-});
-col.addEventListener('drop',async e=>{
-e.preventDefault();
-document.querySelectorAll('.kcol.drag-over').forEach(el=>el.classList.remove('drag-over'));
-const id=_dragId!==null?_dragId:parseInt(e.dataTransfer.getData('text/plain'));
-_dragId=null;
-if(!id)return;
-const t=tasks.find(t=>t.id===id);
-if(!t)return;
-const newStage=STAGES[si];
-if(t.stage===newStage)return;
-t.stage=newStage;
-try{await window._sb.from('mkt_tasks').update({stage:newStage}).eq('id',t.id);}catch(err){console.error('drop update failed',err);}
-renderKanban();
-});
-});
+  document.querySelectorAll('.kcard').forEach(card=>{
+    const id=parseInt(card.dataset.id);
+    // card click → open edit (only if not a button)
+    card.addEventListener('click',e=>{
+      if(!e.target.closest('.kcard-actions')) openEdit(id);
+    });
+    // action buttons
+    const btnPrev=card.querySelector('.k-prev');
+    const btnEdit=card.querySelector('.k-edit');
+    const btnNext=card.querySelector('.k-next');
+    const btnDel =card.querySelector('.k-del');
+    if(btnPrev) btnPrev.addEventListener('click',e=>{e.stopPropagation();moveTask(id,-1);});
+    if(btnEdit) btnEdit.addEventListener('click',e=>{e.stopPropagation();openEdit(id);});
+    if(btnNext) btnNext.addEventListener('click',e=>{e.stopPropagation();moveTask(id,1);});
+    if(btnDel)  btnDel.addEventListener('click',e=>{e.stopPropagation();doDelete(id);});
+    // drag
+    card.setAttribute('draggable','true');
+    card.addEventListener('dragstart',e=>{
+      _dragId=id;
+      e.dataTransfer.effectAllowed='move';
+      e.dataTransfer.setData('text/plain',String(id));
+      setTimeout(()=>card.classList.add('dragging'),0);
+    });
+    card.addEventListener('dragend',()=>{
+      card.classList.remove('dragging');
+      document.querySelectorAll('.kcol.drag-over').forEach(el=>el.classList.remove('drag-over'));
+    });
+  });
+  document.querySelectorAll('.kcol').forEach(col=>{
+    const si=parseInt(col.dataset.si);
+    col.addEventListener('dragover',e=>{
+      e.preventDefault();
+      e.dataTransfer.dropEffect='move';
+      document.querySelectorAll('.kcol.drag-over').forEach(el=>el.classList.remove('drag-over'));
+      col.classList.add('drag-over');
+    });
+    col.addEventListener('dragleave',e=>{
+      if(!col.contains(e.relatedTarget)) col.classList.remove('drag-over');
+    });
+    col.addEventListener('drop',async e=>{
+      e.preventDefault();
+      document.querySelectorAll('.kcol.drag-over').forEach(el=>el.classList.remove('drag-over'));
+      const id=_dragId!==null?_dragId:parseInt(e.dataTransfer.getData('text/plain'));
+      _dragId=null;
+      if(!id) return;
+      const t=tasks.find(t=>t.id===id);
+      if(!t) return;
+      const newStage=STAGES[si];
+      if(t.stage===newStage) return;
+      t.stage=newStage;
+      try{await window._sb.from('mkt_tasks').update({stage:newStage}).eq('id',t.id);}catch(err){console.error(err);}
+      renderKanban();
+    });
+  });
+}
+async function moveTask(id,dir){
+  const t=tasks.find(t=>t.id===id); if(!t) return;
+  const si=STAGES.indexOf(t.stage); const ni=si+dir;
+  if(ni<0||ni>=STAGES.length) return;
+  t.stage=STAGES[ni];
+  try{await window._sb.from('mkt_tasks').update({stage:t.stage}).eq('id',id);}catch(err){console.error(err);}
+  renderKanban();
+}
+async function doDelete(id){
+  if(!confirm('Delete this task?')) return;
+  try{await window._sb.from('mkt_tasks').delete().eq('id',id);}catch(err){console.error(err);}
+  tasks=tasks.filter(t=>t.id!==id);
+  renderKanban();
 }
 // ═════════════ EDIT MODAL ═════════════
 function openEdit(id){
