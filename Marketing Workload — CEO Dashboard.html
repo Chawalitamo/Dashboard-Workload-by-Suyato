@@ -178,7 +178,7 @@ nav h1{font-size:15px;font-weight:600;letter-spacing:-.01em}
 .kcard-note{font-size:10px;color:var(--t3);margin:5px 0;line-height:1.4}
 .kcard-actions{display:flex;gap:3px;margin-top:7px;padding-top:7px;border-top:1px solid var(--b0)}
 .kcard.dragging{opacity:.3;border:1px dashed var(--gold);cursor:grabbing}
-.kcard{cursor:grab}
+.kcard{cursor:grab;user-select:none;-webkit-user-select:none}
 .kcol.drag-over>.kcol-body{background:var(--surf3);border-radius:var(--r);outline:2px dashed var(--gold);outline-offset:2px}
 .kcol.drag-over{background:var(--surf2);border-radius:var(--r)}
 .cta{background:none;border:1px solid var(--b1);border-radius:4px;color:var(--t2);padding:3px 7px;cursor:pointer;font-size:11px;display:flex;align-items:center;gap:3px;transition:all .12s;font-family:'DBHeavent','Sarabun',sans-serif}
@@ -1211,28 +1211,30 @@ return `<div style="display:flex;align-items:center;justify-content:space-betwee
 }
 // ═════════════ DRAG & DROP & CARD ACTIONS ═════════════
 let _dragId=null;
+function findTask(rawId){
+  return tasks.find(t=>String(t.id)===String(rawId));
+}
 function setupDragDrop(){
+  console.log('[board] setupDragDrop, cards:',document.querySelectorAll('.kcard').length);
   document.querySelectorAll('.kcard').forEach(card=>{
-    const id=parseInt(card.dataset.id);
-    // card click → open edit (only if not a button)
+    const rawId=card.dataset.id;
     card.addEventListener('click',e=>{
-      if(!e.target.closest('.kcard-actions')) openEdit(id);
+      if(!e.target.closest('.kcard-actions')) openEdit(rawId);
     });
-    // action buttons
     const btnPrev=card.querySelector('.k-prev');
     const btnEdit=card.querySelector('.k-edit');
     const btnNext=card.querySelector('.k-next');
     const btnDel =card.querySelector('.k-del');
-    if(btnPrev) btnPrev.addEventListener('click',e=>{e.stopPropagation();moveTask(id,-1);});
-    if(btnEdit) btnEdit.addEventListener('click',e=>{e.stopPropagation();openEdit(id);});
-    if(btnNext) btnNext.addEventListener('click',e=>{e.stopPropagation();moveTask(id,1);});
-    if(btnDel)  btnDel.addEventListener('click',e=>{e.stopPropagation();doDelete(id);});
-    // drag
+    if(btnPrev) btnPrev.addEventListener('click',e=>{e.stopPropagation();moveTask(rawId,-1);});
+    if(btnEdit) btnEdit.addEventListener('click',e=>{e.stopPropagation();openEdit(rawId);});
+    if(btnNext) btnNext.addEventListener('click',e=>{e.stopPropagation();moveTask(rawId,1);});
+    if(btnDel)  btnDel.addEventListener('click',e=>{e.stopPropagation();doDelete(rawId);});
     card.setAttribute('draggable','true');
     card.addEventListener('dragstart',e=>{
-      _dragId=id;
+      _dragId=rawId;
       e.dataTransfer.effectAllowed='move';
-      e.dataTransfer.setData('text/plain',String(id));
+      e.dataTransfer.setData('text/plain',rawId);
+      console.log('[drag] start id:',rawId);
       setTimeout(()=>card.classList.add('dragging'),0);
     });
     card.addEventListener('dragend',()=>{
@@ -1254,11 +1256,12 @@ function setupDragDrop(){
     col.addEventListener('drop',async e=>{
       e.preventDefault();
       document.querySelectorAll('.kcol.drag-over').forEach(el=>el.classList.remove('drag-over'));
-      const id=_dragId!==null?_dragId:parseInt(e.dataTransfer.getData('text/plain'));
+      const rawId=_dragId!==null?_dragId:e.dataTransfer.getData('text/plain');
       _dragId=null;
-      if(!id) return;
-      const t=tasks.find(t=>t.id===id);
-      if(!t) return;
+      console.log('[drag] drop id:',rawId,'→ stage:',STAGES[si]);
+      if(!rawId) return;
+      const t=findTask(rawId);
+      if(!t){console.warn('[drag] task not found:',rawId);return;}
       const newStage=STAGES[si];
       if(t.stage===newStage) return;
       t.stage=newStage;
@@ -1267,24 +1270,26 @@ function setupDragDrop(){
     });
   });
 }
-async function moveTask(id,dir){
-  const t=tasks.find(t=>t.id===id); if(!t) return;
+async function moveTask(rawId,dir){
+  const t=findTask(rawId); if(!t){console.warn('[move] task not found:',rawId);return;}
   const si=STAGES.indexOf(t.stage); const ni=si+dir;
   if(ni<0||ni>=STAGES.length) return;
   t.stage=STAGES[ni];
-  try{await window._sb.from('mkt_tasks').update({stage:t.stage}).eq('id',id);}catch(err){console.error(err);}
+  console.log('[move] id:',rawId,'→',t.stage);
+  try{await window._sb.from('mkt_tasks').update({stage:t.stage}).eq('id',t.id);}catch(err){console.error(err);}
   renderKanban();
 }
-async function doDelete(id){
+async function doDelete(rawId){
   if(!confirm('Delete this task?')) return;
-  try{await window._sb.from('mkt_tasks').delete().eq('id',id);}catch(err){console.error(err);}
-  tasks=tasks.filter(t=>t.id!==id);
+  const t=findTask(rawId); if(!t) return;
+  try{await window._sb.from('mkt_tasks').delete().eq('id',t.id);}catch(err){console.error(err);}
+  tasks=tasks.filter(t=>String(t.id)!==String(rawId));
   renderKanban();
 }
 // ═════════════ EDIT MODAL ═════════════
 function openEdit(id){
-const t=tasks.find(t=>t.id===id);if(!t)return;
-editId=id;
+const t=findTask(id);if(!t)return;
+editId=t.id;
 document.getElementById('e-title').value=t.title;
 document.getElementById('e-project').value=t.project;
 document.getElementById('e-owner').value=t.owner;
@@ -1294,7 +1299,7 @@ document.getElementById('e-note').value=t.note||'';
 document.getElementById('edit-modal').classList.add('open');
 }
 async function saveEdit(){
-const t=tasks.find(t=>t.id===editId);if(!t)return;
+const t=findTask(editId);if(!t)return;
 t.title=document.getElementById('e-title').value.trim()||t.title;
 t.project=document.getElementById('e-project').value;
 t.owner=document.getElementById('e-owner').value;
