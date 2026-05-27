@@ -176,11 +176,11 @@ nav h1{font-size:15px;font-weight:600;letter-spacing:-.01em}
 .kcard-title{font-size:12px;font-weight:500;line-height:1.45;margin-bottom:8px}
 .kcard-foot{display:flex;align-items:center;justify-content:space-between}
 .kcard-note{font-size:10px;color:var(--t3);margin:5px 0;line-height:1.4}
-.kcard-actions{display:flex;gap:3px;margin-top:7px;padding-top:7px;border-top:1px solid var(--b0);opacity:0;transition:opacity .15s}
-.kcard:hover .kcard-actions{opacity:1}
-.kcard.dragging{opacity:.35;border-style:dashed;cursor:grabbing}
+.kcard-actions{display:flex;gap:3px;margin-top:7px;padding-top:7px;border-top:1px solid var(--b0)}
+.kcard.dragging{opacity:.3;border:1px dashed var(--gold);cursor:grabbing}
 .kcard{cursor:grab}
-.kcol-body.drag-over{background:var(--surf3);border-radius:var(--r);outline:2px dashed var(--gold);outline-offset:3px;transition:background .1s}
+.kcol.drag-over>.kcol-body{background:var(--surf3);border-radius:var(--r);outline:2px dashed var(--gold);outline-offset:2px}
+.kcol.drag-over{background:var(--surf2);border-radius:var(--r)}
 .cta{background:none;border:1px solid var(--b1);border-radius:4px;color:var(--t2);padding:3px 7px;cursor:pointer;font-size:11px;display:flex;align-items:center;gap:3px;transition:all .12s;font-family:'DBHeavent','Sarabun',sans-serif}
 .cta:hover{border-color:var(--b2);color:var(--t1);background:var(--surf3)}
 .cta.del:hover{border-color:#f07070;color:#f07070}
@@ -1182,7 +1182,7 @@ if(fo) list=list.filter(t=>t.owner===fo);
 document.getElementById('kanban').innerHTML=STAGES.map((stage,si)=>{
 const cards=list.filter(t=>t.stage===stage);
 const key=SKEY(stage);
-return `<div class="kcol"><div class="kcol-head"><div style="display:flex;align-items:center;gap:6px"><div style="width:7px;height:7px;border-radius:50%;flex-shrink:0" class="d-${key}"></div><span class="kcol-ttl">${stage==='AW Release / Event Live'?'AW Release':stage}</span></div><span class="kcol-cnt">${cards.length}</span></div><div class="kcol-body" ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropTask(event,${si})">${cards.length===0?`<div class="kcol-empty"><i class="ti ti-inbox" aria-hidden="true"></i>Empty</div>`:cards.map(t=>kcardHTML(t,stage,si)).join('')}</div></div>`;
+return `<div class="kcol" ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropTask(event,${si})"><div class="kcol-head"><div style="display:flex;align-items:center;gap:6px"><div style="width:7px;height:7px;border-radius:50%;flex-shrink:0" class="d-${key}"></div><span class="kcol-ttl">${stage==='AW Release / Event Live'?'AW Release':stage}</span></div><span class="kcol-cnt">${cards.length}</span></div><div class="kcol-body" style="min-height:60px">${cards.length===0?`<div class="kcol-empty"><i class="ti ti-inbox"></i>Empty</div>`:cards.map(t=>kcardHTML(t,stage,si)).join('')}</div></div>`;
 }).join('');
 renderSbStats();
 }
@@ -1198,7 +1198,7 @@ const cls=diff<0?'hot':diff<=3?'warn':'';
 const lbl=diff<0?`${Math.abs(diff)}d late`:diff===0?'Today':diff===1?'Tomorrow':`${d.getDate()} ${d.toLocaleString('en',{month:'short'})}`;
 dueHTML=`<span class="due-tag ${cls}">${lbl}</span>`;
 }
-return `<div class="kcard" draggable="true" ondragstart="dragStart(event,${t.id})" ondragend="dragEnd(event)" onclick="openEdit(${t.id})"><div class="kcard-proj"><span style="width:6px;height:6px;border-radius:50%;background:${pc};flex-shrink:0;display:inline-block"></span>${esc(t.project)}</div><div class="kcard-title">${esc(t.title)}</div>${t.note?`<div class="kcard-note">${esc(t.note)}</div>`:''}<div class="kcard-foot"><span class="owner-pip o-${ok}">${t.owner}</span>${dueHTML}</div><div class="kcard-actions">${canL?`<button class="cta" title="Move left" onclick="moveTask(event,${t.id},-1)"><i class="ti ti-arrow-left"></i></button>`:''}<button class="cta" title="Edit" onclick="openEdit(${t.id});event.stopPropagation()"><i class="ti ti-edit"></i></button>${canR?`<button class="cta" title="Move right" onclick="moveTask(event,${t.id},1)"><i class="ti ti-arrow-right"></i></button>`:''}<button class="cta del" title="Delete" onclick="delKanban(event,${t.id})"><i class="ti ti-trash"></i></button></div></div>`;
+return `<div class="kcard" data-id="${t.id}" draggable="true" ondragstart="dragStart(event,${t.id})" ondragend="dragEnd(event)" onclick="openEdit(${t.id})"><div class="kcard-proj"><span style="width:6px;height:6px;border-radius:50%;background:${pc};flex-shrink:0;display:inline-block"></span>${esc(t.project)}</div><div class="kcard-title">${esc(t.title)}</div>${t.note?`<div class="kcard-note">${esc(t.note)}</div>`:''}<div class="kcard-foot"><span class="owner-pip o-${ok}">${t.owner}</span>${dueHTML}</div><div class="kcard-actions">${canL?`<button class="cta" title="Move to previous stage" onclick="moveTask(event,${t.id},-1)">&#8592;</button>`:''}<button class="cta" title="Edit" onclick="openEdit(${t.id});event.stopPropagation()">Edit</button>${canR?`<button class="cta" title="Move to next stage" onclick="moveTask(event,${t.id},1)">&#8594;</button>`:''}<button class="cta del" title="Delete" onclick="delKanban(event,${t.id})">&#x2715;</button></div></div>`;
 }
 function renderSbStats(){
 const list=activeProj==='All'?tasks:tasks.filter(t=>t.project===activeProj);
@@ -1228,26 +1228,27 @@ function dragStart(e,id){
 _dragId=id;
 e.dataTransfer.effectAllowed='move';
 e.dataTransfer.setData('text/plain',String(id));
-const card=e.currentTarget;
-setTimeout(()=>card.classList.add('dragging'),0);
+setTimeout(()=>{const c=document.querySelector('.kcard[data-id="'+id+'"]');if(c)c.classList.add('dragging');},0);
 }
 function dragEnd(e){
 document.querySelectorAll('.kcard.dragging').forEach(el=>el.classList.remove('dragging'));
-document.querySelectorAll('.kcol-body.drag-over').forEach(el=>el.classList.remove('drag-over'));
+document.querySelectorAll('.kcol.drag-over').forEach(el=>el.classList.remove('drag-over'));
 }
 function dragOver(e){
 e.preventDefault();
+e.stopPropagation();
 e.dataTransfer.dropEffect='move';
-document.querySelectorAll('.kcol-body.drag-over').forEach(el=>el.classList.remove('drag-over'));
-e.currentTarget.classList.add('drag-over');
+const col=e.currentTarget.closest('.kcol');
+if(col){document.querySelectorAll('.kcol.drag-over').forEach(el=>el.classList.remove('drag-over'));col.classList.add('drag-over');}
 }
 function dragLeave(e){
-if(!e.currentTarget.contains(e.relatedTarget))e.currentTarget.classList.remove('drag-over');
+const col=e.currentTarget;
+if(!col.contains(e.relatedTarget))col.classList.remove('drag-over');
 }
 async function dropTask(e,stageIdx){
 e.preventDefault();
 e.stopPropagation();
-document.querySelectorAll('.kcol-body.drag-over').forEach(el=>el.classList.remove('drag-over'));
+document.querySelectorAll('.kcol.drag-over').forEach(el=>el.classList.remove('drag-over'));
 const id=_dragId!==null?_dragId:parseInt(e.dataTransfer.getData('text/plain'));
 _dragId=null;
 if(!id)return;
@@ -1256,7 +1257,7 @@ if(!t)return;
 const newStage=STAGES[stageIdx];
 if(t.stage===newStage)return;
 t.stage=newStage;
-await window._sb.from('mkt_tasks').update({stage:newStage}).eq('id',t.id);
+try{await window._sb.from('mkt_tasks').update({stage:newStage}).eq('id',t.id);}catch(err){console.error('stage update failed',err);}
 renderKanban();
 }
 // ═════════════ EDIT MODAL ═════════════
