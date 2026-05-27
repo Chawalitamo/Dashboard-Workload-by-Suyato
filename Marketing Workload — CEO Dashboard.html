@@ -1,0 +1,1306 @@
+<!DOCTYPE html>
+<!-- saved from url=(0043)file:///Users/chawalit/Downloads/index.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Marketing Workload — CEO Dashboard</title>
+<link href="./Marketing Workload — CEO Dashboard_files/css2" rel="stylesheet">
+<link href="./Marketing Workload — CEO Dashboard_files/css2" rel="stylesheet"><style>@font-face{font-family:'DBHeavent';font-weight:400;src:local('DB Heavent'),local('DBHeavent')}@font-face{font-family:'DBHeavent';font-weight:500;src:local('DB Heavent Med'),local('DBHeaventMed')}@font-face{font-family:'DBHeavent';font-weight:700;src:local('DB Heavent Bd'),local('DBHeaventBd')}</style>
+<script src="./Marketing Workload — CEO Dashboard_files/chart.umd.min.js"></script>
+<link rel="stylesheet" href="./Marketing Workload — CEO Dashboard_files/tabler-icons.min.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+--bg:#0d0d0c;--surf:#161614;--surf2:#1e1e1b;--surf3:#262623;--surf4:#2e2e2b;
+--b0:#ffffff0a;--b1:#ffffff14;--b2:#ffffff22;--b3:#ffffff36;
+--t1:#f0ede6;--t2:#9e9b94;--t3:#5c5a55;--t4:#3a3835;
+--gold:#e8c547;--gold2:#c4a830;--gold3:rgba(232,197,71,.12);
+--r:10px;--rsm:6px;--rxl:16px;
+}
+html,body{height:100%;overflow:hidden}
+body{font-family:'DBHeavent','Sarabun',sans-serif;background:var(--bg);color:var(--t1);font-size:15px;display:flex;flex-direction:column}
+/* NAV */
+nav{display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:52px;border-bottom:1px solid var(--b1);flex-shrink:0;background:var(--bg);z-index:60}
+.nav-left{display:flex;align-items:center;gap:14px}
+.badge-logo{font-family:'DBHeavent',monospace;font-size:12px;font-weight:500;color:var(--gold);background:var(--gold3);border:1px solid rgba(232,197,71,.25);padding:4px 10px;border-radius:var(--rsm);letter-spacing:.04em}
+nav h1{font-size:15px;font-weight:600;letter-spacing:-.01em}
+#clock{font-family:'DBHeavent',monospace;font-size:11px;color:var(--t3)}
+/* PAGE TABS */
+.page-tabs{display:flex;border-bottom:1px solid var(--b1);flex-shrink:0;padding:0 24px;background:var(--bg)}
+.ptab{display:flex;align-items:center;gap:7px;padding:10px 18px;font-size:13px;font-weight:500;color:var(--t3);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;margin-bottom:-1px}
+.ptab i{font-size:16px}
+.ptab.active{color:var(--gold);border-bottom-color:var(--gold)}
+.ptab:hover:not(.active){color:var(--t2)}
+/* project nav tabs in header */
+.pnav-tab{display:flex;align-items:center;gap:6px;padding:5px 12px;font-size:12px;font-weight:500;border-radius:var(--rsm);border:1px solid var(--b1);background:none;color:var(--t3);cursor:pointer;transition:all .15s;white-space:nowrap;font-family:'DBHeavent','Sarabun',sans-serif}
+.pnav-tab .pnav-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.pnav-tab:hover{background:var(--surf2);color:var(--t1)}
+.pnav-tab.active{background:var(--surf2);border-color:var(--b2);color:var(--t1)}
+/* VIEWS */
+.view{display:none;flex:1;overflow:hidden}
+.view.active{display:flex}
+/* ══════════ DASHBOARD ══════════ */
+#view-dashboard{flex-direction:column;overflow-y:auto}
+.dash-inner{padding:24px;display:flex;flex-direction:column;gap:20px}
+.kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.kpi{background:var(--surf);border:1px solid var(--b1);border-radius:var(--r);padding:16px 18px;display:flex;flex-direction:column;gap:6px}
+.kpi .kpi-icon{width:32px;height:32px;border-radius:var(--rsm);display:flex;align-items:center;justify-content:center;font-size:16px;margin-bottom:2px}
+.kpi .kpi-val{font-family:'DBHeavent',monospace;font-size:26px;font-weight:500;line-height:1}
+.kpi .kpi-lbl{font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.06em}
+.kpi .kpi-sub{font-size:12px;color:var(--t2);margin-top:2px}
+.pipeline{background:var(--surf);border:1px solid var(--b1);border-radius:var(--r);padding:18px 20px}
+.section-title{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.pipe-row{display:flex;overflow-x:auto}
+.pipe-row::-webkit-scrollbar{height:3px}
+.pipe-row::-webkit-scrollbar-thumb{background:var(--surf3)}
+.pipe-seg{flex:1;min-width:90px;padding:12px 14px;border-right:1px solid var(--b1)}
+.pipe-seg:last-child{border-right:none}
+.pipe-dot{width:8px;height:8px;border-radius:50%;margin-bottom:6px}
+.pipe-name{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;line-height:1.3}
+.pipe-count{font-family:'DBHeavent',monospace;font-size:22px;font-weight:500}
+.pipe-bar{height:3px;background:var(--surf3);border-radius:2px;margin-top:8px;overflow:hidden}
+.pipe-bar-fill{height:100%;border-radius:2px;transition:width .6s}
+.persons-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.person-card{background:var(--surf);border:1px solid var(--b1);border-radius:var(--r);padding:14px 16px}
+.person-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.person-avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0}
+.person-name{font-size:13px;font-weight:600}
+.person-stats{font-size:11px;color:var(--t3);margin-top:1px}
+.person-pct{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.person-pct span:first-child{font-size:11px;color:var(--t2)}
+.person-pct span:last-child{font-family:'DBHeavent',monospace;font-size:12px;font-weight:500;color:var(--gold)}
+.pbar{height:5px;background:var(--surf3);border-radius:3px;overflow:hidden}
+.pbar-fill{height:100%;border-radius:3px;background:var(--gold);transition:width .6s}
+.person-progress-wrap{margin-bottom:10px}
+.ptask-row{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--t2);padding:3px 0;border-bottom:1px solid var(--b0)}
+.ptask-row:last-child{border-bottom:none}
+.ptask-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.ptask-name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ptask-stage{font-size:10px;padding:1px 6px;border-radius:10px;white-space:nowrap;flex-shrink:0}
+.proj-table{width:100%;border-collapse:collapse;font-size:13px}
+.proj-table th{text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);padding:8px 12px;border-bottom:1px solid var(--b1)}
+.proj-table td{padding:10px 12px;border-bottom:1px solid var(--b0);vertical-align:middle}
+.proj-table tr:last-child td{border-bottom:none}
+.proj-table tr:hover td{background:var(--surf2)}
+.prog-cell{display:flex;align-items:center;gap:10px}
+/* ══════════ LIST VIEW ══════════ */
+#view-list{flex-direction:column}
+.list-top{display:flex;align-items:center;justify-content:space-between;padding:10px 20px;border-bottom:1px solid var(--b1);flex-shrink:0;gap:10px;flex-wrap:wrap}
+.filter-pills{display:flex;gap:5px;flex-wrap:wrap}
+.fpill{padding:5px 14px;font-size:12px;font-weight:500;border-radius:20px;border:1px solid var(--b2);background:none;color:var(--t2);cursor:pointer;transition:all .12s}
+.fpill.active{background:var(--t1);color:var(--bg);border-color:transparent}
+.fpill:hover:not(.active){background:var(--surf2);color:var(--t1)}
+.list-filters{display:flex;gap:6px}
+.fsel{background:var(--surf2);border:1px solid var(--b1);border-radius:var(--rsm);padding:6px 10px;color:var(--t2);font-family:'DBHeavent','Sarabun',sans-serif;font-size:12px;outline:none;cursor:pointer}
+.fsel:focus{border-color:var(--b2)}
+.list-add-btn{display:flex;align-items:center;gap:6px;background:var(--gold);color:#0d0d0c;border:none;border-radius:var(--rsm);padding:6px 14px;font-family:'DBHeavent','Sarabun',sans-serif;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}
+.list-add-btn:hover{background:var(--gold2)}
+.list-body{flex:1;overflow-y:auto;padding:0 20px 20px}
+.list-body::-webkit-scrollbar{width:4px}
+.list-body::-webkit-scrollbar-thumb{background:var(--surf3);border-radius:2px}
+/* Table */
+.lt{width:100%;border-collapse:collapse;font-size:13px;margin-top:14px}
+.lt thead th{position:sticky;top:0;background:var(--bg);text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);padding:10px 12px;border-bottom:1px solid var(--b1);white-space:nowrap;z-index:2}
+.lt tbody tr{border-bottom:1px solid var(--b0);transition:background .1s}
+.lt tbody tr:last-child{border-bottom:none}
+.lt tbody tr:hover{background:var(--surf2)}
+.lt td{padding:12px 12px;vertical-align:middle}
+/* Owner cell */
+.ow-cell{display:flex;align-items:center;gap:8px}
+.ow-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;flex-shrink:0}
+/* Stage badge */
+.sbadge{display:inline-flex;align-items:center;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;white-space:nowrap}
+/* Progress cell */
+.prog-wrap{display:flex;flex-direction:column;gap:4px;min-width:180px}
+.prog-slider-row{display:flex;align-items:center;gap:8px}
+.prog-slider-row input[type=range]{flex:1;accent-color:var(--gold);cursor:pointer;height:4px}
+.prog-pct{font-family:'DBHeavent',monospace;font-size:11px;color:var(--gold);min-width:30px}
+.prog-bar-row{display:flex;align-items:center;gap:6px}
+.prog-stage-sel{font-size:11px;background:none;border:none;color:var(--t2);font-family:'DBHeavent','Sarabun',sans-serif;cursor:pointer;outline:none;padding:0}
+.prog-stage-sel option{background:var(--surf2);color:var(--t1)}
+.pb{height:4px;flex:1;background:var(--surf3);border-radius:2px;overflow:hidden}
+.pb-fill{height:100%;border-radius:2px;transition:width .3s}
+/* Note btn */
+.note-btn{font-size:11px;padding:4px 10px;border-radius:var(--rsm);border:1px solid var(--b1);background:none;color:var(--t2);cursor:pointer;white-space:nowrap;transition:all .12s}
+.note-btn:hover{background:var(--surf2);color:var(--t1)}
+.note-btn.has{background:#0e2235;color:#5aaaf0;border-color:#1a3a5a}
+/* Task name input */
+.task-name-inp{background:none;border:none;color:var(--t1);font-family:'DBHeavent','Sarabun',sans-serif;font-size:13px;font-weight:500;width:100%;outline:none;padding:2px 4px;border-radius:4px;min-width:160px}
+.task-name-inp:hover{background:var(--surf3)}
+.task-name-inp:focus{background:var(--surf2);outline:1px solid var(--b2)}
+/* Project dot */
+.proj-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;display:inline-block}
+/* Due */
+.due-inp{background:none;border:none;color:var(--t2);font-family:'DBHeavent',monospace;font-size:12px;outline:none;cursor:pointer;width:100px}
+.due-inp:hover{background:var(--surf3);border-radius:4px}
+.due-inp:focus{background:var(--surf2);border-radius:4px;outline:1px solid var(--b2)}
+.due-hot{color:#f07070}
+.due-warn{color:var(--gold)}
+/* Delete */
+.del-btn{background:none;border:none;color:var(--t3);cursor:pointer;padding:3px 5px;border-radius:4px;font-size:13px;display:flex;align-items:center}
+.del-btn:hover{color:#f07070;background:rgba(240,112,112,.1)}
+/* ══════════ BOARD ══════════ */
+#view-board{flex-direction:column}
+.board-top{display:flex;align-items:center;justify-content:space-between;padding:10px 20px;border-bottom:1px solid var(--b1);flex-shrink:0;gap:10px;flex-wrap:wrap}
+.proj-tabs-wrap{display:flex;gap:4px}
+.pjtab{padding:6px 14px;font-size:12px;font-weight:500;border-radius:var(--rsm);border:1px solid var(--b1);background:none;color:var(--t2);cursor:pointer;transition:all .15s}
+.pjtab.active{background:var(--surf2);color:var(--t1);border-color:var(--b2)}
+.pjtab:hover:not(.active){background:var(--surf);color:var(--t1)}
+.board-layout{display:flex;flex:1;overflow:hidden}
+.sidebar{width:270px;flex-shrink:0;border-right:1px solid var(--b1);overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:11px}
+.sidebar::-webkit-scrollbar{width:3px}
+.sidebar::-webkit-scrollbar-thumb{background:var(--surf3)}
+.sb-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);padding-bottom:8px;border-bottom:1px solid var(--b1)}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:11px;font-weight:500;color:var(--t2)}
+.field input,.field select,.field textarea{background:var(--surf2);border:1px solid var(--b1);border-radius:var(--rsm);padding:7px 9px;color:var(--t1);font-family:'DBHeavent','Sarabun',sans-serif;font-size:12px;outline:none;transition:border-color .15s;width:100%}
+.field textarea{resize:vertical;min-height:56px}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--gold2)}
+.field select option{background:var(--surf2)}
+.btn-add-sb{display:flex;align-items:center;justify-content:center;gap:7px;background:var(--gold);color:#0d0d0c;border:none;border-radius:var(--rsm);padding:9px;font-family:'DBHeavent','Sarabun',sans-serif;font-size:12px;font-weight:600;cursor:pointer;width:100%}
+.btn-add-sb:hover{background:var(--gold2)}
+.kanban{flex:1;overflow-x:auto;overflow-y:hidden;padding:16px;display:flex;gap:11px;align-items:flex-start}
+.kanban::-webkit-scrollbar{height:4px}
+.kanban::-webkit-scrollbar-thumb{background:var(--surf3);border-radius:2px}
+.kcol{flex-shrink:0;width:205px;display:flex;flex-direction:column;gap:8px;max-height:100%}
+.kcol-head{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;border-radius:var(--rsm);background:var(--surf2);border:1px solid var(--b1)}
+.kcol-ttl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--t2)}
+.kcol-cnt{font-family:'DBHeavent',monospace;font-size:10px;color:var(--t3);background:var(--surf3);padding:2px 6px;border-radius:10px}
+.kcol-body{overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:7px;padding-right:2px}
+.kcol-body::-webkit-scrollbar{width:2px}
+.kcol-body::-webkit-scrollbar-thumb{background:var(--surf3)}
+.kcard{background:var(--surf);border:1px solid var(--b1);border-radius:var(--r);padding:11px 12px;cursor:pointer;transition:border-color .15s;animation:cin .18s ease}
+@keyframes cin{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
+.kcard:hover{border-color:var(--b2);background:var(--surf2)}
+.kcard-proj{font-size:10px;color:var(--t3);margin-bottom:5px;display:flex;align-items:center;gap:4px}
+.kcard-title{font-size:12px;font-weight:500;line-height:1.45;margin-bottom:8px}
+.kcard-foot{display:flex;align-items:center;justify-content:space-between}
+.kcard-note{font-size:10px;color:var(--t3);margin:5px 0;line-height:1.4}
+.kcard-actions{display:flex;gap:3px;margin-top:7px;padding-top:7px;border-top:1px solid var(--b0);opacity:0;transition:opacity .15s}
+.kcard:hover .kcard-actions{opacity:1}
+.cta{background:none;border:1px solid var(--b1);border-radius:4px;color:var(--t2);padding:3px 7px;cursor:pointer;font-size:11px;display:flex;align-items:center;gap:3px;transition:all .12s;font-family:'DBHeavent','Sarabun',sans-serif}
+.cta:hover{border-color:var(--b2);color:var(--t1);background:var(--surf3)}
+.cta.del:hover{border-color:#f07070;color:#f07070}
+.kcol-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:22px 10px;color:var(--t3);font-size:11px;border:1px dashed var(--b1);border-radius:var(--r)}
+.kcol-empty i{font-size:18px}
+.owner-pip{font-size:11px;font-weight:500;padding:2px 7px;border-radius:10px}
+.due-tag{font-family:'DBHeavent',monospace;font-size:10px;color:var(--t3)}
+.due-tag.hot{color:#f07070}
+.due-tag.warn{color:var(--gold)}
+/* MODAL */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:300;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:var(--surf);border:1px solid var(--b2);border-radius:var(--rxl);padding:22px;width:440px;max-width:95vw;max-height:90vh;overflow-y:auto}
+.modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--b1)}
+.modal-head h3{font-size:15px;font-weight:600}
+.modal-close{background:none;border:none;color:var(--t2);cursor:pointer;font-size:18px;padding:2px;display:flex}
+.modal-close:hover{color:var(--t1)}
+.mgrid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.mgrid .full{grid-column:1/-1}
+.mactions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;padding-top:14px;border-top:1px solid var(--b1)}
+.btn-sec{background:none;border:1px solid var(--b2);border-radius:var(--rsm);color:var(--t2);padding:7px 16px;font-family:'DBHeavent','Sarabun',sans-serif;font-size:13px;cursor:pointer}
+.btn-sec:hover{background:var(--surf2);color:var(--t1)}
+.btn-pri{background:var(--gold);border:none;border-radius:var(--rsm);color:#0d0d0c;padding:7px 16px;font-family:'DBHeavent','Sarabun',sans-serif;font-size:13px;font-weight:600;cursor:pointer}
+.btn-pri:hover{background:var(--gold2)}
+/* NOTE MODAL */
+.note-modal{width:380px}
+/* STAGE/OWNER COLORS */
+.s-jobbrief{background:#1c2030;color:#7b9cf0}.s-design{background:#25163a;color:#b87ff0}
+.s-production{background:#0e2235;color:#5aaaf0}.s-review{background:#2a2008;color:#f0c040}
+.s-approval{background:#2a1220;color:#f07ab0}.s-awrelease{background:#0d2518;color:#50d090}
+.s-onhold{background:#1e1e1e;color:#808080}.s-complete{background:#0d2010;color:#40c060}
+.d-jobbrief{background:#3b5bdb}.d-design{background:#7048e8}.d-production{background:#1971c2}
+.d-review{background:#e67700}.d-approval{background:#c2255c}.d-awrelease{background:#0ca678}
+.d-onhold{background:#495057}.d-complete{background:#2f9e44}
+/* progress bar fills per stage */
+.pf-jobbrief{background:#3b5bdb}.pf-design{background:#7048e8}.pf-production{background:#1971c2}
+.pf-review{background:#e67700}.pf-approval{background:#c2255c}.pf-awrelease{background:#0ca678}
+.pf-onhold{background:#495057}.pf-complete{background:#2f9e44}
+.o-por{background:#2d1f4a;color:#c4a8ff}.o-sun{background:#143322;color:#7dd4a0}
+.o-jew{background:#3a1818;color:#f4a0a0}.o-nod{background:#0f2340;color:#7ab8f5}
+.o-donut{background:#38280a;color:#f5c870}.o-ming{background:#1e3010;color:#a4d870}
+.o-ji{background:#38102a;color:#f59ab8}.o-kanom{background:#0e2e30;color:#70d4d4}
+.o-ton{background:#362010;color:#f5a870}.o-nick{background:#22123a;color:#b07af5}
+.o-benz{background:#0e2038;color:#70a8f5}.o-ju{background:#381010;color:#f57070}
+.o-toon{background:#0e2820;color:#60d0a0}.o-witch{background:#2c2008;color:#e0b860}
+.o-aom{background:#28102e;color:#d090e0}
+button{font-family:'DBHeavent','Sarabun',sans-serif}
+/* ── DASHBOARD CHARTS ── */
+.dash-grid-top{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px}
+.dash-grid-mid{display:grid;grid-template-columns:1.4fr 1fr;gap:14px;margin-bottom:14px}
+.dash-grid-bot{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.chart-card{background:var(--surf);border:1px solid var(--b1);border-radius:var(--r);padding:18px 20px}
+.chart-card.full{grid-column:1/-1}
+.chart-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin-bottom:4px;display:flex;align-items:center;gap:7px}
+.chart-subtitle{font-size:12px;color:var(--t2);margin-bottom:16px}
+.chart-wrap{position:relative;width:100%}
+.trend-badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;margin-left:8px}
+.trend-up{background:#0d2518;color:#50d090}
+.trend-dn{background:#2a1220;color:#f07070}
+.trend-flat{background:#1e1e1e;color:#808080}
+/* Leaderboard */
+.lb-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--b0)}
+.lb-row:last-child{border-bottom:none}
+.lb-rank{font-family:'DBHeavent',monospace;font-size:12px;font-weight:700;color:var(--t3);width:20px;flex-shrink:0;text-align:center}
+.lb-rank.gold{color:#e8c547}
+.lb-rank.silver{color:#a0aec0}
+.lb-rank.bronze{color:#c68b3e}
+.lb-name{flex:1;font-size:13px;font-weight:500}
+.lb-bar-wrap{width:90px;height:5px;background:var(--surf3);border-radius:3px;overflow:hidden}
+.lb-bar-fill{height:100%;border-radius:3px}
+.lb-pct{font-family:'DBHeavent',monospace;font-size:12px;color:var(--gold);min-width:36px;text-align:right}
+/* Stage flow */
+.flow-row{display:flex;align-items:center;gap:0;margin-top:6px;overflow-x:auto}
+.flow-seg{flex:1;min-width:60px;display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 4px;cursor:default}
+.flow-seg-bar{width:100%;height:28px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;transition:opacity .2s}
+.flow-seg:hover .flow-seg-bar{opacity:.85}
+.flow-seg-lbl{font-size:9px;color:var(--t3);text-align:center;text-transform:uppercase;letter-spacing:.04em;line-height:1.3}
+.flow-arrow{color:var(--t4);font-size:14px;margin-top:-12px;flex-shrink:0}
+/* Summary numbers in KPI */
+.kpi-big{font-family:'DBHeavent',monospace;font-size:32px;font-weight:700;line-height:1;margin-bottom:4px}
+.kpi-delta{font-size:11px;margin-top:4px}
+</style>
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+window._sb = createClient('https://fxmigukayxvieziseqil.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ4bWlndWtheXh2aWV6aXNlcWlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0Mjg5NzcsImV4cCI6MjA5NTAwNDk3N30.ZGqBI_QfJdp68hYBxW0rw78Z2u9tIV5Ru3AFydYozEA');
+window._sbReady = true;
+if(window._pendingLoad) window._pendingLoad();
+</script>
+</head>
+<body>
+<nav>
+<div class="nav-left">
+<img src="data:image/webp;base64,UklGRn4GAABXRUJQVlA4IHIGAABQIQCdASpMAEwAPjEUiUMiISEUfbYAIAMEtgBo3Lx/VfxA1zDmf4Z/mB8ttTfqH3j/b3lkTqdUn4P7QPer/K/YB5gH6b/3z7Zu4z+s3qA/jP8m/3P+E95T+jeo70AP2J6wv0AP169Kj9uvgj/a39mfgN/Wn/vXYDk8vWbOF/Zj7dwz7Tf9P3oDiH8i/yPGB3j/6H/n/JA8AagB+Rv9R+Rn+A+MT/g8qf0H/1PcE/k/9F/0v9i9rf2QeiX+vB/S9t+jMfMuaAz1l3v+2ZmOMxQE18aRLqbG5nndbo2KbgKWc0k3eLGAz3N2xCsmou9+40VuipNFPSdSskqJZKGyZreb+rgl27uNWTfXOrFb1g4GKADqWAD+/UFVpRfk8v5PJm5pQxYeDH4FKVYghPxaKH/oUVNypQtHmRzTFPw7uhlgANDoNXbWlSysD+9WLr0n/tQSrE61tjnNwaqTeUVfTK78JV60wvfYPV2P/o9KTu3P9e53NfKlYrY3z94qXxP1jM12s4xUcxnBcDKcyTUWsdBiPDG6P4I7DnFCeJw4pF39+TXWZ51M/pQ9GaYRSpauPK35rcYVf9i1F+/x0s+MkJ5jmB06TSEzJ4//LADLUm8MXK42rvRByRUctctXkwBeT2DZW/3ZusVwAYM/kGqwVdIEjkiXSGxiV80sOP1oQG+qTc2hrwv+Cuy3/o8KwHypD+2/f/bZ0nTAkui259QLkLvbkUnFcVmkqQ2uPov/VDSEBGLN6tUzlVHqupXf5xmX38J0+dZ/Ronb1ySSNr6Powa8RMBC7c4pfCG6TNLZp4+nm7Z0PCcyf1B+5OC24xURsiZxAw8WB/9HmYI+9UH5SXB1z+BTOH/mYL9Cnf5ITKfppBSEJqY7y2+wnjskQ9DprY7/VvGMTfMifiSRgXvAmBMtP0eoPOa7drYgxoUVmAC84KUWSAvptMKXAycDOc+fIzF8p0Of3c5WfgeY10d5mnh0Lglzg+pI8BIrQ07AfvN59RJ9/oI2+/iNvMajlUy18Lm2Ods1d678f3CKv13ICwjaW942PEDj3MXelBU+GGxqQNfjsZ4dFO96eC3cJX17d8UFJVpPEqEbUQuLuPr0Ab8Po4W3pUxfSw2HNY/TQvXYj5VEoDfeF9IzSF3Zo+T+pBIN76wgILrtX+Dici/WrCV4KTg61lnl9VJZCjhZdBonzNzfATOiXgNY2BnYs1Oq8Zfpl/IUAvWLCquY6BcPyKMnjVI2rtKn6wT0PPw59lk6oMHWDtE4YRwB3msVEf0sH0xR0KaBcCo51r4YQl/YmyJ/Y32VNYWcEfekXPN34O/Ci1hP0saoRw5mKFp5ZEOqTlpe2ktj+4TLYWiZp4puBT8jY8dZv82a/rZ9b7QjhLmBl1OuAK/eL86HJTC6ZKRSBqo/7AHOvarr3ZRfYwEv1RX3zS+7TIWQHRPSRaDv5coiM8nf9q/UvizUnAFV9nsxECiSr5zdEl4/iRH0Mt/JoeQIOiKQnuvc3oAlVoeb5H+eX5kiHtxMgwO7lVueIfu8se7MoH2FBiYkTE3bZLDSk8+Xg9o2AFkdhw+ElYF5f1/vrA/Iur6tOmyNR/QORCHn7I7OZ47FHJQ3Z5jbk/uoA/yzvjzELW5BeAYJJ7j/QjK7tofTT8bf9zWGFuSF8QCcmFJYp39sC+WQvnoXmoOoNwol2aP/AOXI59c0Ku5CxsIzMkar/5/16L7bX/GA8rk17PzQZ3HBqFD3HllHDI197RM4YVOOTvFszXhLyVa8SjSR7rXg0zx1FazXoGks19L4G7BIV2orMUE6DX81bpPYhU1PBW2vFxDO0n7ZjFt3hXhdjgSmbNgHI8xw1kF7X/k6N/ae02ZiBbM14owKfC6FvHAvpmSfWxg2lWrE59Z0YLV45ui5AzLev/mHEr9/HEhpKqkd//gy4u/VcAFyO2rzeVF+UCIbnt5kXvdcNbzu52QBgjjpI/rMZXH6iUotAuZsOvyUyHZg7oTStPZW32AQOzDf+i9loAZemoo7sPKbz9x9T1mLwOYkRaeV71oDjujT82YX/n8meoeP7vcUB84sjsk3ZGUvQT8ebpOBT/mxptaFfZD7wz/1jieEfBY3jqCnwRr5hS/oA7kFOngqzUioRFyKUd1fKLRQC74c/HKR7kYgkSKqa4BCzotn0wF1luYqGmw2HoJGT9etmNQYs4PAAAAAAAA=" alt="CJx" style="height:38px;width:38px;object-fit:cover;border-radius:7px;flex-shrink:0">
+<h1>Marketing Workload</h1>
+</div>
+<span id="sync-dot" style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: rgb(80, 208, 144); margin-right: 5px;"></span><span id="sync-lbl" style="font-size:11px;color:var(--t3);margin-right:12px">● Live · 11:58</span><span id="clock">Wed, 27 May 2026 · 11:58</span>
+</nav>
+<div class="page-tabs">
+<button class="ptab active" onclick="showView(&#39;dashboard&#39;,this)"><i class="ti ti-layout-dashboard" aria-hidden="true"></i>CEO Dashboard</button>
+<button class="ptab" onclick="showView(&#39;list&#39;,this)"><i class="ti ti-list-details" aria-hidden="true"></i>Task List</button>
+<button class="ptab" onclick="showView(&#39;board&#39;,this)"><i class="ti ti-layout-kanban" aria-hidden="true"></i>Kanban Board</button>
+<div style="flex:1"></div>
+<div id="project-nav-tabs" style="display:flex;align-items:center;gap:4px;padding:0 4px"><div style="display:flex;align-items:center;gap:0">
+<button class="pnav-tab" onclick="quickSwitchProject(&#39;Spot &amp; Production&#39;)" title="Spot &amp; Production" style="border-radius:var(--rsm) 0 0 var(--rsm);border-right:none"><div class="pnav-dot" style="background:#5aaaf0"></div>Spot &amp; Productio…</button>
+<button onclick="openEditProject(&#39;Spot &amp; Production&#39;)" title="Edit project" style="display:flex;align-items:center;justify-content:center;padding:5px 7px;background:none;border:1px solid var(--b1);border-left:none;border-radius:0 var(--rsm) var(--rsm) 0;color:var(--t3);cursor:pointer;font-size:12px;transition:all .15s;margin:6px 0" onmouseover="this.style.background=&#39;var(--surf2)&#39;;this.style.color=&#39;var(--t1)&#39;" onmouseout="this.style.background=&#39;none&#39;;this.style.color=&#39;var(--t3)&#39;"><i class="ti ti-dots-vertical" aria-hidden="true"></i></button>
+</div><div style="display:flex;align-items:center;gap:0">
+<button class="pnav-tab" onclick="quickSwitchProject(&#39;CJx Commu2026&#39;)" title="CJx Commu2026" style="border-radius:var(--rsm) 0 0 var(--rsm);border-right:none"><div class="pnav-dot" style="background:#b87ff0"></div>CJx Commu2026</button>
+<button onclick="openEditProject(&#39;CJx Commu2026&#39;)" title="Edit project" style="display:flex;align-items:center;justify-content:center;padding:5px 7px;background:none;border:1px solid var(--b1);border-left:none;border-radius:0 var(--rsm) var(--rsm) 0;color:var(--t3);cursor:pointer;font-size:12px;transition:all .15s;margin:6px 0" onmouseover="this.style.background=&#39;var(--surf2)&#39;;this.style.color=&#39;var(--t1)&#39;" onmouseout="this.style.background=&#39;none&#39;;this.style.color=&#39;var(--t3)&#39;"><i class="ti ti-dots-vertical" aria-hidden="true"></i></button>
+</div><div style="display:flex;align-items:center;gap:0">
+<button class="pnav-tab" onclick="quickSwitchProject(&#39;xxxx&#39;)" title="xxxx" style="border-radius:var(--rsm) 0 0 var(--rsm);border-right:none"><div class="pnav-dot" style="background:#c4a8ff"></div>xxxx</button>
+<button onclick="openEditProject(&#39;xxxx&#39;)" title="Edit project" style="display:flex;align-items:center;justify-content:center;padding:5px 7px;background:none;border:1px solid var(--b1);border-left:none;border-radius:0 var(--rsm) var(--rsm) 0;color:var(--t3);cursor:pointer;font-size:12px;transition:all .15s;margin:6px 0" onmouseover="this.style.background=&#39;var(--surf2)&#39;;this.style.color=&#39;var(--t1)&#39;" onmouseout="this.style.background=&#39;none&#39;;this.style.color=&#39;var(--t3)&#39;"><i class="ti ti-dots-vertical" aria-hidden="true"></i></button>
+</div><div style="display:flex;align-items:center;gap:0">
+<button class="pnav-tab" onclick="quickSwitchProject(&#39;zzz&#39;)" title="zzz" style="border-radius:var(--rsm) 0 0 var(--rsm);border-right:none"><div class="pnav-dot" style="background:#f07070"></div>zzz</button>
+<button onclick="openEditProject(&#39;zzz&#39;)" title="Edit project" style="display:flex;align-items:center;justify-content:center;padding:5px 7px;background:none;border:1px solid var(--b1);border-left:none;border-radius:0 var(--rsm) var(--rsm) 0;color:var(--t3);cursor:pointer;font-size:12px;transition:all .15s;margin:6px 0" onmouseover="this.style.background=&#39;var(--surf2)&#39;;this.style.color=&#39;var(--t1)&#39;" onmouseout="this.style.background=&#39;none&#39;;this.style.color=&#39;var(--t3)&#39;"><i class="ti ti-dots-vertical" aria-hidden="true"></i></button>
+</div></div>
+<button onclick="openNewProjectModal()" title="Add new project" style="display:flex;align-items:center;gap:5px;margin:6px 0 6px 4px;padding:5px 12px;background:var(--gold3);border:1px solid rgba(232,197,71,.3);border-radius:var(--rsm);color:var(--gold);font-family:&#39;DBHeavent&#39;,&#39;Sarabun&#39;,sans-serif;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;transition:background .15s"><i class="ti ti-folder-plus" aria-hidden="true" style="font-size:14px"></i>+ New project</button>
+</div>
+<div class="view active" id="view-dashboard">
+<div class="dash-inner" id="dash-inner">
+<div class="dash-grid-top">
+<div class="chart-card">
+<div class="chart-title"><i class="ti ti-chart-donut" aria-hidden="true"></i>Stage distribution</div>
+<div class="chart-subtitle">All tasks by current stage</div>
+<div class="chart-wrap" style="height:180px"><canvas id="donut-chart" width="161" height="161" style="display: block; box-sizing: border-box; height: 180px; width: 180px;"></canvas></div>
+</div>
+<div class="chart-card">
+<div class="chart-title"><i class="ti ti-chart-bar" aria-hidden="true"></i>Workload per person</div>
+<div class="chart-subtitle">Task count by team member</div>
+<div class="chart-wrap" style="height:180px"><canvas id="bar-chart" width="323" height="161" style="display: block; box-sizing: border-box; height: 180px; width: 360px;"></canvas></div>
+</div>
+<div class="chart-card">
+<div class="chart-title"><i class="ti ti-chart-radar" aria-hidden="true"></i>Progress radar</div>
+<div class="chart-subtitle">Top 6 members by % completion</div>
+<div class="chart-wrap" style="height:180px"><canvas id="radar-chart" width="161" height="161" style="display: block; box-sizing: border-box; height: 180px; width: 180px;"></canvas></div>
+</div>
+</div>
+<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:14px">
+<div class="kpi"><div class="kpi-icon" style="background:#1e2840;color:#7b9cf0"><i class="ti ti-layout-kanban" aria-hidden="true"></i></div>
+<div class="kpi-big">29</div><div class="kpi-lbl">Total tasks</div>
+<div class="kpi-delta" style="color:var(--t3)">3 projects · 7 members</div>
+</div>
+<div class="kpi"><div class="kpi-icon" style="background:#0d2010;color:#40c060"><i class="ti ti-circle-check" aria-hidden="true"></i></div>
+<div class="kpi-big" style="color:#40c060">0</div><div class="kpi-lbl">Complete</div>
+<div class="kpi-delta" style="color:#40c060">0% completion rate</div>
+</div>
+<div class="kpi"><div class="kpi-icon" style="background:#0e2235;color:#5aaaf0"><i class="ti ti-player-play" aria-hidden="true"></i></div>
+<div class="kpi-big" style="color:#5aaaf0">29</div><div class="kpi-lbl">In progress</div>
+<div class="kpi-delta" style="color:var(--t3)">0 on hold</div>
+</div>
+<div class="kpi"><div class="kpi-icon" style="background:#2a1a08;color:#f0b040"><i class="ti ti-clock" aria-hidden="true"></i></div>
+<div class="kpi-big" style="color:#f07070">25</div><div class="kpi-lbl">Overdue</div>
+<div class="kpi-delta" style="color:#f07070">⚠ Needs attention</div>
+</div>
+<div class="kpi"><div class="kpi-icon" style="background:#1a140a;color:var(--gold)"><i class="ti ti-chart-line" aria-hidden="true"></i></div>
+<div class="kpi-big" style="color:var(--gold)">54%</div><div class="kpi-lbl">Avg progress</div>
+<div class="kpi-delta" style="color:var(--t3)">Weighted by stage</div>
+</div>
+</div>
+<div class="dash-grid-mid">
+<div class="chart-card">
+<div class="chart-title"><i class="ti ti-arrow-right" aria-hidden="true"></i>Stage pipeline flow</div>
+<div class="chart-subtitle">Tasks currently sitting in each stage</div>
+<div class="flow-row"><div class="flow-seg">
+<div class="flow-seg-bar" style="background:#3b5bdb;opacity:0.9249999999999999">6</div>
+<div class="flow-seg-lbl">Job Brief</div>
+</div><div class="flow-arrow" style="margin-top:-12px;padding-bottom:18px;color:var(--t4);font-size:12px">›</div><div class="flow-seg">
+<div class="flow-seg-bar" style="background:#7048e8;opacity:0.2">0</div>
+<div class="flow-seg-lbl">Design</div>
+</div><div class="flow-arrow" style="margin-top:-12px;padding-bottom:18px;color:var(--t4);font-size:12px">›</div><div class="flow-seg">
+<div class="flow-seg-bar" style="background:#1971c2;opacity:0.964">7</div>
+<div class="flow-seg-lbl">Production</div>
+</div><div class="flow-arrow" style="margin-top:-12px;padding-bottom:18px;color:var(--t4);font-size:12px">›</div><div class="flow-seg">
+<div class="flow-seg-bar" style="background:#e67700;opacity:1">8</div>
+<div class="flow-seg-lbl">Review</div>
+</div><div class="flow-arrow" style="margin-top:-12px;padding-bottom:18px;color:var(--t4);font-size:12px">›</div><div class="flow-seg">
+<div class="flow-seg-bar" style="background:#c2255c;opacity:0.85">4</div>
+<div class="flow-seg-lbl">Approval Stage</div>
+</div><div class="flow-arrow" style="margin-top:-12px;padding-bottom:18px;color:var(--t4);font-size:12px">›</div><div class="flow-seg">
+<div class="flow-seg-bar" style="background:#0ca678;opacity:0.85">4</div>
+<div class="flow-seg-lbl">AW Release</div>
+</div><div class="flow-arrow" style="margin-top:-12px;padding-bottom:18px;color:var(--t4);font-size:12px">›</div><div class="flow-seg">
+<div class="flow-seg-bar" style="background:#495057;opacity:0.2">0</div>
+<div class="flow-seg-lbl">On Hold</div>
+</div><div class="flow-arrow" style="margin-top:-12px;padding-bottom:18px;color:var(--t4);font-size:12px">›</div><div class="flow-seg">
+<div class="flow-seg-bar" style="background:#2f9e44;opacity:0.2">0</div>
+<div class="flow-seg-lbl">Complete</div>
+</div></div>
+<div style="margin-top:14px"><div class="chart-wrap" style="height:120px"><canvas id="pipeline-chart" width="215" height="107" style="display: block; box-sizing: border-box; height: 120px; width: 240px;"></canvas></div></div>
+</div>
+<div class="chart-card">
+<div class="chart-title"><i class="ti ti-trophy" aria-hidden="true"></i>Progress leaderboard</div>
+<div class="chart-subtitle">Ranked by weighted completion %</div>
+<div><div class="lb-row">
+<div class="lb-rank gold">🥇</div>
+<div class="person-avatar o-benz" style="width:26px;height:26px;font-size:10px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0">B</div>
+<div class="lb-name">Benz<span style="font-size:10px;color:var(--t3);margin-left:6px">2 tasks</span></div>
+<div class="lb-bar-wrap"><div class="lb-bar-fill" style="width:80%;background:#50d090"></div></div>
+<div class="lb-pct">80%</div>
+</div><div class="lb-row">
+<div class="lb-rank silver">🥈</div>
+<div class="person-avatar o-witch" style="width:26px;height:26px;font-size:10px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0">W</div>
+<div class="lb-name">Witch<span style="font-size:10px;color:var(--t3);margin-left:6px">5 tasks</span></div>
+<div class="lb-bar-wrap"><div class="lb-bar-fill" style="width:67%;background:#5aaaf0"></div></div>
+<div class="lb-pct">67%</div>
+</div><div class="lb-row">
+<div class="lb-rank bronze">🥉</div>
+<div class="person-avatar o-nod" style="width:26px;height:26px;font-size:10px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0">N</div>
+<div class="lb-name">Nod<span style="font-size:10px;color:var(--t3);margin-left:6px">2 tasks</span></div>
+<div class="lb-bar-wrap"><div class="lb-bar-fill" style="width:65%;background:#5aaaf0"></div></div>
+<div class="lb-pct">65%</div>
+</div><div class="lb-row">
+<div class="lb-rank ">4</div>
+<div class="person-avatar o-ton" style="width:26px;height:26px;font-size:10px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0">T</div>
+<div class="lb-name">Ton<span style="font-size:10px;color:var(--t3);margin-left:6px">12 tasks</span></div>
+<div class="lb-bar-wrap"><div class="lb-bar-fill" style="width:65%;background:#5aaaf0"></div></div>
+<div class="lb-pct">65%</div>
+</div><div class="lb-row">
+<div class="lb-rank ">5</div>
+<div class="person-avatar o-ju" style="width:26px;height:26px;font-size:10px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0">J</div>
+<div class="lb-name">Ju<span style="font-size:10px;color:var(--t3);margin-left:6px">2 tasks</span></div>
+<div class="lb-bar-wrap"><div class="lb-bar-fill" style="width:65%;background:#5aaaf0"></div></div>
+<div class="lb-pct">65%</div>
+</div><div class="lb-row">
+<div class="lb-rank ">6</div>
+<div class="person-avatar o-por" style="width:26px;height:26px;font-size:10px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0">P</div>
+<div class="lb-name">Por<span style="font-size:10px;color:var(--t3);margin-left:6px">4 tasks</span></div>
+<div class="lb-bar-wrap"><div class="lb-bar-fill" style="width:5%;background:#f07070"></div></div>
+<div class="lb-pct">5%</div>
+</div><div class="lb-row">
+<div class="lb-rank ">7</div>
+<div class="person-avatar o-sun" style="width:26px;height:26px;font-size:10px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0">S</div>
+<div class="lb-name">Sun<span style="font-size:10px;color:var(--t3);margin-left:6px">2 tasks</span></div>
+<div class="lb-bar-wrap"><div class="lb-bar-fill" style="width:5%;background:#f07070"></div></div>
+<div class="lb-pct">5%</div>
+</div></div>
+</div>
+</div>
+<div class="dash-grid-bot">
+<div class="chart-card">
+<div class="chart-title"><i class="ti ti-folder" aria-hidden="true"></i>Projects overview</div>
+<div class="chart-subtitle">Progress across all projects</div>
+<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px"><div style="background:var(--surf2);border-radius:8px;padding:12px 14px;border-left:3px solid #5aaaf0">
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+<span style="font-size:13px;font-weight:600">Spot &amp; Production</span>
+<span style="font-family:&#39;DBHeavent&#39;,monospace;font-size:14px;font-weight:700;color:#5aaaf0">64%</span>
+</div>
+<div style="height:5px;background:var(--surf3);border-radius:3px;overflow:hidden;margin-bottom:8px">
+<div style="height:100%;width:64%;background:#5aaaf0;border-radius:3px;transition:width .6s"></div>
+</div>
+<div style="display:flex;gap:14px;font-size:11px;color:var(--t3)">
+<span>📋 18 tasks</span>
+<span style="color:#50d090">✓ 0 done</span>
+<span style="color:var(--gold)">⏳ 18 left</span>
+</div>
+</div><div style="background:var(--surf2);border-radius:8px;padding:12px 14px;border-left:3px solid #b87ff0">
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+<span style="font-size:13px;font-weight:600">CJx Commu2026</span>
+<span style="font-family:&#39;DBHeavent&#39;,monospace;font-size:14px;font-weight:700;color:#b87ff0">40%</span>
+</div>
+<div style="height:5px;background:var(--surf3);border-radius:3px;overflow:hidden;margin-bottom:8px">
+<div style="height:100%;width:40%;background:#b87ff0;border-radius:3px;transition:width .6s"></div>
+</div>
+<div style="display:flex;gap:14px;font-size:11px;color:var(--t3)">
+<span>📋 10 tasks</span>
+<span style="color:#50d090">✓ 0 done</span>
+<span style="color:var(--gold)">⏳ 10 left</span>
+</div>
+</div><div style="background:var(--surf2);border-radius:8px;padding:12px 14px;border-left:3px solid #c4a8ff">
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+<span style="font-size:13px;font-weight:600">xxxx</span>
+<span style="font-family:&#39;DBHeavent&#39;,monospace;font-size:14px;font-weight:700;color:#c4a8ff">5%</span>
+</div>
+<div style="height:5px;background:var(--surf3);border-radius:3px;overflow:hidden;margin-bottom:8px">
+<div style="height:100%;width:5%;background:#c4a8ff;border-radius:3px;transition:width .6s"></div>
+</div>
+<div style="display:flex;gap:14px;font-size:11px;color:var(--t3)">
+<span>📋 1 tasks</span>
+<span style="color:#50d090">✓ 0 done</span>
+<span style="color:var(--gold)">⏳ 1 left</span>
+</div>
+</div></div>
+<div class="chart-wrap" style="height:160px"><canvas id="proj-chart" width="287" height="143" style="display: block; box-sizing: border-box; height: 160px; width: 320px;"></canvas></div>
+</div>
+<div class="chart-card">
+<div class="chart-title"><i class="ti ti-users" aria-hidden="true"></i>Team capacity heat map</div>
+<div class="chart-subtitle">Active tasks vs completion per person</div>
+<div class="chart-wrap" style="height:300px"><canvas id="bubble-chart" width="539" height="269" style="display: block; box-sizing: border-box; height: 300px; width: 600px;"></canvas></div>
+</div>
+</div>
+</div>
+</div>
+<div class="view" id="view-list">
+<div style="display:flex;flex-direction:column;flex:1;overflow:hidden">
+<div class="list-top">
+<div class="filter-pills" id="list-stage-pills"></div>
+<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+<select class="fsel" id="lf-owner" onchange="renderList()">
+<option value="">All members</option>
+<option>Por</option><option>Sun</option><option>Jew</option><option>Nod</option>
+<option>Donut</option><option>Ming</option><option>Ji</option><option>Kanom</option>
+<option>Ton</option><option>Nick</option><option>Benz</option><option>Ju</option>
+<option>Toon</option><option>Witch</option><option>Aom</option>
+</select>
+<select class="fsel" id="lf-project" onchange="renderList()"><option value="">All projects</option><option value="Spot &amp; Production">Spot &amp; Production</option><option value="CJx Commu2026">CJx Commu2026</option><option value="xxxx">xxxx</option><option value="zzz">zzz</option></select>
+<button class="list-add-btn" onclick="openAddModal()"><i class="ti ti-plus" aria-hidden="true"></i>Add task</button>
+</div>
+</div>
+<div class="list-body">
+<table class="lt">
+<thead>
+<tr>
+<th style="width:24%">Task</th>
+<th style="width:14%">Owner</th>
+<th style="width:11%">Stage</th>
+<th style="width:22%">Progress</th>
+<th style="width:10%">Due date</th>
+<th style="width:10%">Note</th>
+<th style="width:4%"></th>
+</tr>
+</thead>
+<tbody id="list-tbody"></tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="view" id="view-board">
+<div style="display:flex;flex-direction:column;flex:1;overflow:hidden">
+<div class="board-top">
+<div class="proj-tabs-wrap" id="proj-tabs"></div>
+<div style="display:flex;gap:6px">
+<select class="fsel" id="bf-owner" onchange="renderKanban()">
+<option value="">All members</option>
+<option>Por</option><option>Sun</option><option>Jew</option><option>Nod</option>
+<option>Donut</option><option>Ming</option><option>Ji</option><option>Kanom</option>
+<option>Ton</option><option>Nick</option><option>Benz</option><option>Ju</option>
+<option>Toon</option><option>Witch</option><option>Aom</option>
+</select>
+</div>
+</div>
+<div class="board-layout">
+<div class="sidebar">
+<div class="sb-title"><i class="ti ti-plus" aria-hidden="true" style="vertical-align:-2px;margin-right:3px"></i>Add task</div>
+<div class="field"><label>Task name *</label><input type="text" id="f-title" placeholder="e.g. Brand refresh…"></div>
+<div class="field"><label>Project</label>
+<select id="f-project"><option value="Spot &amp; Production">Spot &amp; Production</option><option value="CJx Commu2026">CJx Commu2026</option><option value="xxxx">xxxx</option><option value="zzz">zzz</option></select>
+</div>
+<div class="field"><label>Person in charge *</label>
+<select id="f-owner"><option value="">— Select —</option>
+<option>Por</option><option>Sun</option><option>Jew</option><option>Nod</option>
+<option>Donut</option><option>Ming</option><option>Ji</option><option>Kanom</option>
+<option>Ton</option><option>Nick</option><option>Benz</option><option>Ju</option>
+<option>Toon</option><option>Witch</option><option>Aom</option>
+</select>
+</div>
+<div class="field"><label>Stage</label>
+<select id="f-stage">
+<option>Job Brief</option><option>Design</option><option>Production</option>
+<option>Review</option><option>Approval Stage</option>
+<option>AW Release / Event Live</option><option>On Hold</option><option>Complete</option>
+</select>
+</div>
+<div class="field"><label>Due date</label><input type="date" id="f-due"></div>
+<div class="field"><label>Note</label><textarea id="f-note" placeholder="Brief, link, context…"></textarea></div>
+<button class="btn-add-sb" onclick="addTask()"><i class="ti ti-circle-plus" aria-hidden="true"></i>Add to board</button>
+<div style="border-top:1px solid var(--b1);padding-top:12px;margin-top:4px">
+<div class="sb-title" style="margin-bottom:10px">Stage counts</div>
+<div id="sb-stats" style="display:flex;flex-direction:column;gap:5px"></div>
+</div>
+</div>
+<div class="kanban" id="kanban"></div>
+</div>
+</div>
+</div>
+<div class="modal-bg" id="edit-modal">
+<div class="modal">
+<div class="modal-head"><h3>Edit task</h3><button class="modal-close" onclick="closeModal(&#39;edit-modal&#39;)"><i class="ti ti-x" aria-hidden="true"></i></button></div>
+<div class="mgrid">
+<div class="field full"><label>Task name</label><input type="text" id="e-title"></div>
+<div class="field"><label>Project</label>
+<select id="e-project"><option value="Spot &amp; Production">Spot &amp; Production</option><option value="CJx Commu2026">CJx Commu2026</option><option value="xxxx">xxxx</option><option value="zzz">zzz</option></select>
+</div>
+<div class="field"><label>Person in charge</label>
+<select id="e-owner">
+<option>Por</option><option>Sun</option><option>Jew</option><option>Nod</option>
+<option>Donut</option><option>Ming</option><option>Ji</option><option>Kanom</option>
+<option>Ton</option><option>Nick</option><option>Benz</option><option>Ju</option>
+<option>Toon</option><option>Witch</option><option>Aom</option>
+</select>
+</div>
+<div class="field"><label>Stage</label>
+<select id="e-stage">
+<option>Job Brief</option><option>Design</option><option>Production</option>
+<option>Review</option><option>Approval Stage</option>
+<option>AW Release / Event Live</option><option>On Hold</option><option>Complete</option>
+</select>
+</div>
+<div class="field"><label>Due date</label><input type="date" id="e-due"></div>
+<div class="field full"><label>Note</label><textarea id="e-note" style="min-height:72px"></textarea></div>
+</div>
+<div class="mactions">
+<button class="btn-sec" onclick="closeModal(&#39;edit-modal&#39;)">Cancel</button>
+<button class="btn-pri" onclick="saveEdit()">Save changes</button>
+</div>
+</div>
+</div>
+<div class="modal-bg" id="add-modal">
+<div class="modal">
+<div class="modal-head"><h3>Add new task</h3><button class="modal-close" onclick="closeModal(&#39;add-modal&#39;)"><i class="ti ti-x" aria-hidden="true"></i></button></div>
+<div class="mgrid">
+<div class="field full"><label>Task name *</label><input type="text" id="a-title" placeholder="e.g. PACKSHOT BAKERY NPD…"></div>
+<div class="field"><label>Project</label>
+<select id="a-project"><option value="Spot &amp; Production">Spot &amp; Production</option><option value="CJx Commu2026">CJx Commu2026</option><option value="xxxx">xxxx</option><option value="zzz">zzz</option></select>
+</div>
+<div class="field"><label>Person in charge *</label>
+<select id="a-owner"><option value="">— Select —</option>
+<option>Por</option><option>Sun</option><option>Jew</option><option>Nod</option>
+<option>Donut</option><option>Ming</option><option>Ji</option><option>Kanom</option>
+<option>Ton</option><option>Nick</option><option>Benz</option><option>Ju</option>
+<option>Toon</option><option>Witch</option><option>Aom</option>
+</select>
+</div>
+<div class="field"><label>Stage</label>
+<select id="a-stage">
+<option>Job Brief</option><option>Design</option><option>Production</option>
+<option>Review</option><option>Approval Stage</option>
+<option>AW Release / Event Live</option><option>On Hold</option><option>Complete</option>
+</select>
+</div>
+<div class="field"><label>Due date</label><input type="date" id="a-due"></div>
+<div class="field full"><label>Note</label><textarea id="a-note" placeholder="Brief, link, context…" style="min-height:64px"></textarea></div>
+</div>
+<div class="mactions">
+<button class="btn-sec" onclick="closeModal(&#39;add-modal&#39;)">Cancel</button>
+<button class="btn-pri" onclick="addTaskModal()">Add task</button>
+</div>
+</div>
+</div>
+<div class="modal-bg" id="note-modal">
+<div class="modal note-modal">
+<div class="modal-head"><h3 id="note-modal-title">Note</h3><button class="modal-close" onclick="closeModal(&#39;note-modal&#39;)"><i class="ti ti-x" aria-hidden="true"></i></button></div>
+<div class="field"><label>Note / context</label><textarea id="nm-text" style="min-height:100px" placeholder="Add context, blockers, links…"></textarea></div>
+<div class="mactions">
+<button class="btn-sec" onclick="closeModal(&#39;note-modal&#39;)">Cancel</button>
+<button class="btn-pri" onclick="saveNote()">Save note</button>
+</div>
+</div>
+</div>
+<div class="modal-bg" id="edit-project-modal">
+<div class="modal" style="width:360px">
+<div class="modal-head"><h3>Edit project</h3><button class="modal-close" onclick="closeModal(&#39;edit-project-modal&#39;)"><i class="ti ti-x" aria-hidden="true"></i></button></div>
+<div style="display:flex;flex-direction:column;gap:12px">
+<div class="field"><label>Project name *</label><input type="text" id="ep-name" placeholder="Project name…" maxlength="60" onkeydown="if(event.key===&#39;Enter&#39;)saveEditProject()"></div>
+<div class="field"><label>Color</label><div id="ep-color-swatches" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px"></div></div>
+<div style="border-top:1px solid var(--b1);padding-top:12px">
+<button onclick="deleteProjectConfirm()" style="display:flex;align-items:center;gap:7px;width:100%;background:rgba(240,112,112,0.08);border:1px solid rgba(240,112,112,0.3);border-radius:var(--rsm);color:#f07070;padding:9px 14px;cursor:pointer;font-family:&#39;DBHeavent&#39;,&#39;Sarabun&#39;,sans-serif;font-size:13px;font-weight:500">
+<i class="ti ti-trash" aria-hidden="true"></i> Delete this project
+</button>
+</div>
+</div>
+<div class="mactions">
+<button class="btn-sec" onclick="closeModal(&#39;edit-project-modal&#39;)">Cancel</button>
+<button class="btn-pri" onclick="saveEditProject()">Save changes</button>
+</div>
+</div>
+</div>
+<div class="modal-bg" id="new-project-modal">
+<div class="modal" style="width:360px">
+<div class="modal-head"><h3>Add new project</h3><button class="modal-close" onclick="closeModal(&#39;new-project-modal&#39;)"><i class="ti ti-x" aria-hidden="true"></i></button></div>
+<div style="display:flex;flex-direction:column;gap:12px">
+<div class="field"><label>Project name *</label><input type="text" id="np-name" placeholder="e.g. Brand Campaign 2026…" maxlength="60" onkeydown="if(event.key===&#39;Enter&#39;)createProject()"></div>
+<div class="field"><label>Color</label>
+<div id="np-color-swatches" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px"></div>
+</div>
+</div>
+<div class="mactions">
+<button class="btn-sec" onclick="closeModal(&#39;new-project-modal&#39;)">Cancel</button>
+<button class="btn-pri" onclick="createProject()">Create project</button>
+</div>
+</div>
+</div>
+<script>
+// ═════════════ DATA ═════════════
+const STAGES=['Job Brief','Design','Production','Review','Approval Stage','AW Release / Event Live','On Hold','Complete'];
+const SKEY=s=>({
+'Job Brief':'jobbrief','Design':'design','Production':'production','Review':'review',
+'Approval Stage':'approval','AW Release / Event Live':'awrelease','On Hold':'onhold','Complete':'complete'
+}[s]||'jobbrief');
+const STAGE_PCT={'Job Brief':5,'Design':20,'Production':45,'Review':65,'Approval Stage':80,'AW Release / Event Live':95,'On Hold':30,'Complete':100};
+// ═════ PROJECTS (dynamic) ═════
+const PROJECT_PALETTE=['#5aaaf0','#b87ff0','#f5a870','#7dd4a0','#f07070','#f0c040','#70d4d4','#c4a8ff','#f59ab8','#a4d870'];
+let projects=[];
+let selectedNpColor=PROJECT_PALETTE[2];
+function projColor(name){const p=projects.find(x=>x.name===name);return p?p.color:'#888';}
+function renderProjectColorSwatches(){
+const el=document.getElementById('np-color-swatches');if(!el)return;
+el.innerHTML=PROJECT_PALETTE.map(c=>`<div onclick="selectNpColor('${c}',this)" style="width:22px;height:22px;border-radius:50%;background:${c};cursor:pointer;border:2px solid ${c===selectedNpColor?'#fff':'transparent'};transition:border .1s" title="${c}"></div>`).join('');
+}
+function selectNpColor(c,el){
+selectedNpColor=c;
+document.querySelectorAll('#np-color-swatches div').forEach(d=>d.style.border='2px solid transparent');
+el.style.border='2px solid #fff';
+}
+function openNewProjectModal(){
+selectedNpColor=PROJECT_PALETTE[projects.length%PROJECT_PALETTE.length];
+document.getElementById('np-name').value='';
+renderProjectColorSwatches();
+document.getElementById('new-project-modal').classList.add('open');
+setTimeout(()=>document.getElementById('np-name').focus(),100);
+}
+async function createProject(){
+const name=document.getElementById('np-name').value.trim();
+if(!name){document.getElementById('np-name').style.borderColor='#f07070';return;}
+if(projects.find(p=>p.name===name)){alert('A project with this name already exists.');return;}
+const{data:_pd,error:_pe}=await window._sb.from('mkt_projects').insert({name,color:selectedNpColor,sort_order:projects.length}).select().single();
+if(_pe){alert('Save failed: '+_pe.message);return;}
+projects.push({name:_pd.name,color:_pd.color,id:_pd.id});
+closeModal('new-project-modal');
+populateAllProjectSelects();
+renderProjectNavTabs();
+renderDash();
+}
+function openEditProject(name){
+const p=projects.find(x=>x.name===name);if(!p)return;
+editingProjectName=name;
+document.getElementById('ep-name').value=p.name;
+selectedEpColor=p.color;
+renderEditProjectSwatches();
+document.getElementById('edit-project-modal').classList.add('open');
+setTimeout(()=>document.getElementById('ep-name').focus(),100);
+}
+function renderEditProjectSwatches(){
+const el=document.getElementById('ep-color-swatches');if(!el)return;
+el.innerHTML=PROJECT_PALETTE.map(c=>`<div onclick="selectEpColor('${c}',this)" style="width:22px;height:22px;border-radius:50%;background:${c};cursor:pointer;border:2px solid ${c===selectedEpColor?'#fff':'transparent'};transition:border .1s"></div>`).join('');
+}
+function selectEpColor(c,el){
+selectedEpColor=c;
+document.querySelectorAll('#ep-color-swatches div').forEach(d=>d.style.border='2px solid transparent');
+el.style.border='2px solid #fff';
+}
+async function saveEditProject(){
+const newName=document.getElementById('ep-name').value.trim();
+if(!newName){document.getElementById('ep-name').style.borderColor='#f07070';return;}
+if(newName!==editingProjectName&&projects.find(p=>p.name===newName)){alert('A project with this name already exists.');return;}
+const p=projects.find(x=>x.name===editingProjectName);if(!p)return;
+const oldName=p.name;
+await Promise.all([
+  window._sb.from('mkt_projects').update({name:newName,color:selectedEpColor}).eq('id',p.id),
+  window._sb.from('mkt_tasks').update({project:newName}).eq('project',oldName)
+]);
+p.name=newName; p.color=selectedEpColor;
+// Update all tasks that referenced old project name
+tasks.forEach(t=>{if(t.project===oldName)t.project=newName;});
+if(activeProj===oldName)activeProj=newName;
+closeModal('edit-project-modal');
+populateAllProjectSelects();
+renderProjectNavTabs();
+renderKanban();
+renderDash();
+}
+async function deleteProjectConfirm(){
+const p=projects.find(x=>x.name===editingProjectName);if(!p)return;
+const taskCount=tasks.filter(t=>t.project===editingProjectName).length;
+const msg=taskCount>0
+?`Delete "${editingProjectName}"? This will also delete its ${taskCount} task${taskCount!==1?'s':''}. This cannot be undone.`
+:`Delete "${editingProjectName}"? This cannot be undone.`;
+if(!confirm(msg))return;
+await Promise.all([
+  window._sb.from('mkt_projects').delete().eq('name',editingProjectName),
+  window._sb.from('mkt_tasks').delete().eq('project',editingProjectName)
+]);
+tasks=tasks.filter(t=>t.project!==editingProjectName);
+projects=projects.filter(x=>x.name!==editingProjectName);
+if(activeProj===editingProjectName)activeProj='All';
+closeModal('edit-project-modal');
+populateAllProjectSelects();
+renderProjectNavTabs();
+renderProjTabs();
+renderKanban();
+renderDash();
+}
+let editingProjectName=null;
+let selectedEpColor=PROJECT_PALETTE[0];
+function populateAllProjectSelects(){
+const opts=projects.map(p=>`<option value="${esc(p.name)}">${esc(p.name)}</option>`).join('');
+const allOpts='<option value="">All projects</option>'+opts;
+const el=(id,inner)=>{const e=document.getElementById(id);if(e)e.innerHTML=inner;};
+el('lf-project',allOpts);
+el('f-project',opts);
+el('e-project',opts);
+el('a-project',opts);
+}
+function renderProjectNavTabs(){
+const el=document.getElementById('project-nav-tabs');if(!el)return;
+el.innerHTML=projects.map(p=>`<div style="display:flex;align-items:center;gap:0">
+<button class="pnav-tab" onclick="quickSwitchProject('${esc(p.name)}')" title="${esc(p.name)}" style="border-radius:var(--rsm) 0 0 var(--rsm);border-right:none"><div class="pnav-dot" style="background:${p.color}"></div>${esc(p.name.length>16?p.name.substring(0,16)+'…':p.name)}</button>
+<button onclick="openEditProject('${esc(p.name)}')" title="Edit project" style="display:flex;align-items:center;justify-content:center;padding:5px 7px;background:none;border:1px solid var(--b1);border-left:none;border-radius:0 var(--rsm) var(--rsm) 0;color:var(--t3);cursor:pointer;font-size:12px;transition:all .15s;margin:6px 0" onmouseover="this.style.background='var(--surf2)';this.style.color='var(--t1)'" onmouseout="this.style.background='none';this.style.color='var(--t3)'"><i class="ti ti-dots-vertical" aria-hidden="true"></i></button>
+</div>`).join('');
+}
+function quickSwitchProject(name){
+// Switch to board view and select that project
+document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
+document.querySelectorAll('.ptab').forEach(x=>x.classList.remove('active'));
+document.getElementById('view-board').classList.add('active');
+document.querySelectorAll('.ptab')[2].classList.add('active');
+activeProj=name;
+renderProjTabs();renderKanban();
+}
+const OWNERS=['Por','Sun','Jew','Nod','Donut','Ming','Ji','Kanom','Ton','Nick','Benz','Ju','Toon','Witch','Aom'];
+const OKEY=n=>n.toLowerCase().replace(/\s/g,'');
+let tasks=[];
+// nextId → Supabase UUIDs
+let editId=null;
+let noteId=null;
+let activeProj='All';
+let listStageFilter='All';
+// ═════════════ NAV ═════════════
+function showView(v,el){
+document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
+document.querySelectorAll('.ptab').forEach(x=>x.classList.remove('active'));
+document.getElementById('view-'+v).classList.add('active');
+el.classList.add('active');
+if(v==='dashboard') renderDash();
+if(v==='list'){populateAllProjectSelects();renderListPills();renderList();}
+if(v==='board'){populateAllProjectSelects();renderProjTabs();renderKanban();}
+}
+// ═════════════ DASHBOARD ═════════════
+function renderDash(){
+const total=tasks.length;
+const complete=tasks.filter(t=>t.stage==='Complete').length;
+const inprog=tasks.filter(t=>!['Complete','On Hold'].includes(t.stage)).length;
+const onhold=tasks.filter(t=>t.stage==='On Hold').length;
+const overdue=tasks.filter(t=>t.due&&new Date(t.due)<new Date()&&t.stage!=='Complete').length;
+const avgPct=total?Math.round(tasks.reduce((s,t)=>s+STAGE_PCT[t.stage],0)/total):0;
+const projs=[...new Set(tasks.map(t=>t.project))];
+// ── Person progress data (sorted) ──
+const personData=OWNERS.map(owner=>{
+const ot=tasks.filter(t=>t.owner===owner);
+if(!ot.length)return null;
+const pct=Math.round(ot.reduce((s,t)=>s+STAGE_PCT[t.stage],0)/ot.length);
+const active=ot.filter(t=>!['Complete','On Hold'].includes(t.stage)).length;
+const done=ot.filter(t=>t.stage==='Complete').length;
+return{owner,pct,total:ot.length,active,done,ok:OKEY(owner)};
+}).filter(Boolean).sort((a,b)=>b.pct-a.pct);
+// ── Stage counts ──
+const stageCounts=STAGES.map(s=>tasks.filter(t=>t.stage===s).length);
+// ── Project data ──
+const projData=projs.map(p=>{
+const pt=tasks.filter(t=>t.project===p);
+const pct=pt.length?Math.round(pt.reduce((s,t)=>s+STAGE_PCT[t.stage],0)/pt.length):0;
+const done=pt.filter(t=>t.stage==='Complete').length;
+return{name:p,total:pt.length,done,pct,color:projColor(p)};
+});
+// ── Leaderboard HTML ──
+const lbHTML=personData.slice(0,8).map((p,i)=>{
+const rankCls=i===0?'gold':i===1?'silver':i===2?'bronze':'';
+const rankIcon=i===0?'🥇':i===1?'🥈':i===2?'🥉':`${i+1}`;
+const barColor=p.pct>=80?'#50d090':p.pct>=50?'#5aaaf0':p.pct>=30?'#e67700':'#f07070';
+return`<div class="lb-row">
+<div class="lb-rank ${rankCls}">${rankIcon}</div>
+<div class="person-avatar o-${p.ok}" style="width:26px;height:26px;font-size:10px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0">${p.owner[0]}</div>
+<div class="lb-name">${p.owner}<span style="font-size:10px;color:var(--t3);margin-left:6px">${p.total} tasks</span></div>
+<div class="lb-bar-wrap"><div class="lb-bar-fill" style="width:${p.pct}%;background:${barColor}"></div></div>
+<div class="lb-pct">${p.pct}%</div>
+</div>`;
+}).join('');
+// ── Project cards ──
+const projCardsHTML=projData.map(p=>{
+const remaining=p.total-p.done;
+return`<div style="background:var(--surf2);border-radius:8px;padding:12px 14px;border-left:3px solid ${p.color}">
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+<span style="font-size:13px;font-weight:600">${esc(p.name)}</span>
+<span style="font-family:'DBHeavent',monospace;font-size:14px;font-weight:700;color:${p.color}">${p.pct}%</span>
+</div>
+<div style="height:5px;background:var(--surf3);border-radius:3px;overflow:hidden;margin-bottom:8px">
+<div style="height:100%;width:${p.pct}%;background:${p.color};border-radius:3px;transition:width .6s"></div>
+</div>
+<div style="display:flex;gap:14px;font-size:11px;color:var(--t3)">
+<span>📋 ${p.total} tasks</span>
+<span style="color:#50d090">✓ ${p.done} done</span>
+<span style="color:var(--gold)">⏳ ${remaining} left</span>
+</div>
+</div>`;
+}).join('');
+// ── Stage flow ──
+const STAGE_COLORS=['#3b5bdb','#7048e8','#1971c2','#e67700','#c2255c','#0ca678','#495057','#2f9e44'];
+const maxStage=Math.max(...stageCounts,1);
+const stageFlowHTML=STAGES.map((s,i)=>{
+const cnt=stageCounts[i];
+const w=Math.round((cnt/maxStage)*100);
+const lbl=s==='AW Release / Event Live'?'AW Release':s;
+return`<div class="flow-seg">
+<div class="flow-seg-bar" style="background:${STAGE_COLORS[i]};opacity:${cnt===0?0.2:0.7+w*0.003}">${cnt}</div>
+<div class="flow-seg-lbl">${lbl}</div>
+</div>${i<STAGES.length-1?'<div class="flow-arrow" style="margin-top:-12px;padding-bottom:18px;color:var(--t4);font-size:12px">›</div>':''}`;
+}).join('');
+// ── Overdue by owner ──
+const overdueByOwner=OWNERS.map(o=>({
+owner:o,
+count:tasks.filter(t=>t.owner===o&&t.due&&new Date(t.due)<new Date()&&t.stage!=='Complete').length
+})).filter(x=>x.count>0).sort((a,b)=>b.count-a.count);
+document.getElementById('dash-inner').innerHTML=`
+<div class="dash-grid-top">
+<div class="chart-card">
+<div class="chart-title"><i class="ti ti-chart-donut" aria-hidden="true"></i>Stage distribution</div>
+<div class="chart-subtitle">All tasks by current stage</div>
+<div class="chart-wrap" style="height:180px"><canvas id="donut-chart"></canvas></div>
+</div>
+<div class="chart-card">
+<div class="chart-title"><i class="ti ti-chart-bar" aria-hidden="true"></i>Workload per person</div>
+<div class="chart-subtitle">Task count by team member</div>
+<div class="chart-wrap" style="height:180px"><canvas id="bar-chart"></canvas></div>
+</div>
+<div class="chart-card">
+<div class="chart-title"><i class="ti ti-chart-radar" aria-hidden="true"></i>Progress radar</div>
+<div class="chart-subtitle">Top 6 members by % completion</div>
+<div class="chart-wrap" style="height:180px"><canvas id="radar-chart"></canvas></div>
+</div>
+</div>
+<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:14px">
+<div class="kpi"><div class="kpi-icon" style="background:#1e2840;color:#7b9cf0"><i class="ti ti-layout-kanban" aria-hidden="true"></i></div>
+<div class="kpi-big">${total}</div><div class="kpi-lbl">Total tasks</div>
+<div class="kpi-delta" style="color:var(--t3)">${projs.length} projects · ${OWNERS.filter(o=>tasks.some(t=>t.owner===o)).length} members</div>
+</div>
+<div class="kpi"><div class="kpi-icon" style="background:#0d2010;color:#40c060"><i class="ti ti-circle-check" aria-hidden="true"></i></div>
+<div class="kpi-big" style="color:#40c060">${complete}</div><div class="kpi-lbl">Complete</div>
+<div class="kpi-delta" style="color:#40c060">${total?Math.round(complete/total*100):0}% completion rate</div>
+</div>
+<div class="kpi"><div class="kpi-icon" style="background:#0e2235;color:#5aaaf0"><i class="ti ti-player-play" aria-hidden="true"></i></div>
+<div class="kpi-big" style="color:#5aaaf0">${inprog}</div><div class="kpi-lbl">In progress</div>
+<div class="kpi-delta" style="color:var(--t3)">${onhold} on hold</div>
+</div>
+<div class="kpi"><div class="kpi-icon" style="background:#2a1a08;color:#f0b040"><i class="ti ti-clock" aria-hidden="true"></i></div>
+<div class="kpi-big" style="color:${overdue>0?'#f07070':'var(--t1)'}">${overdue}</div><div class="kpi-lbl">Overdue</div>
+<div class="kpi-delta" style="color:${overdue>0?'#f07070':'#50d090'}">${overdue>0?'⚠ Needs attention':'✓ All on track'}</div>
+</div>
+<div class="kpi"><div class="kpi-icon" style="background:#1a140a;color:var(--gold)"><i class="ti ti-chart-line" aria-hidden="true"></i></div>
+<div class="kpi-big" style="color:var(--gold)">${avgPct}%</div><div class="kpi-lbl">Avg progress</div>
+<div class="kpi-delta" style="color:var(--t3)">Weighted by stage</div>
+</div>
+</div>
+<div class="dash-grid-mid">
+<div class="chart-card">
+<div class="chart-title"><i class="ti ti-arrow-right" aria-hidden="true"></i>Stage pipeline flow</div>
+<div class="chart-subtitle">Tasks currently sitting in each stage</div>
+<div class="flow-row">${stageFlowHTML}</div>
+<div style="margin-top:14px"><div class="chart-wrap" style="height:120px"><canvas id="pipeline-chart"></canvas></div></div>
+</div>
+<div class="chart-card">
+<div class="chart-title"><i class="ti ti-trophy" aria-hidden="true"></i>Progress leaderboard</div>
+<div class="chart-subtitle">Ranked by weighted completion %</div>
+<div>${lbHTML}</div>
+</div>
+</div>
+<div class="dash-grid-bot">
+<div class="chart-card">
+<div class="chart-title"><i class="ti ti-folder" aria-hidden="true"></i>Projects overview</div>
+<div class="chart-subtitle">Progress across all projects</div>
+<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px">${projCardsHTML}</div>
+<div class="chart-wrap" style="height:160px"><canvas id="proj-chart"></canvas></div>
+</div>
+<div class="chart-card">
+<div class="chart-title"><i class="ti ti-users" aria-hidden="true"></i>Team capacity heat map</div>
+<div class="chart-subtitle">Active tasks vs completion per person</div>
+<div class="chart-wrap" style="height:300px"><canvas id="bubble-chart"></canvas></div>
+</div>
+</div>
+`;
+// ── Destroy old charts ──
+['donut-chart','bar-chart','radar-chart','pipeline-chart','proj-chart','bubble-chart'].forEach(id=>{
+const inst=Chart.getChart(id);if(inst)inst.destroy();
+});
+const CHART_TEXT=getComputedStyle(document.documentElement).getPropertyValue('--t2').trim()||'#9e9b94';
+const CHART_GRID='rgba(255,255,255,0.06)';
+Chart.defaults.font.family="'DBHeavent','Sarabun',sans-serif";
+Chart.defaults.color=CHART_TEXT;
+// 1. Donut chart – stage distribution
+new Chart(document.getElementById('donut-chart'),{
+type:'doughnut',
+data:{
+labels:STAGES.map(s=>s==='AW Release / Event Live'?'AW Release':s),
+datasets:[{data:stageCounts,backgroundColor:STAGE_COLORS,borderWidth:0,hoverOffset:6}]
+},
+options:{responsive:true,maintainAspectRatio:true,cutout:'65%',
+plugins:{legend:{position:'right',labels:{boxWidth:10,padding:10,font:{size:10}}},
+tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${ctx.parsed} tasks`}}}}
+});
+// 2. Bar chart – tasks per person
+const activePersons=OWNERS.filter(o=>tasks.some(t=>t.owner===o));
+const taskCounts=activePersons.map(o=>tasks.filter(t=>t.owner===o).length);
+const barColors=activePersons.map(o=>{
+const p=personData.find(x=>x.owner===o);
+return p&&p.pct>=70?'#50d090':p&&p.pct>=40?'#5aaaf0':'#e67700';
+});
+new Chart(document.getElementById('bar-chart'),{
+type:'bar',
+data:{labels:activePersons,datasets:[{label:'Tasks',data:taskCounts,backgroundColor:barColors,borderRadius:4,borderSkipped:false}]},
+options:{responsive:true,maintainAspectRatio:true,
+plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${ctx.parsed.y} tasks`}}},
+scales:{x:{grid:{color:CHART_GRID},ticks:{font:{size:10}}},y:{grid:{color:CHART_GRID},ticks:{stepSize:1,font:{size:10}},beginAtZero:true}}}
+});
+// 3. Radar chart – top 6 members
+const top6=personData.slice(0,6);
+new Chart(document.getElementById('radar-chart'),{
+type:'radar',
+data:{
+labels:top6.map(p=>p.owner),
+datasets:[
+{label:'Progress %',data:top6.map(p=>p.pct),fill:true,backgroundColor:'rgba(232,197,71,0.15)',borderColor:'#e8c547',pointBackgroundColor:'#e8c547',pointRadius:3},
+{label:'Active tasks',data:top6.map(p=>p.active*10),fill:true,backgroundColor:'rgba(90,170,240,0.1)',borderColor:'#5aaaf0',pointBackgroundColor:'#5aaaf0',pointRadius:3}
+]
+},
+options:{responsive:true,maintainAspectRatio:true,
+plugins:{legend:{position:'bottom',labels:{boxWidth:8,font:{size:10}}}},
+scales:{r:{grid:{color:CHART_GRID},angleLines:{color:CHART_GRID},ticks:{display:false},suggestedMin:0,suggestedMax:100}}}
+});
+// 4. Pipeline horizontal bar
+new Chart(document.getElementById('pipeline-chart'),{
+type:'bar',
+data:{
+labels:STAGES.map(s=>s==='AW Release / Event Live'?'AW Release':s),
+datasets:[{label:'Tasks',data:stageCounts,backgroundColor:STAGE_COLORS,borderRadius:4,borderSkipped:false}]
+},
+options:{indexAxis:'y',responsive:true,maintainAspectRatio:true,
+plugins:{legend:{display:false}},
+scales:{x:{grid:{color:CHART_GRID},ticks:{stepSize:1,font:{size:10}},beginAtZero:true},y:{grid:{display:false},ticks:{font:{size:10}}}}}
+});
+// 5. Project comparison horizontal bar
+new Chart(document.getElementById('proj-chart'),{
+type:'bar',
+data:{
+labels:projData.map(p=>p.name.length>20?p.name.substring(0,20)+'…':p.name),
+datasets:[
+{label:'Complete',data:projData.map(p=>p.done),backgroundColor:'#2f9e44',borderRadius:4,borderSkipped:false},
+{label:'Remaining',data:projData.map(p=>p.total-p.done),backgroundColor:'rgba(255,255,255,0.08)',borderRadius:4,borderSkipped:false}
+]
+},
+options:{indexAxis:'y',responsive:true,maintainAspectRatio:true,
+plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}}},
+scales:{x:{stacked:true,grid:{color:CHART_GRID},ticks:{stepSize:1,font:{size:10}},beginAtZero:true},y:{stacked:true,grid:{display:false},ticks:{font:{size:10}}}}}
+});
+// 6. Bubble chart – capacity map (active tasks vs progress, bubble = total)
+const bubbleData=personData.map((p,i)=>({
+x:p.active,y:p.pct,r:Math.max(4,p.total*2.5),label:p.owner,ok:p.ok
+}));
+const bubbleColors=personData.map(p=>{
+const map={'por':'#c4a8ff','sun':'#7dd4a0','jew':'#f4a0a0','nod':'#7ab8f5','donut':'#f5c870','ming':'#a4d870','ji':'#f59ab8','kanom':'#70d4d4','ton':'#f5a870','nick':'#b07af5','benz':'#70a8f5','ju':'#f57070','toon':'#60d0a0','witch':'#e0b860','aom':'#d090e0'};
+return map[p.ok]||'#888';
+});
+new Chart(document.getElementById('bubble-chart'),{
+type:'bubble',
+data:{datasets:bubbleData.map((d,i)=>({label:d.label,data:[{x:d.x,y:d.y,r:d.r}],backgroundColor:bubbleColors[i]+'88',borderColor:bubbleColors[i],borderWidth:1.5}))},
+options:{responsive:true,maintainAspectRatio:true,
+plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>{const d=bubbleData[ctx.datasetIndex];return`${d.label}: ${d.y}% progress, ${d.x} active tasks`;}}}},
+scales:{x:{title:{display:true,text:'Active tasks',font:{size:10}},grid:{color:CHART_GRID},ticks:{stepSize:1,font:{size:10}},beginAtZero:true},
+y:{title:{display:true,text:'Progress %',font:{size:10}},grid:{color:CHART_GRID},ticks:{font:{size:10}},min:0,max:105}}}
+});
+}
+function renderListPills(){
+const el=document.getElementById('list-stage-pills');
+const opts=['All',...STAGES];
+el.innerHTML=opts.map(s=>`<button class="fpill${s===listStageFilter?' active':''}" onclick="setListStage('${s}',this)">${s==='AW Release / Event Live'?'AW Release':s}</button>`).join('');
+}
+function setListStage(s,el){
+listStageFilter=s;
+document.querySelectorAll('.fpill').forEach(p=>p.classList.remove('active'));
+el.classList.add('active');
+renderList();
+}
+function renderList(){
+const fo=document.getElementById('lf-owner').value;
+const fp=document.getElementById('lf-project').value;
+let list=tasks;
+if(listStageFilter!=='All') list=list.filter(t=>t.stage===listStageFilter);
+if(fo) list=list.filter(t=>t.owner===fo);
+if(fp) list=list.filter(t=>t.project===fp);
+const tbody=document.getElementById('list-tbody');
+if(!list.length){tbody.innerHTML=`<tr><td colspan="7" style="text-align:center;padding:3rem;color:var(--t3)"><i class="ti ti-inbox" style="font-size:24px;display:block;margin-bottom:8px" aria-hidden="true"></i>No tasks found</td></tr>`;return;}
+tbody.innerHTML=list.map(t=>{
+const ok=OKEY(t.owner);
+const sk=SKEY(t.stage);
+const pct=STAGE_PCT[t.stage];
+const pc=projColor(t.project);
+let dueCls='',dueLbl='';
+if(t.due){
+const d=new Date(t.due),now=new Date();now.setHours(0,0,0,0);
+const diff=Math.ceil((d-now)/86400000);
+dueCls=diff<0?'due-hot':diff<=3?'due-warn':'';
+dueLbl=diff<0?`${Math.abs(diff)}d late`:diff===0?'Today':diff===1?'Tomorrow':`${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+} else {dueLbl='—';}
+const hasNote=t.note&&t.note.trim().length>0;
+const stageOpts=STAGES.map(s=>`<option value="${s}"${s===t.stage?' selected':''}>${s==='AW Release / Event Live'?'AW Release':s}</option>`).join('');
+return `<tr>
+<td>
+<div style="display:flex;align-items:center;gap:6px">
+<span class="proj-dot" style="background:${pc}" title="${esc(t.project)}"></span>
+<input class="task-name-inp" value="${esc(t.title)}" onchange="updateField(${t.id},'title',this.value)" title="${esc(t.title)}"/>
+</div>
+</td>
+<td>
+<div class="ow-cell">
+<div class="ow-av o-${ok}">${t.owner[0]}</div>
+<select style="background:none;border:none;color:var(--t1);font-family:'DBHeavent','Sarabun',sans-serif;font-size:12px;outline:none;cursor:pointer" onchange="updateField(${t.id},'owner',this.value)">
+${OWNERS.map(o=>`<option value="${o}"${o===t.owner?' selected':''}>${o}</option>`).join('')}
+</select>
+</div>
+</td>
+<td><span class="sbadge s-${sk}">${t.stage==='AW Release / Event Live'?'AW Release':t.stage}</span></td>
+<td>
+<div class="prog-wrap">
+<div class="prog-slider-row">
+<input type="range" min="0" max="100" step="5" value="${pct}" oninput="slideProgress(${t.id},parseInt(this.value),this)"/>
+<span class="prog-pct" id="pct-${t.id}">${pct}%</span>
+</div>
+<div class="prog-bar-row">
+<div class="pb"><div class="pb-fill pf-${sk}" id="pb-${t.id}" style="width:${pct}%"></div></div>
+<select class="prog-stage-sel" onchange="updateStage(${t.id},this.value)">${stageOpts}</select>
+</div>
+</div>
+</td>
+<td><input class="due-inp ${dueCls}" type="date" value="${t.due||''}" onchange="updateField(${t.id},'due',this.value)" title="${dueLbl}"/></td>
+<td><button class="note-btn${hasNote?' has':''}" onclick="openNote(${t.id})">${hasNote?'View note':'Add note'}</button></td>
+<td><button class="del-btn" onclick="deleteTaskList(${t.id})" title="Delete"><i class="ti ti-trash" aria-hidden="true"></i></button></td>
+</tr>`;
+}).join('');
+}
+async function slideProgress(id,val,inp){
+// Find nearest stage
+const entries=Object.entries(STAGE_PCT);
+let best=entries[0];
+entries.forEach(([s,p])=>{ if(Math.abs(p-val)<Math.abs(best[1]-val)) best=[s,p]; });
+const t=tasks.find(t=>t.id===id); if(!t) return;
+t.stage=best[0];
+const pct=best[1];
+inp.value=pct;
+const pctEl=document.getElementById('pct-'+id);
+const pbEl=document.getElementById('pb-'+id);
+if(pctEl) pctEl.textContent=pct+'%';
+if(pbEl){ pbEl.style.width=pct+'%'; const sk=SKEY(best[0]); pbEl.className='pb-fill pf-'+sk; }
+await window._sb.from('mkt_tasks').update({stage:best[0]}).eq('id',id);
+renderList();
+}
+async function updateStage(id,val){
+const t=tasks.find(t=>t.id===id); if(!t) return;
+t.stage=val;
+await window._sb.from('mkt_tasks').update({stage:val}).eq('id',id);
+renderList();
+}
+async function updateField(id,field,val){
+const t=tasks.find(t=>t.id===id); if(!t) return;
+t[field]=val;
+await window._sb.from('mkt_tasks').update({[field]:val}).eq('id',id);
+}
+async function deleteTaskList(id){
+if(!confirm('Delete this task?')) return;
+await window._sb.from('mkt_tasks').delete().eq('id',id);
+tasks=tasks.filter(t=>t.id!==id); renderList();
+}
+// Note
+function openNote(id){
+const t=tasks.find(t=>t.id===id); if(!t) return;
+noteId=id;
+document.getElementById('note-modal-title').textContent='Note — '+t.title.substring(0,40);
+document.getElementById('nm-text').value=t.note||'';
+document.getElementById('note-modal').classList.add('open');
+}
+function saveNote(){
+const t=tasks.find(t=>t.id===noteId); if(t) t.note=document.getElementById('nm-text').value.trim();
+closeModal('note-modal'); renderList();
+}
+// Add via modal
+function openAddModal(){ document.getElementById('add-modal').classList.add('open'); }
+async function addTaskModal(){
+const title=document.getElementById('a-title').value.trim();
+const owner=document.getElementById('a-owner').value;
+if(!title||!owner){ alert('Please fill in task name and owner.'); return; }
+const _nt={title,owner,project:document.getElementById('a-project').value,stage:document.getElementById('a-stage').value,due:document.getElementById('a-due').value||null,note:document.getElementById('a-note').value.trim()};
+const{data:_nd,error:_ne}=await window._sb.from('mkt_tasks').insert(_nt).select().single();
+if(_ne){alert('Save failed');return;}
+tasks.unshift({id:_nd.id,..._nt,due:_nt.due||''});
+document.getElementById('a-title').value=''; document.getElementById('a-due').value=''; document.getElementById('a-note').value=''; document.getElementById('a-owner').value='';
+closeModal('add-modal'); renderList();
+}
+// ═════════════ BOARD / KANBAN ═════════════
+function renderProjTabs(){
+const projs=['All',...projects.map(p=>p.name)];
+document.getElementById('proj-tabs').innerHTML=projs.map(p=>{
+const col=p==='All'?null:projColor(p);
+return `<button class="pjtab${p===activeProj?' active':''}" onclick="switchProj('${esc(p)}',this)">${p==='All'?'All projects':`<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${col};margin-right:5px;vertical-align:middle"></span>${p}`}</button>`;
+}).join('');
+}
+function switchProj(p,el){
+activeProj=p; document.querySelectorAll('.pjtab').forEach(x=>x.classList.remove('active')); el.classList.add('active'); renderKanban();
+}
+function renderKanban(){
+const fo=document.getElementById('bf-owner').value;
+let list=tasks;
+if(activeProj!=='All') list=list.filter(t=>t.project===activeProj);
+if(fo) list=list.filter(t=>t.owner===fo);
+document.getElementById('kanban').innerHTML=STAGES.map((stage,si)=>{
+const cards=list.filter(t=>t.stage===stage);
+const key=SKEY(stage);
+return `<div class="kcol"><div class="kcol-head"><div style="display:flex;align-items:center;gap:6px"><div style="width:7px;height:7px;border-radius:50%;flex-shrink:0" class="d-${key}"></div><span class="kcol-ttl">${stage==='AW Release / Event Live'?'AW Release':stage}</span></div><span class="kcol-cnt">${cards.length}</span></div><div class="kcol-body">${cards.length===0?`<div class="kcol-empty"><i class="ti ti-inbox" aria-hidden="true"></i>Empty</div>`:cards.map(t=>kcardHTML(t,stage,si)).join('')}</div></div>`;
+}).join('');
+renderSbStats();
+}
+function kcardHTML(t,stage,si){
+const ok=OKEY(t.owner);
+const canL=si>0,canR=si<STAGES.length-1;
+const pc=projColor(t.project);
+let dueHTML='';
+if(t.due){
+const d=new Date(t.due),now=new Date();now.setHours(0,0,0,0);
+const diff=Math.ceil((d-now)/86400000);
+const cls=diff<0?'hot':diff<=3?'warn':'';
+const lbl=diff<0?`${Math.abs(diff)}d late`:diff===0?'Today':diff===1?'Tomorrow':`${d.getDate()} ${d.toLocaleString('en',{month:'short'})}`;
+dueHTML=`<span class="due-tag ${cls}">${lbl}</span>`;
+}
+return `<div class="kcard" onclick="openEdit(${t.id})"><div class="kcard-proj"><span style="width:6px;height:6px;border-radius:50%;background:${pc};flex-shrink:0;display:inline-block"></span>${esc(t.project)}</div><div class="kcard-title">${esc(t.title)}</div>${t.note?`<div class="kcard-note">${esc(t.note)}</div>`:''}<div class="kcard-foot"><span class="owner-pip o-${ok}">${t.owner}</span>${dueHTML}</div><div class="kcard-actions">${canL?`<button class="cta" onclick="moveTask(event,${t.id},-1)"><i class="ti ti-arrow-left" aria-hidden="true"></i></button>`:''}<button class="cta" onclick="openEdit(${t.id});event.stopPropagation()"><i class="ti ti-edit" aria-hidden="true"></i></button>${canR?`<button class="cta" onclick="moveTask(event,${t.id},1)"><i class="ti ti-arrow-right" aria-hidden="true"></i></button>`:''}<button class="cta del" onclick="delKanban(event,${t.id})"><i class="ti ti-trash" aria-hidden="true"></i></button></div></div>`;
+}
+function renderSbStats(){
+const list=activeProj==='All'?tasks:tasks.filter(t=>t.project===activeProj);
+const g={};list.forEach(t=>{g[t.stage]=(g[t.stage]||0)+1;});
+document.getElementById('sb-stats').innerHTML=STAGES.filter(s=>g[s]).map(s=>{
+const k=SKEY(s);
+return `<div style="display:flex;align-items:center;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--b0)"><div style="display:flex;align-items:center;gap:6px"><div style="width:6px;height:6px;border-radius:50%" class="d-${k}"></div><span style="font-size:11px">${s==='AW Release / Event Live'?'AW Release':s}</span></div><span style="font-family:'DBHeavent',monospace;font-size:11px;color:var(--t3)">${g[s]}</span></div>`;
+}).join('');
+}
+async function moveTask(e,id,dir){
+e.stopPropagation();
+const t=tasks.find(t=>t.id===id);if(!t)return;
+const si=STAGES.indexOf(t.stage);const ni=si+dir;
+if(ni<0||ni>=STAGES.length)return;
+t.stage=STAGES[ni];
+await window._sb.from('mkt_tasks').update({stage:t.stage}).eq('id',id);
+renderKanban();
+}
+async function delKanban(e,id){
+e.stopPropagation();if(!confirm('Delete?'))return;
+await window._sb.from('mkt_tasks').delete().eq('id',id);
+tasks=tasks.filter(t=>t.id!==id);renderKanban();
+}
+// ═════════════ EDIT MODAL ═════════════
+function openEdit(id){
+const t=tasks.find(t=>t.id===id);if(!t)return;
+editId=id;
+document.getElementById('e-title').value=t.title;
+document.getElementById('e-project').value=t.project;
+document.getElementById('e-owner').value=t.owner;
+document.getElementById('e-stage').value=t.stage;
+document.getElementById('e-due').value=t.due||'';
+document.getElementById('e-note').value=t.note||'';
+document.getElementById('edit-modal').classList.add('open');
+}
+async function saveEdit(){
+const t=tasks.find(t=>t.id===editId);if(!t)return;
+t.title=document.getElementById('e-title').value.trim()||t.title;
+t.project=document.getElementById('e-project').value;
+t.owner=document.getElementById('e-owner').value;
+t.stage=document.getElementById('e-stage').value;
+t.due=document.getElementById('e-due').value;
+t.note=document.getElementById('e-note').value.trim();
+await window._sb.from('mkt_tasks').update({title:t.title,owner:t.owner,project:t.project,stage:t.stage,due:t.due||null,note:t.note}).eq('id',editId);
+closeModal('edit-modal');
+renderKanban();
+renderList();
+}
+// ═════════════ BOARD ADD ═════════════
+async function addTask(){
+const title=document.getElementById('f-title').value.trim();
+const owner=document.getElementById('f-owner').value;
+if(!title||!owner){document.getElementById('f-title').style.borderColor=!title?'#f07070':'';document.getElementById('f-owner').style.borderColor=!owner?'#f07070':'';return;}
+document.getElementById('f-title').style.borderColor='';document.getElementById('f-owner').style.borderColor='';
+const _ft={title,owner,project:document.getElementById('f-project').value,stage:document.getElementById('f-stage').value,due:document.getElementById('f-due').value||null,note:document.getElementById('f-note').value.trim()};
+const{data:_fd,error:_fe}=await window._sb.from('mkt_tasks').insert(_ft).select().single();
+if(_fe){alert('Save failed');return;}
+tasks.unshift({id:_fd.id,..._ft,due:_ft.due||''});
+document.getElementById('f-title').value='';document.getElementById('f-due').value='';document.getElementById('f-note').value='';
+renderKanban();
+}
+// ═════════════ UTILS ═════════════
+function closeModal(id){document.getElementById(id).classList.remove('open');editId=null;noteId=null;if(id==='edit-project-modal')editingProjectName=null;}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function clock(){const d=new Date();document.getElementById('clock').textContent=d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short',year:'numeric'})+' · '+d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});}
+document.querySelectorAll('.modal-bg').forEach(bg=>bg.addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal(bg.id);}));
+document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal-bg.open').forEach(m=>closeModal(m.id));});
+clock(); setInterval(clock,60000);
+
+function _sync(state,msg){
+  const dot=document.getElementById('sync-dot');
+  const lbl=document.getElementById('sync-lbl');
+  if(dot) dot.style.background=state==='ok'?'#50d090':state==='busy'?'#e8c547':'#f07070';
+  if(lbl) lbl.textContent=msg;
+}
+
+async function loadFromSupabase(){
+  if(!window._sb){_sync('err','Client not ready'); return;}
+  _sync('busy','Loading…');
+  try{
+    const [{data:projs,error:e1},{data:tks,error:e2}]=await Promise.all([
+      window._sb.from('mkt_projects').select('*').order('sort_order'),
+      window._sb.from('mkt_tasks').select('*').order('created_at')
+    ]);
+    if(e1) throw e1;
+    if(e2) throw e2;
+    projects=projs.map(p=>({name:p.name,color:p.color,id:p.id}));
+    tasks=tks.map(t=>({id:t.id,title:t.title,owner:t.owner,project:t.project,stage:t.stage,due:t.due||'',note:t.note||''}));
+    _sync('ok','● Live · '+new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}));
+    populateAllProjectSelects();
+    renderProjectNavTabs();
+    renderDash();
+    const av=document.querySelector('.ptab.active');
+    if(av){const v=av.getAttribute('data-view');if(v==='list'){renderListPills();renderList();}else if(v==='board'){renderProjTabs();renderKanban();}}
+  }catch(err){
+    _sync('err','⚠ Offline');
+    console.error('Supabase error:',err);
+  }
+}
+
+window._pendingLoad = function(){
+  loadFromSupabase();
+  setInterval(loadFromSupabase, 30000);
+};
+if(window._sbReady) window._pendingLoad();
+</script>
+
+</body></html>
