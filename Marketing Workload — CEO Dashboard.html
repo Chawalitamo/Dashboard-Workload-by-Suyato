@@ -294,6 +294,7 @@ if(window._pendingLoad) window._pendingLoad();
 <button class="ptab" onclick="showView(&#39;list&#39;,this)"><i class="ti ti-list-details" aria-hidden="true"></i>Task List</button>
 <button class="ptab" onclick="showView(&#39;board&#39;,this)"><i class="ti ti-layout-kanban" aria-hidden="true"></i>Kanban Board</button>
 <div style="flex:1"></div>
+<button class="ptab" onclick="openTeamEmailsModal()" title="Notification settings" style="margin-right:6px"><i class="ti ti-bell-ringing" aria-hidden="true"></i>Notify</button>
 <div id="project-nav-tabs" style="display:flex;align-items:center;gap:4px;padding:0 4px"><div style="display:flex;align-items:center;gap:0">
 <button class="pnav-tab" onclick="quickSwitchProject(&#39;Spot &amp; Production&#39;)" title="Spot &amp; Production" style="border-radius:var(--rsm) 0 0 var(--rsm);border-right:none"><div class="pnav-dot" style="background:#5aaaf0"></div>Spot &amp; Productio…</button>
 <button onclick="openEditProject(&#39;Spot &amp; Production&#39;)" title="Edit project" style="display:flex;align-items:center;justify-content:center;padding:5px 7px;background:none;border:1px solid var(--b1);border-left:none;border-radius:0 var(--rsm) var(--rsm) 0;color:var(--t3);cursor:pointer;font-size:12px;transition:all .15s;margin:6px 0" onmouseover="this.style.background=&#39;var(--surf2)&#39;;this.style.color=&#39;var(--t1)&#39;" onmouseout="this.style.background=&#39;none&#39;;this.style.color=&#39;var(--t3)&#39;"><i class="ti ti-dots-vertical" aria-hidden="true"></i></button>
@@ -672,6 +673,23 @@ if(window._pendingLoad) window._pendingLoad();
 </div>
 </div>
 </div>
+<!-- TEAM EMAILS / NOTIFICATION MODAL -->
+<div class="modal-bg" id="team-emails-modal">
+<div class="modal" style="width:520px">
+<div class="modal-head"><h3>🔔 Notification Settings</h3><button class="modal-close" onclick="closeModal('team-emails-modal')">&#x2715;</button></div>
+<p style="font-size:12px;color:var(--t3);margin:0 0 14px">Enter each member's email address. Overdue task reminders are sent automatically every morning at <strong style="color:var(--gold)">8:00 AM</strong>. Leave blank to skip that person.</p>
+<div id="team-emails-list" style="display:flex;flex-direction:column;gap:7px;max-height:340px;overflow-y:auto;padding-right:4px"></div>
+<div id="notify-status" style="display:none;margin-top:10px;font-size:12px;padding:7px 10px;border-radius:6px;background:var(--surf2)"></div>
+<div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--b1);display:flex;gap:8px;justify-content:space-between;align-items:center;flex-wrap:wrap">
+<button class="btn-sec" id="send-now-btn" onclick="sendOverdueReminders()">📨 Send Reminders Now</button>
+<div style="display:flex;gap:8px">
+<button class="btn-sec" onclick="closeModal('team-emails-modal')">Cancel</button>
+<button class="btn-pri" onclick="saveTeamEmails()">Save</button>
+</div>
+</div>
+</div>
+</div>
+
 <!-- ATTACHMENT MODAL -->
 <div class="modal-bg" id="attach-modal">
 <div class="modal" style="width:480px">
@@ -1463,6 +1481,71 @@ document.querySelectorAll('.modal-bg').forEach(bg=>bg.addEventListener('click',e
 document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal-bg.open').forEach(m=>closeModal(m.id));});
 clock(); setInterval(clock,60000);
 initAttachZone();
+
+// ═════════════ NOTIFICATION SETTINGS ═════════════
+async function openTeamEmailsModal(){
+  const{data}=await window._sb.from('mkt_owners').select('name,email,notify_overdue');
+  const emailMap={};
+  (data||[]).forEach(o=>{emailMap[o.name]={email:o.email||'',notify:o.notify_overdue!==false};});
+  const list=document.getElementById('team-emails-list');
+  list.innerHTML=OWNERS.map(name=>{
+    const d=emailMap[name]||{email:'',notify:true};
+    return `<div style="display:flex;align-items:center;gap:8px">
+      <div style="width:26px;height:26px;border-radius:50%;background:var(--surf3);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;color:var(--t1)">${name[0]}</div>
+      <span style="width:64px;font-size:13px;font-weight:600;flex-shrink:0">${name}</span>
+      <input type="email" placeholder="email@company.com" value="${d.email||''}" data-owner="${name}"
+        style="flex:1;background:var(--surf2);border:1px solid var(--b1);border-radius:6px;padding:6px 9px;color:var(--t1);font-size:12px;outline:none;transition:border .15s"
+        onfocus="this.style.borderColor='var(--gold2)'" onblur="this.style.borderColor='var(--b1)'">
+      <label style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--t3);flex-shrink:0;cursor:pointer">
+        <input type="checkbox" data-owner-notify="${name}" ${d.notify?'checked':''} style="cursor:pointer">Notify
+      </label>
+    </div>`;
+  }).join('');
+  document.getElementById('notify-status').style.display='none';
+  document.getElementById('team-emails-modal').classList.add('open');
+}
+
+async function saveTeamEmails(){
+  const rows=OWNERS.map(name=>{
+    const inp=document.querySelector(`input[data-owner="${name}"]`);
+    const chk=document.querySelector(`input[data-owner-notify="${name}"]`);
+    return{name,email:inp?inp.value.trim():'',notify_overdue:chk?chk.checked:true};
+  });
+  try{
+    await window._sb.from('mkt_owners').upsert(rows,{onConflict:'name'});
+    const s=document.getElementById('notify-status');
+    s.style.display='block'; s.style.color='#50d090'; s.textContent='✅ Saved!';
+    setTimeout(()=>closeModal('team-emails-modal'),900);
+  }catch(err){
+    const s=document.getElementById('notify-status');
+    s.style.display='block'; s.style.color='#f07070'; s.textContent='❌ '+err.message;
+  }
+}
+
+async function sendOverdueReminders(){
+  const btn=document.getElementById('send-now-btn');
+  const s=document.getElementById('notify-status');
+  btn.disabled=true; btn.textContent='⏳ Sending…';
+  s.style.display='none';
+  try{
+    const res=await fetch('https://fxmigukayxvieziseqil.supabase.co/functions/v1/notify-overdue',{
+      method:'POST',headers:{'Content-Type':'application/json'},body:'{}'
+    });
+    const j=await res.json();
+    s.style.display='block';
+    if(res.ok){
+      s.style.color='#50d090';
+      s.textContent=`✅ Done — ${j.owners_notified||0} email(s) sent for ${j.overdue_tasks||0} overdue task(s).`;
+    }else{
+      s.style.color='#f07070';
+      s.textContent='❌ '+(j.error||'Unknown error');
+    }
+  }catch(err){
+    s.style.display='block'; s.style.color='#f07070'; s.textContent='❌ '+err.message;
+  }
+  btn.disabled=false; btn.textContent='📨 Send Reminders Now';
+}
+// ═══════════════════════════════════════════════════
 
 function _sync(state,msg){
   const dot=document.getElementById('sync-dot');

@@ -1,0 +1,28 @@
+name: Daily Overdue Task Notifications
+
+on:
+  schedule:
+    # 01:00 UTC = 08:00 Bangkok (UTC+7) every day
+    - cron: '0 1 * * *'
+  workflow_dispatch:   # Allow manual trigger from GitHub UI
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send overdue notifications via Supabase Edge Function
+        run: |
+          RESPONSE=$(curl -s -o /tmp/response.json -w "%{http_code}" \
+            -X POST \
+            "https://fxmigukayxvieziseqil.supabase.co/functions/v1/notify-overdue" \
+            -H "Content-Type: application/json" \
+            -d '{}')
+
+          echo "HTTP Status: $RESPONSE"
+          echo "Response body:"
+          cat /tmp/response.json
+
+          if [ "$RESPONSE" != "200" ]; then
+            echo "::error::Edge function returned HTTP $RESPONSE"
+            exit 1
+          fi
