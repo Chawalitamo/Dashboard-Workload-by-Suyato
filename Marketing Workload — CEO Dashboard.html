@@ -184,6 +184,17 @@ nav h1{font-size:15px;font-weight:600;letter-spacing:-.01em}
 .cta{background:none;border:1px solid var(--b1);border-radius:4px;color:var(--t2);padding:3px 7px;cursor:pointer;font-size:11px;display:flex;align-items:center;gap:3px;transition:all .12s;font-family:'DBHeavent','Sarabun',sans-serif}
 .cta:hover{border-color:var(--b2);color:var(--t1);background:var(--surf3)}
 .cta.del:hover{border-color:#f07070;color:#f07070}
+/* ── ATTACHMENTS ── */
+.attach-list{display:flex;flex-direction:column;gap:7px;margin-bottom:14px;max-height:280px;overflow-y:auto}
+.attach-item{display:flex;align-items:center;gap:9px;padding:8px 10px;background:var(--surf2);border:1px solid var(--b1);border-radius:var(--rsm)}
+.attach-icon{font-size:18px;flex-shrink:0;width:24px;text-align:center}
+.attach-info{flex:1;min-width:0}
+.attach-name{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--t1)}
+.attach-meta{font-size:10px;color:var(--t3);margin-top:2px}
+.attach-empty{text-align:center;color:var(--t3);font-size:12px;padding:24px 0}
+.upload-zone{border:2px dashed var(--b2);border-radius:var(--r);padding:20px 12px;text-align:center;cursor:pointer;transition:all .15s}
+.upload-zone:hover,.upload-zone.drag-on{border-color:var(--gold);background:var(--gold3)}
+.attach-badge{display:inline-flex;align-items:center;justify-content:center;background:var(--gold);color:#0d0d0c;border-radius:10px;font-size:9px;font-weight:700;padding:1px 5px;margin-left:2px;line-height:1;vertical-align:middle}
 .kcol-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:22px 10px;color:var(--t3);font-size:11px;border:1px dashed var(--b1);border-radius:var(--r)}
 .kcol-empty i{font-size:18px}
 .owner-pip{font-size:11px;font-weight:500;padding:2px 7px;border-radius:10px}
@@ -661,6 +672,21 @@ if(window._pendingLoad) window._pendingLoad();
 </div>
 </div>
 </div>
+<!-- ATTACHMENT MODAL -->
+<div class="modal-bg" id="attach-modal">
+<div class="modal" style="width:480px">
+<div class="modal-head"><h3 id="attach-modal-title">📎 Attachments</h3><button class="modal-close" onclick="closeModal('attach-modal')">&#x2715;</button></div>
+<div id="attach-list" class="attach-list"><div class="attach-empty">No files attached yet</div></div>
+<div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()">
+<div style="font-size:26px;margin-bottom:6px">📎</div>
+<div style="font-size:13px;font-weight:600;color:var(--t2)">Click to upload or drag files here</div>
+<div style="font-size:11px;color:var(--t3);margin-top:4px">PPT · Excel · Word · PDF · Images · ZIP — max 50 MB each</div>
+</div>
+<input type="file" id="file-input" style="display:none" multiple accept=".ppt,.pptx,.xls,.xlsx,.doc,.docx,.pdf,.jpg,.jpeg,.png,.gif,.zip,.rar">
+<div id="upload-progress" style="display:none;margin-top:10px;font-size:12px;color:var(--t2);text-align:center;padding:6px;background:var(--surf2);border-radius:var(--rsm)">Uploading…</div>
+</div>
+</div>
+
 <script>
 // ═════════════ DATA ═════════════
 const STAGES=['Job Brief','Design','Production','Review','Approval Stage','AW Release / Event Live','On Hold','Complete'];
@@ -1223,7 +1249,9 @@ const cls=diff<0?'hot':diff<=3?'warn':'';
 const lbl=diff<0?`${Math.abs(diff)}d late`:diff===0?'Today':diff===1?'Tomorrow':`${d.getDate()} ${d.toLocaleString('en',{month:'short'})}`;
 dueHTML=`<span class="due-tag ${cls}">${lbl}</span>`;
 }
-return `<div class="kcard" data-id="${t.id}" data-can-l="${canL?1:0}" data-can-r="${canR?1:0}"><div class="kcard-proj"><span style="width:6px;height:6px;border-radius:50%;background:${pc};flex-shrink:0;display:inline-block"></span>${esc(t.project)}</div><div class="kcard-title">${esc(t.title)}</div>${t.note?`<div class="kcard-note">${esc(t.note)}</div>`:''}<div class="kcard-foot"><span class="owner-pip o-${ok}">${t.owner}</span>${dueHTML}</div><div class="kcard-actions">${canL?'<button class="cta k-prev">&#8592; Prev</button>':''}<button class="cta k-edit">&#9998; Edit</button>${canR?'<button class="cta k-next">Next &#8594;</button>':''}<button class="cta del k-del">&#x2715; Del</button></div></div>`;
+const ac=(t.attachments||[]).length;
+const attachBtn=`<button class="cta k-attach" title="Attachments">&#128206;${ac>0?`<span class="attach-badge">${ac}</span>`:''}</button>`;
+return `<div class="kcard" data-id="${t.id}" data-can-l="${canL?1:0}" data-can-r="${canR?1:0}"><div class="kcard-proj"><span style="width:6px;height:6px;border-radius:50%;background:${pc};flex-shrink:0;display:inline-block"></span>${esc(t.project)}</div><div class="kcard-title">${esc(t.title)}</div>${t.note?`<div class="kcard-note">${esc(t.note)}</div>`:''}<div class="kcard-foot"><span class="owner-pip o-${ok}">${t.owner}</span>${dueHTML}</div><div class="kcard-actions">${canL?'<button class="cta k-prev">&#8592; Prev</button>':''}<button class="cta k-edit">&#9998; Edit</button>${canR?'<button class="cta k-next">Next &#8594;</button>':''}${attachBtn}<button class="cta del k-del">&#x2715; Del</button></div></div>`;
 }
 function renderSbStats(){
 const list=activeProj==='All'?tasks:tasks.filter(t=>t.project===activeProj);
@@ -1249,10 +1277,12 @@ function setupDragDrop(){
     const btnEdit=card.querySelector('.k-edit');
     const btnNext=card.querySelector('.k-next');
     const btnDel =card.querySelector('.k-del');
-    if(btnPrev) btnPrev.addEventListener('click',e=>{e.stopPropagation();moveTask(rawId,-1);});
-    if(btnEdit) btnEdit.addEventListener('click',e=>{e.stopPropagation();openEdit(rawId);});
-    if(btnNext) btnNext.addEventListener('click',e=>{e.stopPropagation();moveTask(rawId,1);});
-    if(btnDel)  btnDel.addEventListener('click',e=>{e.stopPropagation();doDelete(rawId);});
+    if(btnPrev)   btnPrev.addEventListener('click',e=>{e.stopPropagation();moveTask(rawId,-1);});
+    if(btnEdit)   btnEdit.addEventListener('click',e=>{e.stopPropagation();openEdit(rawId);});
+    if(btnNext)   btnNext.addEventListener('click',e=>{e.stopPropagation();moveTask(rawId,1);});
+    if(btnDel)    btnDel.addEventListener('click',e=>{e.stopPropagation();doDelete(rawId);});
+    const btnAttach=card.querySelector('.k-attach');
+    if(btnAttach) btnAttach.addEventListener('click',e=>{e.stopPropagation();openAttachModal(rawId);});
     card.setAttribute('draggable','true');
     card.addEventListener('dragstart',e=>{
       _dragId=rawId;
@@ -1310,6 +1340,83 @@ async function doDelete(rawId){
   tasks=tasks.filter(t=>String(t.id)!==String(rawId));
   renderKanban();
 }
+// ═════════════ ATTACHMENTS ═════════════
+const SB_URL='https://fxmigukayxvieziseqil.supabase.co';
+let attachTaskId=null;
+function fileIcon(type=''){
+  if(type.includes('pdf')) return '📕';
+  if(type.includes('presentation')||type.includes('powerpoint')) return '📊';
+  if(type.includes('spreadsheet')||type.includes('excel')) return '📗';
+  if(type.includes('word')||type.includes('msword')) return '📘';
+  if(type.includes('image')) return '🖼';
+  if(type.includes('zip')||type.includes('rar')) return '🗜';
+  return '📄';
+}
+function fmtSize(b){if(b<1024)return b+'B';if(b<1048576)return(b/1024).toFixed(1)+'KB';return(b/1048576).toFixed(1)+'MB';}
+function pubUrl(path){return `${SB_URL}/storage/v1/object/public/${path}`;}
+function renderAttachList(t){
+  const list=t.attachments||[];
+  const el=document.getElementById('attach-list');if(!el)return;
+  if(!list.length){el.innerHTML='<div class="attach-empty">No files attached yet</div>';return;}
+  el.innerHTML=list.map((a,i)=>{
+    const d=new Date(a.uploaded_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+    return `<div class="attach-item">
+      <div class="attach-icon">${fileIcon(a.type)}</div>
+      <div class="attach-info"><div class="attach-name" title="${esc(a.name)}">${esc(a.name)}</div><div class="attach-meta">${fmtSize(a.size)} · ${d}</div></div>
+      <a href="${pubUrl(a.path)}" target="_blank" class="cta" style="text-decoration:none;flex-shrink:0" title="Download">&#11015;</a>
+      <button class="cta del" style="flex-shrink:0" onclick="deleteAttachment(${i})" title="Remove">&#x2715;</button>
+    </div>`;
+  }).join('');
+}
+function openAttachModal(rawId){
+  attachTaskId=rawId;
+  const t=findTask(rawId);if(!t)return;
+  document.getElementById('attach-modal-title').textContent='📎 '+t.title.substring(0,50);
+  renderAttachList(t);
+  document.getElementById('attach-modal').classList.add('open');
+}
+async function uploadFiles(files){
+  if(!files||!files.length)return;
+  const t=findTask(attachTaskId);if(!t)return;
+  const prog=document.getElementById('upload-progress');
+  prog.style.display='block';
+  const attachments=[...(t.attachments||[])];
+  for(const file of Array.from(files)){
+    prog.textContent=`Uploading "${file.name}"…`;
+    const safeName=file.name.replace(/[^a-zA-Z0-9._\-() ]/g,'_');
+    const path=`task-files/${t.id}/${Date.now()}_${safeName}`;
+    const{error}=await window._sb.storage.from('task-files').upload(path,file,{upsert:true});
+    if(error){console.error('upload error',error);prog.textContent=`Failed: ${file.name}`;continue;}
+    attachments.push({name:file.name,path,size:file.size,type:file.type||'application/octet-stream',uploaded_at:new Date().toISOString()});
+  }
+  t.attachments=attachments;
+  try{await window._sb.from('mkt_tasks').update({attachments}).eq('id',t.id);}catch(e){console.error(e);}
+  prog.style.display='none';
+  renderAttachList(t);
+  renderKanban();
+}
+async function deleteAttachment(idx){
+  const t=findTask(attachTaskId);if(!t)return;
+  const list=[...(t.attachments||[])];
+  const a=list[idx];if(!a)return;
+  if(!confirm(`Remove "${a.name}"?`))return;
+  await window._sb.storage.from('task-files').remove([a.path]);
+  list.splice(idx,1);
+  t.attachments=list;
+  try{await window._sb.from('mkt_tasks').update({attachments:list}).eq('id',t.id);}catch(e){console.error(e);}
+  renderAttachList(t);
+  renderKanban();
+}
+// Wire up file input & drag-drop on upload zone (runs once after DOM ready)
+function initAttachZone(){
+  const inp=document.getElementById('file-input');
+  const zone=document.getElementById('upload-zone');
+  if(!inp||!zone)return;
+  inp.addEventListener('change',e=>{uploadFiles(e.target.files);inp.value='';});
+  zone.addEventListener('dragover',e=>{e.preventDefault();zone.classList.add('drag-on');});
+  zone.addEventListener('dragleave',()=>zone.classList.remove('drag-on'));
+  zone.addEventListener('drop',e=>{e.preventDefault();zone.classList.remove('drag-on');uploadFiles(e.dataTransfer.files);});
+}
 // ═════════════ EDIT MODAL ═════════════
 function openEdit(id){
 const t=findTask(id);if(!t)return;
@@ -1355,6 +1462,7 @@ function clock(){const d=new Date();document.getElementById('clock').textContent
 document.querySelectorAll('.modal-bg').forEach(bg=>bg.addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal(bg.id);}));
 document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal-bg.open').forEach(m=>closeModal(m.id));});
 clock(); setInterval(clock,60000);
+initAttachZone();
 
 function _sync(state,msg){
   const dot=document.getElementById('sync-dot');
@@ -1374,7 +1482,7 @@ async function loadFromSupabase(){
     if(e1) throw e1;
     if(e2) throw e2;
     projects=projs.map(p=>({name:p.name,color:p.color,id:p.id}));
-    tasks=tks.map(t=>({id:t.id,title:t.title,owner:t.owner,project:t.project,stage:t.stage,due:t.due||'',note:t.note||''}));
+    tasks=tks.map(t=>({id:t.id,title:t.title,owner:t.owner,project:t.project,stage:t.stage,due:t.due||'',note:t.note||'',attachments:t.attachments||[]}));
     _sync('ok','● Live · '+new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}));
     populateAllProjectSelects();
     renderProjectNavTabs();
