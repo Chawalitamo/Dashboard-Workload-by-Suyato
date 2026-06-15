@@ -1371,7 +1371,7 @@ function fileIcon(type=''){
   return '📄';
 }
 function fmtSize(b){if(b<1024)return b+'B';if(b<1048576)return(b/1024).toFixed(1)+'KB';return(b/1048576).toFixed(1)+'MB';}
-function pubUrl(path){return `${SB_URL}/storage/v1/object/public/${path}`;}
+function pubUrl(path){const{data}=window._sb.storage.from('task-files').getPublicUrl(path);return data.publicUrl;}
 function renderAttachList(t){
   const list=t.attachments||[];
   const el=document.getElementById('attach-list');if(!el)return;
