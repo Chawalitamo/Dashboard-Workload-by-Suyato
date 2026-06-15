@@ -675,10 +675,22 @@ if(window._pendingLoad) window._pendingLoad();
 </div>
 <!-- TEAM EMAILS / NOTIFICATION MODAL -->
 <div class="modal-bg" id="team-emails-modal">
-<div class="modal" style="width:520px">
+<div class="modal" style="width:540px">
 <div class="modal-head"><h3>🔔 Notification Settings</h3><button class="modal-close" onclick="closeModal('team-emails-modal')">&#x2715;</button></div>
-<p style="font-size:12px;color:var(--t3);margin:0 0 14px">Enter each member's email address. Overdue task reminders are sent automatically every morning at <strong style="color:var(--gold)">10:00 AM</strong>. Leave blank to skip that person.</p>
-<div id="team-emails-list" style="display:flex;flex-direction:column;gap:7px;max-height:340px;overflow-y:auto;padding-right:4px"></div>
+
+<!-- Microsoft Teams webhook -->
+<div style="background:var(--surf2);border-radius:8px;padding:12px 14px;margin-bottom:14px">
+<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+<span style="font-size:18px">💬</span>
+<span style="font-size:13px;font-weight:700;color:var(--t1)">Microsoft Teams</span>
+<span style="font-size:10px;color:var(--t3);margin-left:auto">Incoming Webhook URL</span>
+</div>
+<input type="url" id="teams-webhook-url" placeholder="https://xxx.webhook.office.com/webhookb2/..." style="width:100%;background:var(--surf3);border:1px solid var(--b1);border-radius:6px;padding:7px 10px;color:var(--t1);font-size:11px;outline:none;box-sizing:border-box;transition:border .15s" onfocus="this.style.borderColor='var(--gold2)'" onblur="this.style.borderColor='var(--b1)'">
+<p style="margin:6px 0 0;font-size:10px;color:var(--t3)">In Teams → channel ··· → Connectors → Incoming Webhook → Create → copy URL here. Notifications will be posted for task events and daily overdue summaries.</p>
+</div>
+
+<p style="font-size:12px;color:var(--t3);margin:0 0 10px">📧 <strong style="color:var(--t2)">Email reminders</strong> — sent every morning at <strong style="color:var(--gold)">10:00 AM</strong>. Leave blank to skip.</p>
+<div id="team-emails-list" style="display:flex;flex-direction:column;gap:7px;max-height:280px;overflow-y:auto;padding-right:4px"></div>
 <div id="notify-status" style="display:none;margin-top:10px;font-size:12px;padding:7px 10px;border-radius:6px;background:var(--surf2)"></div>
 <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--b1);display:flex;gap:8px;justify-content:space-between;align-items:center;flex-wrap:wrap">
 <button class="btn-sec" id="send-now-btn" onclick="sendOverdueReminders()">📨 Send Reminders Now</button>
@@ -1226,6 +1238,7 @@ if(_ne){alert('Save failed');return;}
 tasks.unshift({id:_nd.id,..._nt,due:_nt.due||''});
 document.getElementById('a-title').value=''; document.getElementById('a-due').value=''; document.getElementById('a-note').value=''; document.getElementById('a-owner').value='';
 closeModal('add-modal'); renderList();
+postToTeams('created',{title:_nt.title,owner:_nt.owner,project:_nt.project,stage:_nt.stage,due:_nt.due||''});
 }
 // ═════════════ BOARD / KANBAN ═════════════
 function renderProjTabs(){
@@ -1338,6 +1351,7 @@ function setupDragDrop(){
       if(t.stage===newStage) return;
       t.stage=newStage;
       try{await window._sb.from('mkt_tasks').update({stage:newStage}).eq('id',t.id);}catch(err){console.error(err);}
+      postToTeams('moved',{title:t.title,owner:t.owner,project:t.project,stage:newStage,due:t.due||''});
       renderKanban();
     });
   });
@@ -1349,11 +1363,13 @@ async function moveTask(rawId,dir){
   t.stage=STAGES[ni];
   console.log('[move] id:',rawId,'→',t.stage);
   try{await window._sb.from('mkt_tasks').update({stage:t.stage}).eq('id',t.id);}catch(err){console.error(err);}
+  postToTeams('moved',{title:t.title,owner:t.owner,project:t.project,stage:t.stage,due:t.due||''});
   renderKanban();
 }
 async function doDelete(rawId){
   if(!confirm('Delete this task?')) return;
   const t=findTask(rawId); if(!t) return;
+  postToTeams('deleted',{title:t.title,owner:t.owner,project:t.project,stage:t.stage,due:t.due||''});
   try{await window._sb.from('mkt_tasks').delete().eq('id',t.id);}catch(err){console.error(err);}
   tasks=tasks.filter(t=>String(t.id)!==String(rawId));
   renderKanban();
@@ -1456,6 +1472,7 @@ t.stage=document.getElementById('e-stage').value;
 t.due=document.getElementById('e-due').value;
 t.note=document.getElementById('e-note').value.trim();
 await window._sb.from('mkt_tasks').update({title:t.title,owner:t.owner,project:t.project,stage:t.stage,due:t.due||null,note:t.note}).eq('id',editId);
+postToTeams('updated',{title:t.title,owner:t.owner,project:t.project,stage:t.stage,due:t.due||''});
 closeModal('edit-modal');
 renderKanban();
 renderList();
@@ -1471,6 +1488,7 @@ const{data:_fd,error:_fe}=await window._sb.from('mkt_tasks').insert(_ft).select(
 if(_fe){alert('Save failed');return;}
 tasks.unshift({id:_fd.id,..._ft,due:_ft.due||''});
 document.getElementById('f-title').value='';document.getElementById('f-due').value='';document.getElementById('f-note').value='';
+postToTeams('created',{title:_ft.title,owner:_ft.owner,project:_ft.project,stage:_ft.stage,due:_ft.due||''});
 renderKanban();
 }
 // ═════════════ UTILS ═════════════
@@ -1484,9 +1502,19 @@ initAttachZone();
 
 // ═════════════ NOTIFICATION SETTINGS ═════════════
 async function openTeamEmailsModal(){
-  const{data}=await window._sb.from('mkt_owners').select('name,email,notify_overdue');
+  const[{data:ownersData},{data:settingsData}]=await Promise.all([
+    window._sb.from('mkt_owners').select('name,email,notify_overdue'),
+    window._sb.from('mkt_settings').select('key,value'),
+  ]);
   const emailMap={};
-  (data||[]).forEach(o=>{emailMap[o.name]={email:o.email||'',notify:o.notify_overdue!==false};});
+  (ownersData||[]).forEach(o=>{emailMap[o.name]={email:o.email||'',notify:o.notify_overdue!==false};});
+  const cfg={};
+  (settingsData||[]).forEach(s=>{cfg[s.key]=s.value;});
+
+  // populate Teams webhook field
+  const twEl=document.getElementById('teams-webhook-url');
+  if(twEl) twEl.value=cfg['teams_webhook_url']||'';
+
   const list=document.getElementById('team-emails-list');
   list.innerHTML=OWNERS.map(name=>{
     const d=emailMap[name]||{email:'',notify:true};
@@ -1511,8 +1539,15 @@ async function saveTeamEmails(){
     const chk=document.querySelector(`input[data-owner-notify="${name}"]`);
     return{name,email:inp?inp.value.trim():'',notify_overdue:chk?chk.checked:true};
   });
+  const twEl=document.getElementById('teams-webhook-url');
+  const teamsWebhook=twEl?twEl.value.trim():'';
   try{
-    await window._sb.from('mkt_owners').upsert(rows,{onConflict:'name'});
+    await Promise.all([
+      window._sb.from('mkt_owners').upsert(rows,{onConflict:'name'}),
+      window._sb.from('mkt_settings').upsert(
+        [{key:'teams_webhook_url',value:teamsWebhook}],{onConflict:'key'}
+      ),
+    ]);
     const s=document.getElementById('notify-status');
     s.style.display='block'; s.style.color='#50d090'; s.textContent='✅ Saved!';
     setTimeout(()=>closeModal('team-emails-modal'),900);
@@ -1520,6 +1555,17 @@ async function saveTeamEmails(){
     const s=document.getElementById('notify-status');
     s.style.display='block'; s.style.color='#f07070'; s.textContent='❌ '+err.message;
   }
+}
+
+// Fire-and-forget Teams notification for task events
+async function postToTeams(event,task){
+  try{
+    await fetch('https://fxmigukayxvieziseqil.supabase.co/functions/v1/notify-teams',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({event,task})
+    });
+  }catch(e){console.warn('[teams]',e);}
 }
 
 async function sendOverdueReminders(){
