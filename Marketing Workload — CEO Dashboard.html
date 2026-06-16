@@ -1002,7 +1002,7 @@ document.getElementById('dash-inner').innerHTML=`
 <div class="chart-title"><i class="ti ti-arrow-right" aria-hidden="true"></i>Stage pipeline flow</div>
 <div class="chart-subtitle">Tasks currently sitting in each stage</div>
 <div class="flow-row">${stageFlowHTML}</div>
-<div style="margin-top:14px"><div class="chart-wrap" style="height:120px"><canvas id="pipeline-chart"></canvas></div></div>
+<div style="margin-top:14px"><div class="chart-wrap" style="height:220px"><canvas id="pipeline-chart"></canvas></div></div>
 </div>
 <div class="chart-card">
 <div class="chart-title"><i class="ti ti-trophy" aria-hidden="true"></i>Progress leaderboard</div>
@@ -1072,16 +1072,33 @@ options:{responsive:true,maintainAspectRatio:true,
 plugins:{legend:{position:'bottom',labels:{boxWidth:8,font:{size:10}}}},
 scales:{r:{grid:{color:CHART_GRID},angleLines:{color:CHART_GRID},ticks:{display:false},suggestedMin:0,suggestedMax:100}}}
 });
-// 4. Pipeline horizontal bar
-new Chart(document.getElementById('pipeline-chart'),{
+// 4. Pipeline horizontal bar — filter out empty stages, show counts
+const pipelineFiltered=STAGES.map((s,i)=>({label:s==='AW Release / Event Live'?'AW Release':s,count:stageCounts[i],color:STAGE_COLORS[i]})).filter(x=>x.count>0);
+const pipelineEl=document.getElementById('pipeline-chart');
+const pipelineWrap=pipelineEl.parentElement;
+const pipelineHeight=Math.max(140,pipelineFiltered.length*42);
+pipelineWrap.style.height=pipelineHeight+'px';
+new Chart(pipelineEl,{
 type:'bar',
 data:{
-labels:STAGES.map(s=>s==='AW Release / Event Live'?'AW Release':s),
-datasets:[{label:'Tasks',data:stageCounts,backgroundColor:STAGE_COLORS,borderRadius:4,borderSkipped:false}]
+  labels:pipelineFiltered.map(x=>x.label),
+  datasets:[{
+    label:'Tasks',
+    data:pipelineFiltered.map(x=>x.count),
+    backgroundColor:pipelineFiltered.map(x=>x.color),
+    borderRadius:6,borderSkipped:false,barThickness:22
+  }]
 },
-options:{indexAxis:'y',responsive:true,maintainAspectRatio:true,
-plugins:{legend:{display:false}},
-scales:{x:{grid:{color:CHART_GRID},ticks:{stepSize:1,font:{size:10}},beginAtZero:true},y:{grid:{display:false},ticks:{font:{size:10}}}}}
+options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+plugins:{
+  legend:{display:false},
+  tooltip:{callbacks:{label:ctx=>`${ctx.parsed.x} task${ctx.parsed.x!==1?'s':''}`}},
+  datalabels:{anchor:'end',align:'end',color:'#e0e0f0',font:{size:11,weight:'bold'},formatter:v=>v}
+},
+scales:{
+  x:{grid:{color:CHART_GRID},ticks:{stepSize:1,font:{size:10}},beginAtZero:true,max:Math.max(...pipelineFiltered.map(x=>x.count))+1},
+  y:{grid:{display:false},ticks:{font:{size:11},color:'#c0c0d8'}}
+}}
 });
 // 5. Project comparison horizontal bar
 new Chart(document.getElementById('proj-chart'),{
