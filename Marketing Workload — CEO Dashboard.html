@@ -972,6 +972,10 @@ const overdueByOwner=OWNERS.map(o=>({
 owner:o,
 count:tasks.filter(t=>t.owner===o&&t.due&&new Date(t.due)<new Date()&&t.stage!=='Complete').length
 })).filter(x=>x.count>0).sort((a,b)=>b.count-a.count);
+// ── Destroy old charts before replacing DOM ──
+['donut-chart','bar-chart','radar-chart','pipeline-chart','proj-chart','bubble-chart'].forEach(id=>{
+const el=document.getElementById(id);if(el){const inst=Chart.getChart(el);if(inst)inst.destroy();}
+});
 document.getElementById('dash-inner').innerHTML=`
 <div class="dash-grid-top">
 <div class="chart-card">
@@ -1039,10 +1043,7 @@ document.getElementById('dash-inner').innerHTML=`
 </div>
 </div>
 `;
-// ── Destroy old charts ──
-['donut-chart','bar-chart','radar-chart','pipeline-chart','proj-chart','bubble-chart'].forEach(id=>{
-const inst=Chart.getChart(id);if(inst)inst.destroy();
-});
+try{
 const CHART_TEXT=getComputedStyle(document.documentElement).getPropertyValue('--t2').trim()||'#9e9b94';
 const CHART_GRID='rgba(255,255,255,0.06)';
 Chart.defaults.font.family="'DBHeavent','Sarabun',sans-serif";
@@ -1107,11 +1108,10 @@ data:{
 options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
 plugins:{
   legend:{display:false},
-  tooltip:{callbacks:{label:ctx=>`${ctx.parsed.x} task${ctx.parsed.x!==1?'s':''}`}},
-  datalabels:{anchor:'end',align:'end',color:'#e0e0f0',font:{size:11,weight:'bold'},formatter:v=>v}
+  tooltip:{callbacks:{label:ctx=>`${ctx.parsed.x} task${ctx.parsed.x!==1?'s':''}`}}
 },
 scales:{
-  x:{grid:{color:CHART_GRID},ticks:{stepSize:1,font:{size:10}},beginAtZero:true,max:Math.max(...pipelineFiltered.map(x=>x.count))+1},
+  x:{grid:{color:CHART_GRID},ticks:{stepSize:1,font:{size:10}},beginAtZero:true,max:(pipelineFiltered.length?Math.max(...pipelineFiltered.map(x=>x.count)):5)+1},
   y:{grid:{display:false},ticks:{font:{size:11},color:'#c0c0d8'}}
 }}
 });
@@ -1145,6 +1145,7 @@ plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>{const d=bubbleDa
 scales:{x:{title:{display:true,text:'Active tasks',font:{size:10}},grid:{color:CHART_GRID},ticks:{stepSize:1,font:{size:10}},beginAtZero:true},
 y:{title:{display:true,text:'Progress %',font:{size:10}},grid:{color:CHART_GRID},ticks:{font:{size:10}},min:0,max:105}}}
 });
+}catch(chartErr){console.warn('Chart render error:',chartErr);}
 }
 function renderListPills(){
 const el=document.getElementById('list-stage-pills');
