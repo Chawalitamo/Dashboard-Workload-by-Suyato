@@ -18,21 +18,21 @@
 --r:10px;--rsm:6px;--rxl:16px;
 }
 html,body{height:100%;overflow:hidden}
-body{font-family:'DBHeavent','Sarabun',sans-serif;background:var(--bg);color:var(--t1);font-size:15px;display:flex;flex-direction:column}
+body{font-family:'DBHeavent','Sarabun',sans-serif;background:var(--bg);color:var(--t1);font-size:17px;display:flex;flex-direction:column}
 /* NAV */
 nav{display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:52px;border-bottom:1px solid var(--b1);flex-shrink:0;background:var(--bg);z-index:60}
 .nav-left{display:flex;align-items:center;gap:14px}
-.badge-logo{font-family:'DBHeavent',monospace;font-size:12px;font-weight:500;color:var(--gold);background:var(--gold3);border:1px solid rgba(232,197,71,.25);padding:4px 10px;border-radius:var(--rsm);letter-spacing:.04em}
-nav h1{font-size:15px;font-weight:600;letter-spacing:-.01em}
-#clock{font-family:'DBHeavent',monospace;font-size:11px;color:var(--t3)}
+.badge-logo{font-family:'DBHeavent',monospace;font-size:14px;font-weight:500;color:var(--gold);background:var(--gold3);border:1px solid rgba(232,197,71,.25);padding:4px 10px;border-radius:var(--rsm);letter-spacing:.04em}
+nav h1{font-size:17px;font-weight:600;letter-spacing:-.01em}
+#clock{font-family:'DBHeavent',monospace;font-size:13px;color:var(--t3)}
 /* PAGE TABS */
 .page-tabs{display:flex;border-bottom:1px solid var(--b1);flex-shrink:0;padding:0 24px;background:var(--bg)}
-.ptab{display:flex;align-items:center;gap:7px;padding:10px 18px;font-size:13px;font-weight:500;color:var(--t3);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;margin-bottom:-1px}
-.ptab i{font-size:16px}
+.ptab{display:flex;align-items:center;gap:7px;padding:10px 18px;font-size:15px;font-weight:500;color:var(--t3);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;margin-bottom:-1px}
+.ptab i{font-size:18px}
 .ptab.active{color:var(--gold);border-bottom-color:var(--gold)}
 .ptab:hover:not(.active){color:var(--t2)}
 /* project nav tabs in header */
-.pnav-tab{display:flex;align-items:center;gap:6px;padding:5px 12px;font-size:12px;font-weight:500;border-radius:var(--rsm);border:1px solid var(--b1);background:none;color:var(--t3);cursor:pointer;transition:all .15s;white-space:nowrap;font-family:'DBHeavent','Sarabun',sans-serif}
+.pnav-tab{display:flex;align-items:center;gap:6px;padding:5px 12px;font-size:14px;font-weight:500;border-radius:var(--rsm);border:1px solid var(--b1);background:none;color:var(--t3);cursor:pointer;transition:all .15s;white-space:nowrap;font-family:'DBHeavent','Sarabun',sans-serif}
 .pnav-tab .pnav-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
 .pnav-tab:hover{background:var(--surf2);color:var(--t1)}
 .pnav-tab.active{background:var(--surf2);border-color:var(--b2);color:var(--t1)}
@@ -45,40 +45,40 @@ nav h1{font-size:15px;font-weight:600;letter-spacing:-.01em}
 .kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
 .kpi{background:var(--surf);border:1px solid var(--b1);border-radius:var(--r);padding:16px 18px;display:flex;flex-direction:column;gap:6px}
 .kpi .kpi-icon{width:32px;height:32px;border-radius:var(--rsm);display:flex;align-items:center;justify-content:center;font-size:16px;margin-bottom:2px}
-.kpi .kpi-val{font-family:'DBHeavent',monospace;font-size:26px;font-weight:500;line-height:1}
-.kpi .kpi-lbl{font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.06em}
-.kpi .kpi-sub{font-size:12px;color:var(--t2);margin-top:2px}
+.kpi .kpi-val{font-family:'DBHeavent',monospace;font-size:28px;font-weight:500;line-height:1}
+.kpi .kpi-lbl{font-size:13px;color:var(--t3);text-transform:uppercase;letter-spacing:.06em}
+.kpi .kpi-sub{font-size:14px;color:var(--t2);margin-top:2px}
 .pipeline{background:var(--surf);border:1px solid var(--b1);border-radius:var(--r);padding:18px 20px}
-.section-title{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.section-title{font-size:14px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin-bottom:14px;display:flex;align-items:center;gap:8px}
 .pipe-row{display:flex;overflow-x:auto}
 .pipe-row::-webkit-scrollbar{height:3px}
 .pipe-row::-webkit-scrollbar-thumb{background:var(--surf3)}
 .pipe-seg{flex:1;min-width:90px;padding:12px 14px;border-right:1px solid var(--b1)}
 .pipe-seg:last-child{border-right:none}
 .pipe-dot{width:8px;height:8px;border-radius:50%;margin-bottom:6px}
-.pipe-name{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;line-height:1.3}
-.pipe-count{font-family:'DBHeavent',monospace;font-size:22px;font-weight:500}
+.pipe-name{font-size:12px;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;line-height:1.3}
+.pipe-count{font-family:'DBHeavent',monospace;font-size:24px;font-weight:500}
 .pipe-bar{height:3px;background:var(--surf3);border-radius:2px;margin-top:8px;overflow:hidden}
 .pipe-bar-fill{height:100%;border-radius:2px;transition:width .6s}
 .persons-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
 .person-card{background:var(--surf);border:1px solid var(--b1);border-radius:var(--r);padding:14px 16px}
 .person-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
-.person-avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0}
-.person-name{font-size:13px;font-weight:600}
-.person-stats{font-size:11px;color:var(--t3);margin-top:1px}
+.person-avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;flex-shrink:0}
+.person-name{font-size:15px;font-weight:600}
+.person-stats{font-size:13px;color:var(--t3);margin-top:1px}
 .person-pct{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
-.person-pct span:first-child{font-size:11px;color:var(--t2)}
-.person-pct span:last-child{font-family:'DBHeavent',monospace;font-size:12px;font-weight:500;color:var(--gold)}
+.person-pct span:first-child{font-size:13px;color:var(--t2)}
+.person-pct span:last-child{font-family:'DBHeavent',monospace;font-size:14px;font-weight:500;color:var(--gold)}
 .pbar{height:5px;background:var(--surf3);border-radius:3px;overflow:hidden}
 .pbar-fill{height:100%;border-radius:3px;background:var(--gold);transition:width .6s}
 .person-progress-wrap{margin-bottom:10px}
-.ptask-row{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--t2);padding:3px 0;border-bottom:1px solid var(--b0)}
+.ptask-row{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--t2);padding:3px 0;border-bottom:1px solid var(--b0)}
 .ptask-row:last-child{border-bottom:none}
 .ptask-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
 .ptask-name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ptask-stage{font-size:10px;padding:1px 6px;border-radius:10px;white-space:nowrap;flex-shrink:0}
-.proj-table{width:100%;border-collapse:collapse;font-size:13px}
-.proj-table th{text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);padding:8px 12px;border-bottom:1px solid var(--b1)}
+.ptask-stage{font-size:12px;padding:1px 6px;border-radius:10px;white-space:nowrap;flex-shrink:0}
+.proj-table{width:100%;border-collapse:collapse;font-size:15px}
+.proj-table th{text-align:left;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);padding:8px 12px;border-bottom:1px solid var(--b1)}
 .proj-table td{padding:10px 12px;border-bottom:1px solid var(--b0);vertical-align:middle}
 .proj-table tr:last-child td{border-bottom:none}
 .proj-table tr:hover td{background:var(--surf2)}
@@ -87,51 +87,51 @@ nav h1{font-size:15px;font-weight:600;letter-spacing:-.01em}
 #view-list{flex-direction:column}
 .list-top{display:flex;align-items:center;justify-content:space-between;padding:10px 20px;border-bottom:1px solid var(--b1);flex-shrink:0;gap:10px;flex-wrap:wrap}
 .filter-pills{display:flex;gap:5px;flex-wrap:wrap}
-.fpill{padding:5px 14px;font-size:12px;font-weight:500;border-radius:20px;border:1px solid var(--b2);background:none;color:var(--t2);cursor:pointer;transition:all .12s}
+.fpill{padding:5px 14px;font-size:14px;font-weight:500;border-radius:20px;border:1px solid var(--b2);background:none;color:var(--t2);cursor:pointer;transition:all .12s}
 .fpill.active{background:var(--t1);color:var(--bg);border-color:transparent}
 .fpill:hover:not(.active){background:var(--surf2);color:var(--t1)}
 .list-filters{display:flex;gap:6px}
-.fsel{background:var(--surf2);border:1px solid var(--b1);border-radius:var(--rsm);padding:6px 10px;color:var(--t2);font-family:'DBHeavent','Sarabun',sans-serif;font-size:12px;outline:none;cursor:pointer}
+.fsel{background:var(--surf2);border:1px solid var(--b1);border-radius:var(--rsm);padding:6px 10px;color:var(--t2);font-family:'DBHeavent','Sarabun',sans-serif;font-size:14px;outline:none;cursor:pointer}
 .fsel:focus{border-color:var(--b2)}
-.list-add-btn{display:flex;align-items:center;gap:6px;background:var(--gold);color:#0d0d0c;border:none;border-radius:var(--rsm);padding:6px 14px;font-family:'DBHeavent','Sarabun',sans-serif;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}
+.list-add-btn{display:flex;align-items:center;gap:6px;background:var(--gold);color:#0d0d0c;border:none;border-radius:var(--rsm);padding:6px 14px;font-family:'DBHeavent','Sarabun',sans-serif;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap}
 .list-add-btn:hover{background:var(--gold2)}
 .list-body{flex:1;overflow-y:auto;padding:0 20px 20px}
 .list-body::-webkit-scrollbar{width:4px}
 .list-body::-webkit-scrollbar-thumb{background:var(--surf3);border-radius:2px}
 /* Table */
-.lt{width:100%;border-collapse:collapse;font-size:13px;margin-top:14px}
-.lt thead th{position:sticky;top:0;background:var(--bg);text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);padding:10px 12px;border-bottom:1px solid var(--b1);white-space:nowrap;z-index:2}
+.lt{width:100%;border-collapse:collapse;font-size:15px;margin-top:14px}
+.lt thead th{position:sticky;top:0;background:var(--bg);text-align:left;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);padding:10px 12px;border-bottom:1px solid var(--b1);white-space:nowrap;z-index:2}
 .lt tbody tr{border-bottom:1px solid var(--b0);transition:background .1s}
 .lt tbody tr:last-child{border-bottom:none}
 .lt tbody tr:hover{background:var(--surf2)}
 .lt td{padding:12px 12px;vertical-align:middle}
 /* Owner cell */
 .ow-cell{display:flex;align-items:center;gap:8px}
-.ow-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;flex-shrink:0}
+.ow-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0}
 /* Stage badge */
-.sbadge{display:inline-flex;align-items:center;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;white-space:nowrap}
+.sbadge{display:inline-flex;align-items:center;font-size:13px;font-weight:600;padding:3px 10px;border-radius:20px;white-space:nowrap}
 /* Progress cell */
 .prog-wrap{display:flex;flex-direction:column;gap:4px;min-width:180px}
 .prog-slider-row{display:flex;align-items:center;gap:8px}
 .prog-slider-row input[type=range]{flex:1;accent-color:var(--gold);cursor:pointer;height:4px}
-.prog-pct{font-family:'DBHeavent',monospace;font-size:11px;color:var(--gold);min-width:30px}
+.prog-pct{font-family:'DBHeavent',monospace;font-size:13px;color:var(--gold);min-width:30px}
 .prog-bar-row{display:flex;align-items:center;gap:6px}
-.prog-stage-sel{font-size:11px;background:none;border:none;color:var(--t2);font-family:'DBHeavent','Sarabun',sans-serif;cursor:pointer;outline:none;padding:0}
+.prog-stage-sel{font-size:13px;background:none;border:none;color:var(--t2);font-family:'DBHeavent','Sarabun',sans-serif;cursor:pointer;outline:none;padding:0}
 .prog-stage-sel option{background:var(--surf2);color:var(--t1)}
 .pb{height:4px;flex:1;background:var(--surf3);border-radius:2px;overflow:hidden}
 .pb-fill{height:100%;border-radius:2px;transition:width .3s}
 /* Note btn */
-.note-btn{font-size:11px;padding:4px 10px;border-radius:var(--rsm);border:1px solid var(--b1);background:none;color:var(--t2);cursor:pointer;white-space:nowrap;transition:all .12s}
+.note-btn{font-size:13px;padding:4px 10px;border-radius:var(--rsm);border:1px solid var(--b1);background:none;color:var(--t2);cursor:pointer;white-space:nowrap;transition:all .12s}
 .note-btn:hover{background:var(--surf2);color:var(--t1)}
 .note-btn.has{background:#0e2235;color:#5aaaf0;border-color:#1a3a5a}
 /* Task name input */
-.task-name-inp{background:none;border:none;color:var(--t1);font-family:'DBHeavent','Sarabun',sans-serif;font-size:13px;font-weight:500;width:100%;outline:none;padding:2px 4px;border-radius:4px;min-width:160px}
+.task-name-inp{background:none;border:none;color:var(--t1);font-family:'DBHeavent','Sarabun',sans-serif;font-size:15px;font-weight:500;width:100%;outline:none;padding:2px 4px;border-radius:4px;min-width:160px}
 .task-name-inp:hover{background:var(--surf3)}
 .task-name-inp:focus{background:var(--surf2);outline:1px solid var(--b2)}
 /* Project dot */
 .proj-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;display:inline-block}
 /* Due */
-.due-inp{background:none;border:none;color:var(--t2);font-family:'DBHeavent',monospace;font-size:12px;outline:none;cursor:pointer;width:100px}
+.due-inp{background:none;border:none;color:var(--t2);font-family:'DBHeavent',monospace;font-size:14px;outline:none;cursor:pointer;width:100px}
 .due-inp:hover{background:var(--surf3);border-radius:4px}
 .due-inp:focus{background:var(--surf2);border-radius:4px;outline:1px solid var(--b2)}
 .due-hot{color:#f07070}
@@ -143,45 +143,45 @@ nav h1{font-size:15px;font-weight:600;letter-spacing:-.01em}
 #view-board{flex-direction:column}
 .board-top{display:flex;align-items:center;justify-content:space-between;padding:10px 20px;border-bottom:1px solid var(--b1);flex-shrink:0;gap:10px;flex-wrap:wrap}
 .proj-tabs-wrap{display:flex;gap:4px}
-.pjtab{padding:6px 14px;font-size:12px;font-weight:500;border-radius:var(--rsm);border:1px solid var(--b1);background:none;color:var(--t2);cursor:pointer;transition:all .15s}
+.pjtab{padding:6px 14px;font-size:14px;font-weight:500;border-radius:var(--rsm);border:1px solid var(--b1);background:none;color:var(--t2);cursor:pointer;transition:all .15s}
 .pjtab.active{background:var(--surf2);color:var(--t1);border-color:var(--b2)}
 .pjtab:hover:not(.active){background:var(--surf);color:var(--t1)}
 .board-layout{display:flex;flex:1;overflow:hidden}
 .sidebar{width:270px;flex-shrink:0;border-right:1px solid var(--b1);overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:11px}
 .sidebar::-webkit-scrollbar{width:3px}
 .sidebar::-webkit-scrollbar-thumb{background:var(--surf3)}
-.sb-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);padding-bottom:8px;border-bottom:1px solid var(--b1)}
+.sb-title{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);padding-bottom:8px;border-bottom:1px solid var(--b1)}
 .field{display:flex;flex-direction:column;gap:5px}
-.field label{font-size:11px;font-weight:500;color:var(--t2)}
-.field input,.field select,.field textarea{background:var(--surf2);border:1px solid var(--b1);border-radius:var(--rsm);padding:7px 9px;color:var(--t1);font-family:'DBHeavent','Sarabun',sans-serif;font-size:12px;outline:none;transition:border-color .15s;width:100%}
+.field label{font-size:13px;font-weight:500;color:var(--t2)}
+.field input,.field select,.field textarea{background:var(--surf2);border:1px solid var(--b1);border-radius:var(--rsm);padding:7px 9px;color:var(--t1);font-family:'DBHeavent','Sarabun',sans-serif;font-size:14px;outline:none;transition:border-color .15s;width:100%}
 .field textarea{resize:vertical;min-height:56px}
 .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--gold2)}
 .field select option{background:var(--surf2)}
-.btn-add-sb{display:flex;align-items:center;justify-content:center;gap:7px;background:var(--gold);color:#0d0d0c;border:none;border-radius:var(--rsm);padding:9px;font-family:'DBHeavent','Sarabun',sans-serif;font-size:12px;font-weight:600;cursor:pointer;width:100%}
+.btn-add-sb{display:flex;align-items:center;justify-content:center;gap:7px;background:var(--gold);color:#0d0d0c;border:none;border-radius:var(--rsm);padding:9px;font-family:'DBHeavent','Sarabun',sans-serif;font-size:14px;font-weight:600;cursor:pointer;width:100%}
 .btn-add-sb:hover{background:var(--gold2)}
 .kanban{flex:1;overflow-x:auto;overflow-y:hidden;padding:16px;display:flex;gap:11px;align-items:flex-start}
 .kanban::-webkit-scrollbar{height:4px}
 .kanban::-webkit-scrollbar-thumb{background:var(--surf3);border-radius:2px}
 .kcol{flex-shrink:0;width:205px;display:flex;flex-direction:column;gap:8px;max-height:100%}
 .kcol-head{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;border-radius:var(--rsm);background:var(--surf2);border:1px solid var(--b1)}
-.kcol-ttl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--t2)}
-.kcol-cnt{font-family:'DBHeavent',monospace;font-size:10px;color:var(--t3);background:var(--surf3);padding:2px 6px;border-radius:10px}
+.kcol-ttl{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--t2)}
+.kcol-cnt{font-family:'DBHeavent',monospace;font-size:12px;color:var(--t3);background:var(--surf3);padding:2px 6px;border-radius:10px}
 .kcol-body{overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:7px;padding-right:2px}
 .kcol-body::-webkit-scrollbar{width:2px}
 .kcol-body::-webkit-scrollbar-thumb{background:var(--surf3)}
 .kcard{background:var(--surf);border:1px solid var(--b1);border-radius:var(--r);padding:11px 12px;cursor:pointer;transition:border-color .15s;animation:cin .18s ease}
 @keyframes cin{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
 .kcard:hover{border-color:var(--b2);background:var(--surf2)}
-.kcard-proj{font-size:10px;color:var(--t3);margin-bottom:5px;display:flex;align-items:center;gap:4px}
-.kcard-title{font-size:12px;font-weight:500;line-height:1.45;margin-bottom:8px}
+.kcard-proj{font-size:12px;color:var(--t3);margin-bottom:5px;display:flex;align-items:center;gap:4px}
+.kcard-title{font-size:14px;font-weight:500;line-height:1.45;margin-bottom:8px}
 .kcard-foot{display:flex;align-items:center;justify-content:space-between}
-.kcard-note{font-size:10px;color:var(--t3);margin:5px 0;line-height:1.4}
+.kcard-note{font-size:12px;color:var(--t3);margin:5px 0;line-height:1.4}
 .kcard-actions{display:flex;gap:3px;margin-top:7px;padding-top:7px;border-top:1px solid var(--b0)}
 .kcard.dragging{opacity:.3;border:1px dashed var(--gold);cursor:grabbing}
 .kcard{cursor:grab;user-select:none;-webkit-user-select:none}
 .kcol.drag-over>.kcol-body{background:var(--surf3);border-radius:var(--r);outline:2px dashed var(--gold);outline-offset:2px}
 .kcol.drag-over{background:var(--surf2);border-radius:var(--r)}
-.cta{background:none;border:1px solid var(--b1);border-radius:4px;color:var(--t2);padding:3px 7px;cursor:pointer;font-size:11px;display:flex;align-items:center;gap:3px;transition:all .12s;font-family:'DBHeavent','Sarabun',sans-serif}
+.cta{background:none;border:1px solid var(--b1);border-radius:4px;color:var(--t2);padding:3px 7px;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:3px;transition:all .12s;font-family:'DBHeavent','Sarabun',sans-serif}
 .cta:hover{border-color:var(--b2);color:var(--t1);background:var(--surf3)}
 .cta.del:hover{border-color:#f07070;color:#f07070}
 /* ── ATTACHMENTS ── */
@@ -189,16 +189,16 @@ nav h1{font-size:15px;font-weight:600;letter-spacing:-.01em}
 .attach-item{display:flex;align-items:center;gap:9px;padding:8px 10px;background:var(--surf2);border:1px solid var(--b1);border-radius:var(--rsm)}
 .attach-icon{font-size:18px;flex-shrink:0;width:24px;text-align:center}
 .attach-info{flex:1;min-width:0}
-.attach-name{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--t1)}
-.attach-meta{font-size:10px;color:var(--t3);margin-top:2px}
-.attach-empty{text-align:center;color:var(--t3);font-size:12px;padding:24px 0}
+.attach-name{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--t1)}
+.attach-meta{font-size:12px;color:var(--t3);margin-top:2px}
+.attach-empty{text-align:center;color:var(--t3);font-size:14px;padding:24px 0}
 .upload-zone{border:2px dashed var(--b2);border-radius:var(--r);padding:20px 12px;text-align:center;cursor:pointer;transition:all .15s}
 .upload-zone:hover,.upload-zone.drag-on{border-color:var(--gold);background:var(--gold3)}
-.attach-badge{display:inline-flex;align-items:center;justify-content:center;background:var(--gold);color:#0d0d0c;border-radius:10px;font-size:9px;font-weight:700;padding:1px 5px;margin-left:2px;line-height:1;vertical-align:middle}
-.kcol-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:22px 10px;color:var(--t3);font-size:11px;border:1px dashed var(--b1);border-radius:var(--r)}
+.attach-badge{display:inline-flex;align-items:center;justify-content:center;background:var(--gold);color:#0d0d0c;border-radius:10px;font-size:11px;font-weight:700;padding:1px 5px;margin-left:2px;line-height:1;vertical-align:middle}
+.kcol-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:22px 10px;color:var(--t3);font-size:13px;border:1px dashed var(--b1);border-radius:var(--r)}
 .kcol-empty i{font-size:18px}
-.owner-pip{font-size:11px;font-weight:500;padding:2px 7px;border-radius:10px}
-.due-tag{font-family:'DBHeavent',monospace;font-size:10px;color:var(--t3)}
+.owner-pip{font-size:13px;font-weight:500;padding:2px 7px;border-radius:10px}
+.due-tag{font-family:'DBHeavent',monospace;font-size:12px;color:var(--t3)}
 .due-tag.hot{color:#f07070}
 .due-tag.warn{color:var(--gold)}
 /* MODAL */
@@ -206,15 +206,15 @@ nav h1{font-size:15px;font-weight:600;letter-spacing:-.01em}
 .modal-bg.open{display:flex}
 .modal{background:var(--surf);border:1px solid var(--b2);border-radius:var(--rxl);padding:22px;width:440px;max-width:95vw;max-height:90vh;overflow-y:auto}
 .modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--b1)}
-.modal-head h3{font-size:15px;font-weight:600}
+.modal-head h3{font-size:17px;font-weight:600}
 .modal-close{background:none;border:none;color:var(--t2);cursor:pointer;font-size:18px;padding:2px;display:flex}
 .modal-close:hover{color:var(--t1)}
 .mgrid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
 .mgrid .full{grid-column:1/-1}
 .mactions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;padding-top:14px;border-top:1px solid var(--b1)}
-.btn-sec{background:none;border:1px solid var(--b2);border-radius:var(--rsm);color:var(--t2);padding:7px 16px;font-family:'DBHeavent','Sarabun',sans-serif;font-size:13px;cursor:pointer}
+.btn-sec{background:none;border:1px solid var(--b2);border-radius:var(--rsm);color:var(--t2);padding:7px 16px;font-family:'DBHeavent','Sarabun',sans-serif;font-size:15px;cursor:pointer}
 .btn-sec:hover{background:var(--surf2);color:var(--t1)}
-.btn-pri{background:var(--gold);border:none;border-radius:var(--rsm);color:#0d0d0c;padding:7px 16px;font-family:'DBHeavent','Sarabun',sans-serif;font-size:13px;font-weight:600;cursor:pointer}
+.btn-pri{background:var(--gold);border:none;border-radius:var(--rsm);color:#0d0d0c;padding:7px 16px;font-family:'DBHeavent','Sarabun',sans-serif;font-size:15px;font-weight:600;cursor:pointer}
 .btn-pri:hover{background:var(--gold2)}
 /* NOTE MODAL */
 .note-modal{width:380px}
@@ -245,34 +245,34 @@ button{font-family:'DBHeavent','Sarabun',sans-serif}
 .dash-grid-bot{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
 .chart-card{background:var(--surf);border:1px solid var(--b1);border-radius:var(--r);padding:18px 20px}
 .chart-card.full{grid-column:1/-1}
-.chart-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin-bottom:4px;display:flex;align-items:center;gap:7px}
-.chart-subtitle{font-size:12px;color:var(--t2);margin-bottom:16px}
+.chart-title{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin-bottom:4px;display:flex;align-items:center;gap:7px}
+.chart-subtitle{font-size:14px;color:var(--t2);margin-bottom:16px}
 .chart-wrap{position:relative;width:100%}
-.trend-badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;margin-left:8px}
+.trend-badge{display:inline-flex;align-items:center;gap:4px;font-size:13px;font-weight:600;padding:2px 8px;border-radius:20px;margin-left:8px}
 .trend-up{background:#0d2518;color:#50d090}
 .trend-dn{background:#2a1220;color:#f07070}
 .trend-flat{background:#1e1e1e;color:#808080}
 /* Leaderboard */
 .lb-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--b0)}
 .lb-row:last-child{border-bottom:none}
-.lb-rank{font-family:'DBHeavent',monospace;font-size:12px;font-weight:700;color:var(--t3);width:20px;flex-shrink:0;text-align:center}
+.lb-rank{font-family:'DBHeavent',monospace;font-size:14px;font-weight:700;color:var(--t3);width:20px;flex-shrink:0;text-align:center}
 .lb-rank.gold{color:#e8c547}
 .lb-rank.silver{color:#a0aec0}
 .lb-rank.bronze{color:#c68b3e}
-.lb-name{flex:1;font-size:13px;font-weight:500}
+.lb-name{flex:1;font-size:15px;font-weight:500}
 .lb-bar-wrap{width:90px;height:5px;background:var(--surf3);border-radius:3px;overflow:hidden}
 .lb-bar-fill{height:100%;border-radius:3px}
-.lb-pct{font-family:'DBHeavent',monospace;font-size:12px;color:var(--gold);min-width:36px;text-align:right}
+.lb-pct{font-family:'DBHeavent',monospace;font-size:14px;color:var(--gold);min-width:36px;text-align:right}
 /* Stage flow */
 .flow-row{display:flex;align-items:center;gap:0;margin-top:6px;overflow-x:auto}
 .flow-seg{flex:1;min-width:60px;display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 4px;cursor:default}
-.flow-seg-bar{width:100%;height:28px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;transition:opacity .2s}
+.flow-seg-bar{width:100%;height:28px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;transition:opacity .2s}
 .flow-seg:hover .flow-seg-bar{opacity:.85}
-.flow-seg-lbl{font-size:9px;color:var(--t3);text-align:center;text-transform:uppercase;letter-spacing:.04em;line-height:1.3}
+.flow-seg-lbl{font-size:11px;color:var(--t3);text-align:center;text-transform:uppercase;letter-spacing:.04em;line-height:1.3}
 .flow-arrow{color:var(--t4);font-size:14px;margin-top:-12px;flex-shrink:0}
 /* Summary numbers in KPI */
-.kpi-big{font-family:'DBHeavent',monospace;font-size:32px;font-weight:700;line-height:1;margin-bottom:4px}
-.kpi-delta{font-size:11px;margin-top:4px}
+.kpi-big{font-family:'DBHeavent',monospace;font-size:36px;font-weight:700;line-height:1;margin-bottom:4px}
+.kpi-delta{font-size:13px;margin-top:4px}
 </style>
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
@@ -287,7 +287,7 @@ if(window._pendingLoad) window._pendingLoad();
 <img src="data:image/webp;base64,UklGRn4GAABXRUJQVlA4IHIGAABQIQCdASpMAEwAPjEUiUMiISEUfbYAIAMEtgBo3Lx/VfxA1zDmf4Z/mB8ttTfqH3j/b3lkTqdUn4P7QPer/K/YB5gH6b/3z7Zu4z+s3qA/jP8m/3P+E95T+jeo70AP2J6wv0AP169Kj9uvgj/a39mfgN/Wn/vXYDk8vWbOF/Zj7dwz7Tf9P3oDiH8i/yPGB3j/6H/n/JA8AagB+Rv9R+Rn+A+MT/g8qf0H/1PcE/k/9F/0v9i9rf2QeiX+vB/S9t+jMfMuaAz1l3v+2ZmOMxQE18aRLqbG5nndbo2KbgKWc0k3eLGAz3N2xCsmou9+40VuipNFPSdSskqJZKGyZreb+rgl27uNWTfXOrFb1g4GKADqWAD+/UFVpRfk8v5PJm5pQxYeDH4FKVYghPxaKH/oUVNypQtHmRzTFPw7uhlgANDoNXbWlSysD+9WLr0n/tQSrE61tjnNwaqTeUVfTK78JV60wvfYPV2P/o9KTu3P9e53NfKlYrY3z94qXxP1jM12s4xUcxnBcDKcyTUWsdBiPDG6P4I7DnFCeJw4pF39+TXWZ51M/pQ9GaYRSpauPK35rcYVf9i1F+/x0s+MkJ5jmB06TSEzJ4//LADLUm8MXK42rvRByRUctctXkwBeT2DZW/3ZusVwAYM/kGqwVdIEjkiXSGxiV80sOP1oQG+qTc2hrwv+Cuy3/o8KwHypD+2/f/bZ0nTAkui259QLkLvbkUnFcVmkqQ2uPov/VDSEBGLN6tUzlVHqupXf5xmX38J0+dZ/Ronb1ySSNr6Powa8RMBC7c4pfCG6TNLZp4+nm7Z0PCcyf1B+5OC24xURsiZxAw8WB/9HmYI+9UH5SXB1z+BTOH/mYL9Cnf5ITKfppBSEJqY7y2+wnjskQ9DprY7/VvGMTfMifiSRgXvAmBMtP0eoPOa7drYgxoUVmAC84KUWSAvptMKXAycDOc+fIzF8p0Of3c5WfgeY10d5mnh0Lglzg+pI8BIrQ07AfvN59RJ9/oI2+/iNvMajlUy18Lm2Ods1d678f3CKv13ICwjaW942PEDj3MXelBU+GGxqQNfjsZ4dFO96eC3cJX17d8UFJVpPEqEbUQuLuPr0Ab8Po4W3pUxfSw2HNY/TQvXYj5VEoDfeF9IzSF3Zo+T+pBIN76wgILrtX+Dici/WrCV4KTg61lnl9VJZCjhZdBonzNzfATOiXgNY2BnYs1Oq8Zfpl/IUAvWLCquY6BcPyKMnjVI2rtKn6wT0PPw59lk6oMHWDtE4YRwB3msVEf0sH0xR0KaBcCo51r4YQl/YmyJ/Y32VNYWcEfekXPN34O/Ci1hP0saoRw5mKFp5ZEOqTlpe2ktj+4TLYWiZp4puBT8jY8dZv82a/rZ9b7QjhLmBl1OuAK/eL86HJTC6ZKRSBqo/7AHOvarr3ZRfYwEv1RX3zS+7TIWQHRPSRaDv5coiM8nf9q/UvizUnAFV9nsxECiSr5zdEl4/iRH0Mt/JoeQIOiKQnuvc3oAlVoeb5H+eX5kiHtxMgwO7lVueIfu8se7MoH2FBiYkTE3bZLDSk8+Xg9o2AFkdhw+ElYF5f1/vrA/Iur6tOmyNR/QORCHn7I7OZ47FHJQ3Z5jbk/uoA/yzvjzELW5BeAYJJ7j/QjK7tofTT8bf9zWGFuSF8QCcmFJYp39sC+WQvnoXmoOoNwol2aP/AOXI59c0Ku5CxsIzMkar/5/16L7bX/GA8rk17PzQZ3HBqFD3HllHDI197RM4YVOOTvFszXhLyVa8SjSR7rXg0zx1FazXoGks19L4G7BIV2orMUE6DX81bpPYhU1PBW2vFxDO0n7ZjFt3hXhdjgSmbNgHI8xw1kF7X/k6N/ae02ZiBbM14owKfC6FvHAvpmSfWxg2lWrE59Z0YLV45ui5AzLev/mHEr9/HEhpKqkd//gy4u/VcAFyO2rzeVF+UCIbnt5kXvdcNbzu52QBgjjpI/rMZXH6iUotAuZsOvyUyHZg7oTStPZW32AQOzDf+i9loAZemoo7sPKbz9x9T1mLwOYkRaeV71oDjujT82YX/n8meoeP7vcUB84sjsk3ZGUvQT8ebpOBT/mxptaFfZD7wz/1jieEfBY3jqCnwRr5hS/oA7kFOngqzUioRFyKUd1fKLRQC74c/HKR7kYgkSKqa4BCzotn0wF1luYqGmw2HoJGT9etmNQYs4PAAAAAAAA=" alt="CJx" style="height:38px;width:38px;object-fit:cover;border-radius:7px;flex-shrink:0">
 <h1>Marketing Workload</h1>
 </div>
-<span id="sync-dot" style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: rgb(80, 208, 144); margin-right: 5px;"></span><span id="sync-lbl" style="font-size:11px;color:var(--t3);margin-right:12px">● Live · 11:58</span><span id="clock">Wed, 27 May 2026 · 11:58</span>
+<span id="sync-dot" style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: rgb(80, 208, 144); margin-right: 5px;"></span><span id="sync-lbl" style="font-size:13px;color:var(--t3);margin-right:12px">● Live · 11:58</span><span id="clock">Wed, 27 May 2026 · 11:58</span>
 </nav>
 <div class="page-tabs">
 <button class="ptab active" onclick="showView(&#39;dashboard&#39;,this)"><i class="ti ti-layout-dashboard" aria-hidden="true"></i>CEO Dashboard</button>
@@ -297,18 +297,18 @@ if(window._pendingLoad) window._pendingLoad();
 <button class="ptab" onclick="openTeamEmailsModal()" title="Notification settings" style="margin-right:6px"><i class="ti ti-bell-ringing" aria-hidden="true"></i>Notify</button>
 <div id="project-nav-tabs" style="display:flex;align-items:center;gap:4px;padding:0 4px"><div style="display:flex;align-items:center;gap:0">
 <button class="pnav-tab" onclick="quickSwitchProject(&#39;Spot &amp; Production&#39;)" title="Spot &amp; Production" style="border-radius:var(--rsm) 0 0 var(--rsm);border-right:none"><div class="pnav-dot" style="background:#5aaaf0"></div>Spot &amp; Productio…</button>
-<button onclick="openEditProject(&#39;Spot &amp; Production&#39;)" title="Edit project" style="display:flex;align-items:center;justify-content:center;padding:5px 7px;background:none;border:1px solid var(--b1);border-left:none;border-radius:0 var(--rsm) var(--rsm) 0;color:var(--t3);cursor:pointer;font-size:12px;transition:all .15s;margin:6px 0" onmouseover="this.style.background=&#39;var(--surf2)&#39;;this.style.color=&#39;var(--t1)&#39;" onmouseout="this.style.background=&#39;none&#39;;this.style.color=&#39;var(--t3)&#39;"><i class="ti ti-dots-vertical" aria-hidden="true"></i></button>
+<button onclick="openEditProject(&#39;Spot &amp; Production&#39;)" title="Edit project" style="display:flex;align-items:center;justify-content:center;padding:5px 7px;background:none;border:1px solid var(--b1);border-left:none;border-radius:0 var(--rsm) var(--rsm) 0;color:var(--t3);cursor:pointer;font-size:14px;transition:all .15s;margin:6px 0" onmouseover="this.style.background=&#39;var(--surf2)&#39;;this.style.color=&#39;var(--t1)&#39;" onmouseout="this.style.background=&#39;none&#39;;this.style.color=&#39;var(--t3)&#39;"><i class="ti ti-dots-vertical" aria-hidden="true"></i></button>
 </div><div style="display:flex;align-items:center;gap:0">
 <button class="pnav-tab" onclick="quickSwitchProject(&#39;CJx Commu2026&#39;)" title="CJx Commu2026" style="border-radius:var(--rsm) 0 0 var(--rsm);border-right:none"><div class="pnav-dot" style="background:#b87ff0"></div>CJx Commu2026</button>
-<button onclick="openEditProject(&#39;CJx Commu2026&#39;)" title="Edit project" style="display:flex;align-items:center;justify-content:center;padding:5px 7px;background:none;border:1px solid var(--b1);border-left:none;border-radius:0 var(--rsm) var(--rsm) 0;color:var(--t3);cursor:pointer;font-size:12px;transition:all .15s;margin:6px 0" onmouseover="this.style.background=&#39;var(--surf2)&#39;;this.style.color=&#39;var(--t1)&#39;" onmouseout="this.style.background=&#39;none&#39;;this.style.color=&#39;var(--t3)&#39;"><i class="ti ti-dots-vertical" aria-hidden="true"></i></button>
+<button onclick="openEditProject(&#39;CJx Commu2026&#39;)" title="Edit project" style="display:flex;align-items:center;justify-content:center;padding:5px 7px;background:none;border:1px solid var(--b1);border-left:none;border-radius:0 var(--rsm) var(--rsm) 0;color:var(--t3);cursor:pointer;font-size:14px;transition:all .15s;margin:6px 0" onmouseover="this.style.background=&#39;var(--surf2)&#39;;this.style.color=&#39;var(--t1)&#39;" onmouseout="this.style.background=&#39;none&#39;;this.style.color=&#39;var(--t3)&#39;"><i class="ti ti-dots-vertical" aria-hidden="true"></i></button>
 </div><div style="display:flex;align-items:center;gap:0">
 <button class="pnav-tab" onclick="quickSwitchProject(&#39;xxxx&#39;)" title="xxxx" style="border-radius:var(--rsm) 0 0 var(--rsm);border-right:none"><div class="pnav-dot" style="background:#c4a8ff"></div>xxxx</button>
-<button onclick="openEditProject(&#39;xxxx&#39;)" title="Edit project" style="display:flex;align-items:center;justify-content:center;padding:5px 7px;background:none;border:1px solid var(--b1);border-left:none;border-radius:0 var(--rsm) var(--rsm) 0;color:var(--t3);cursor:pointer;font-size:12px;transition:all .15s;margin:6px 0" onmouseover="this.style.background=&#39;var(--surf2)&#39;;this.style.color=&#39;var(--t1)&#39;" onmouseout="this.style.background=&#39;none&#39;;this.style.color=&#39;var(--t3)&#39;"><i class="ti ti-dots-vertical" aria-hidden="true"></i></button>
+<button onclick="openEditProject(&#39;xxxx&#39;)" title="Edit project" style="display:flex;align-items:center;justify-content:center;padding:5px 7px;background:none;border:1px solid var(--b1);border-left:none;border-radius:0 var(--rsm) var(--rsm) 0;color:var(--t3);cursor:pointer;font-size:14px;transition:all .15s;margin:6px 0" onmouseover="this.style.background=&#39;var(--surf2)&#39;;this.style.color=&#39;var(--t1)&#39;" onmouseout="this.style.background=&#39;none&#39;;this.style.color=&#39;var(--t3)&#39;"><i class="ti ti-dots-vertical" aria-hidden="true"></i></button>
 </div><div style="display:flex;align-items:center;gap:0">
 <button class="pnav-tab" onclick="quickSwitchProject(&#39;zzz&#39;)" title="zzz" style="border-radius:var(--rsm) 0 0 var(--rsm);border-right:none"><div class="pnav-dot" style="background:#f07070"></div>zzz</button>
-<button onclick="openEditProject(&#39;zzz&#39;)" title="Edit project" style="display:flex;align-items:center;justify-content:center;padding:5px 7px;background:none;border:1px solid var(--b1);border-left:none;border-radius:0 var(--rsm) var(--rsm) 0;color:var(--t3);cursor:pointer;font-size:12px;transition:all .15s;margin:6px 0" onmouseover="this.style.background=&#39;var(--surf2)&#39;;this.style.color=&#39;var(--t1)&#39;" onmouseout="this.style.background=&#39;none&#39;;this.style.color=&#39;var(--t3)&#39;"><i class="ti ti-dots-vertical" aria-hidden="true"></i></button>
+<button onclick="openEditProject(&#39;zzz&#39;)" title="Edit project" style="display:flex;align-items:center;justify-content:center;padding:5px 7px;background:none;border:1px solid var(--b1);border-left:none;border-radius:0 var(--rsm) var(--rsm) 0;color:var(--t3);cursor:pointer;font-size:14px;transition:all .15s;margin:6px 0" onmouseover="this.style.background=&#39;var(--surf2)&#39;;this.style.color=&#39;var(--t1)&#39;" onmouseout="this.style.background=&#39;none&#39;;this.style.color=&#39;var(--t3)&#39;"><i class="ti ti-dots-vertical" aria-hidden="true"></i></button>
 </div></div>
-<button onclick="openNewProjectModal()" title="Add new project" style="display:flex;align-items:center;gap:5px;margin:6px 0 6px 4px;padding:5px 12px;background:var(--gold3);border:1px solid rgba(232,197,71,.3);border-radius:var(--rsm);color:var(--gold);font-family:&#39;DBHeavent&#39;,&#39;Sarabun&#39;,sans-serif;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;transition:background .15s"><i class="ti ti-folder-plus" aria-hidden="true" style="font-size:14px"></i>+ New project</button>
+<button onclick="openNewProjectModal()" title="Add new project" style="display:flex;align-items:center;gap:5px;margin:6px 0 6px 4px;padding:5px 12px;background:var(--gold3);border:1px solid rgba(232,197,71,.3);border-radius:var(--rsm);color:var(--gold);font-family:&#39;DBHeavent&#39;,&#39;Sarabun&#39;,sans-serif;font-size:14px;font-weight:500;cursor:pointer;white-space:nowrap;transition:background .15s"><i class="ti ti-folder-plus" aria-hidden="true" style="font-size:16px"></i>+ New project</button>
 </div>
 <div class="view active" id="view-dashboard">
 <div class="dash-inner" id="dash-inner">
@@ -358,25 +358,25 @@ if(window._pendingLoad) window._pendingLoad();
 <div class="flow-row"><div class="flow-seg">
 <div class="flow-seg-bar" style="background:#3b5bdb;opacity:0.9249999999999999">6</div>
 <div class="flow-seg-lbl">Job Brief</div>
-</div><div class="flow-arrow" style="margin-top:-12px;padding-bottom:18px;color:var(--t4);font-size:12px">›</div><div class="flow-seg">
+</div><div class="flow-arrow" style="margin-top:-12px;padding-bottom:18px;color:var(--t4);font-size:14px">›</div><div class="flow-seg">
 <div class="flow-seg-bar" style="background:#7048e8;opacity:0.2">0</div>
 <div class="flow-seg-lbl">Design</div>
-</div><div class="flow-arrow" style="margin-top:-12px;padding-bottom:18px;color:var(--t4);font-size:12px">›</div><div class="flow-seg">
+</div><div class="flow-arrow" style="margin-top:-12px;padding-bottom:18px;color:var(--t4);font-size:14px">›</div><div class="flow-seg">
 <div class="flow-seg-bar" style="background:#1971c2;opacity:0.964">7</div>
 <div class="flow-seg-lbl">Production</div>
-</div><div class="flow-arrow" style="margin-top:-12px;padding-bottom:18px;color:var(--t4);font-size:12px">›</div><div class="flow-seg">
+</div><div class="flow-arrow" style="margin-top:-12px;padding-bottom:18px;color:var(--t4);font-size:14px">›</div><div class="flow-seg">
 <div class="flow-seg-bar" style="background:#e67700;opacity:1">8</div>
 <div class="flow-seg-lbl">Review</div>
-</div><div class="flow-arrow" style="margin-top:-12px;padding-bottom:18px;color:var(--t4);font-size:12px">›</div><div class="flow-seg">
+</div><div class="flow-arrow" style="margin-top:-12px;padding-bottom:18px;color:var(--t4);font-size:14px">›</div><div class="flow-seg">
 <div class="flow-seg-bar" style="background:#c2255c;opacity:0.85">4</div>
 <div class="flow-seg-lbl">Approval Stage</div>
-</div><div class="flow-arrow" style="margin-top:-12px;padding-bottom:18px;color:var(--t4);font-size:12px">›</div><div class="flow-seg">
+</div><div class="flow-arrow" style="margin-top:-12px;padding-bottom:18px;color:var(--t4);font-size:14px">›</div><div class="flow-seg">
 <div class="flow-seg-bar" style="background:#0ca678;opacity:0.85">4</div>
 <div class="flow-seg-lbl">AW Release</div>
-</div><div class="flow-arrow" style="margin-top:-12px;padding-bottom:18px;color:var(--t4);font-size:12px">›</div><div class="flow-seg">
+</div><div class="flow-arrow" style="margin-top:-12px;padding-bottom:18px;color:var(--t4);font-size:14px">›</div><div class="flow-seg">
 <div class="flow-seg-bar" style="background:#495057;opacity:0.2">0</div>
 <div class="flow-seg-lbl">On Hold</div>
-</div><div class="flow-arrow" style="margin-top:-12px;padding-bottom:18px;color:var(--t4);font-size:12px">›</div><div class="flow-seg">
+</div><div class="flow-arrow" style="margin-top:-12px;padding-bottom:18px;color:var(--t4);font-size:14px">›</div><div class="flow-seg">
 <div class="flow-seg-bar" style="background:#2f9e44;opacity:0.2">0</div>
 <div class="flow-seg-lbl">Complete</div>
 </div></div>
@@ -387,44 +387,44 @@ if(window._pendingLoad) window._pendingLoad();
 <div class="chart-subtitle">On-time delivery rate — ranked best to worst</div>
 <div><div class="lb-row">
 <div class="lb-rank gold">🥇</div>
-<div class="person-avatar o-benz" style="width:26px;height:26px;font-size:10px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0">B</div>
-<div class="lb-name">Benz<span style="font-size:10px;color:var(--t3);margin-left:6px">2 tasks</span></div>
+<div class="person-avatar o-benz" style="width:26px;height:26px;font-size:12px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0">B</div>
+<div class="lb-name">Benz<span REPLACEME</div>
 <div class="lb-bar-wrap"><div class="lb-bar-fill" style="width:80%;background:#50d090"></div></div>
 <div class="lb-pct">80%</div>
 </div><div class="lb-row">
 <div class="lb-rank silver">🥈</div>
-<div class="person-avatar o-witch" style="width:26px;height:26px;font-size:10px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0">W</div>
-<div class="lb-name">Witch<span style="font-size:10px;color:var(--t3);margin-left:6px">5 tasks</span></div>
+<div class="person-avatar o-witch" style="width:26px;height:26px;font-size:12px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0">W</div>
+<div class="lb-name">Witch<span REPLACEME</div>
 <div class="lb-bar-wrap"><div class="lb-bar-fill" style="width:67%;background:#5aaaf0"></div></div>
 <div class="lb-pct">67%</div>
 </div><div class="lb-row">
 <div class="lb-rank bronze">🥉</div>
-<div class="person-avatar o-nod" style="width:26px;height:26px;font-size:10px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0">N</div>
-<div class="lb-name">Nod<span style="font-size:10px;color:var(--t3);margin-left:6px">2 tasks</span></div>
+<div class="person-avatar o-nod" style="width:26px;height:26px;font-size:12px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0">N</div>
+<div class="lb-name">Nod<span REPLACEME</div>
 <div class="lb-bar-wrap"><div class="lb-bar-fill" style="width:65%;background:#5aaaf0"></div></div>
 <div class="lb-pct">65%</div>
 </div><div class="lb-row">
 <div class="lb-rank ">4</div>
-<div class="person-avatar o-ton" style="width:26px;height:26px;font-size:10px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0">T</div>
-<div class="lb-name">Ton<span style="font-size:10px;color:var(--t3);margin-left:6px">12 tasks</span></div>
+<div class="person-avatar o-ton" style="width:26px;height:26px;font-size:12px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0">T</div>
+<div class="lb-name">Ton<span REPLACEME</div>
 <div class="lb-bar-wrap"><div class="lb-bar-fill" style="width:65%;background:#5aaaf0"></div></div>
 <div class="lb-pct">65%</div>
 </div><div class="lb-row">
 <div class="lb-rank ">5</div>
-<div class="person-avatar o-ju" style="width:26px;height:26px;font-size:10px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0">J</div>
-<div class="lb-name">Ju<span style="font-size:10px;color:var(--t3);margin-left:6px">2 tasks</span></div>
+<div class="person-avatar o-ju" style="width:26px;height:26px;font-size:12px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0">J</div>
+<div class="lb-name">Ju<span REPLACEME</div>
 <div class="lb-bar-wrap"><div class="lb-bar-fill" style="width:65%;background:#5aaaf0"></div></div>
 <div class="lb-pct">65%</div>
 </div><div class="lb-row">
 <div class="lb-rank ">6</div>
-<div class="person-avatar o-por" style="width:26px;height:26px;font-size:10px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0">P</div>
-<div class="lb-name">Por<span style="font-size:10px;color:var(--t3);margin-left:6px">4 tasks</span></div>
+<div class="person-avatar o-por" style="width:26px;height:26px;font-size:12px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0">P</div>
+<div class="lb-name">Por<span REPLACEME</div>
 <div class="lb-bar-wrap"><div class="lb-bar-fill" style="width:5%;background:#f07070"></div></div>
 <div class="lb-pct">5%</div>
 </div><div class="lb-row">
 <div class="lb-rank ">7</div>
-<div class="person-avatar o-sun" style="width:26px;height:26px;font-size:10px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0">S</div>
-<div class="lb-name">Sun<span style="font-size:10px;color:var(--t3);margin-left:6px">2 tasks</span></div>
+<div class="person-avatar o-sun" style="width:26px;height:26px;font-size:12px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0">S</div>
+<div class="lb-name">Sun<span REPLACEME</div>
 <div class="lb-bar-wrap"><div class="lb-bar-fill" style="width:5%;background:#f07070"></div></div>
 <div class="lb-pct">5%</div>
 </div></div>
@@ -442,7 +442,7 @@ if(window._pendingLoad) window._pendingLoad();
 <div style="height:5px;background:var(--surf3);border-radius:3px;overflow:hidden;margin-bottom:8px">
 <div style="height:100%;width:64%;background:#5aaaf0;border-radius:3px;transition:width .6s"></div>
 </div>
-<div style="display:flex;gap:14px;font-size:11px;color:var(--t3)">
+<div style="display:flex;gap:14px;font-size:13px;color:var(--t3)">
 <span>📋 18 tasks</span>
 <span style="color:#50d090">✓ 0 done</span>
 <span style="color:var(--gold)">⏳ 18 left</span>
@@ -455,7 +455,7 @@ if(window._pendingLoad) window._pendingLoad();
 <div style="height:5px;background:var(--surf3);border-radius:3px;overflow:hidden;margin-bottom:8px">
 <div style="height:100%;width:40%;background:#b87ff0;border-radius:3px;transition:width .6s"></div>
 </div>
-<div style="display:flex;gap:14px;font-size:11px;color:var(--t3)">
+<div style="display:flex;gap:14px;font-size:13px;color:var(--t3)">
 <span>📋 10 tasks</span>
 <span style="color:#50d090">✓ 0 done</span>
 <span style="color:var(--gold)">⏳ 10 left</span>
@@ -468,7 +468,7 @@ if(window._pendingLoad) window._pendingLoad();
 <div style="height:5px;background:var(--surf3);border-radius:3px;overflow:hidden;margin-bottom:8px">
 <div style="height:100%;width:5%;background:#c4a8ff;border-radius:3px;transition:width .6s"></div>
 </div>
-<div style="display:flex;gap:14px;font-size:11px;color:var(--t3)">
+<div style="display:flex;gap:14px;font-size:13px;color:var(--t3)">
 <span>📋 1 tasks</span>
 <span style="color:#50d090">✓ 0 done</span>
 <span style="color:var(--gold)">⏳ 1 left</span>
@@ -683,15 +683,15 @@ if(window._pendingLoad) window._pendingLoad();
 <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
 <span style="font-size:18px">💬</span>
 <span style="font-size:13px;font-weight:700;color:var(--t1)">Microsoft Teams</span>
-<span style="font-size:10px;color:var(--t3);margin-left:auto">Incoming Webhook URL</span>
+<span style="font-size:12px;color:var(--t3);margin-left:auto">Incoming Webhook URL</span>
 </div>
-<input type="url" id="teams-webhook-url" placeholder="https://prod-xx.westus.logic.azure.com:443/workflows/..." style="width:100%;background:var(--surf3);border:1px solid var(--b1);border-radius:6px;padding:7px 10px;color:var(--t1);font-size:11px;outline:none;box-sizing:border-box;transition:border .15s" onfocus="this.style.borderColor='var(--gold2)'" onblur="this.style.borderColor='var(--b1)'">
-<p style="margin:6px 0 0;font-size:10px;color:var(--t3)">Use <strong>Power Automate</strong> to post to a group chat: make.powerautomate.com → New flow → HTTP trigger → Post message in Teams group chat → copy the HTTP POST URL here.</p>
+<input type="url" id="teams-webhook-url" placeholder="https://prod-xx.westus.logic.azure.com:443/workflows/..." style="width:100%;background:var(--surf3);border:1px solid var(--b1);border-radius:6px;padding:7px 10px;color:var(--t1);font-size:13px;outline:none;box-sizing:border-box;transition:border .15s" onfocus="this.style.borderColor='var(--gold2)'" onblur="this.style.borderColor='var(--b1)'">
+<p style="margin:6px 0 0;font-size:12px;color:var(--t3)">Use <strong>Power Automate</strong> to post to a group chat: make.powerautomate.com → New flow → HTTP trigger → Post message in Teams group chat → copy the HTTP POST URL here.</p>
 </div>
 
-<p style="font-size:12px;color:var(--t3);margin:0 0 10px">📧 <strong style="color:var(--t2)">Email reminders</strong> — sent every morning at <strong style="color:var(--gold)">10:00 AM</strong>. Leave blank to skip.</p>
+<p style="font-size:14px;color:var(--t3);margin:0 0 10px">📧 <strong style="color:var(--t2)">Email reminders</strong> — sent every morning at <strong style="color:var(--gold)">10:00 AM</strong>. Leave blank to skip.</p>
 <div id="team-emails-list" style="display:flex;flex-direction:column;gap:7px;max-height:280px;overflow-y:auto;padding-right:4px"></div>
-<div id="notify-status" style="display:none;margin-top:10px;font-size:12px;padding:7px 10px;border-radius:6px;background:var(--surf2)"></div>
+<div id="notify-status" style="display:none;margin-top:10px;font-size:14px;padding:7px 10px;border-radius:6px;background:var(--surf2)"></div>
 <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--b1);display:flex;gap:8px;justify-content:space-between;align-items:center;flex-wrap:wrap">
 <button class="btn-sec" id="send-now-btn" onclick="sendOverdueReminders()">📨 Send Reminders Now</button>
 <div style="display:flex;gap:8px">
@@ -710,10 +710,10 @@ if(window._pendingLoad) window._pendingLoad();
 <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()">
 <div style="font-size:26px;margin-bottom:6px">📎</div>
 <div style="font-size:13px;font-weight:600;color:var(--t2)">Click to upload or drag files here</div>
-<div style="font-size:11px;color:var(--t3);margin-top:4px">PPT · Excel · Word · PDF · Images · ZIP — max 50 MB each</div>
+<div style="font-size:13px;color:var(--t3);margin-top:4px">PPT · Excel · Word · PDF · Images · ZIP — max 50 MB each</div>
 </div>
 <input type="file" id="file-input" style="display:none" multiple accept=".ppt,.pptx,.xls,.xlsx,.doc,.docx,.pdf,.jpg,.jpeg,.png,.gif,.zip,.rar">
-<div id="upload-progress" style="display:none;margin-top:10px;font-size:12px;color:var(--t2);text-align:center;padding:6px;background:var(--surf2);border-radius:var(--rsm)">Uploading…</div>
+<div id="upload-progress" style="display:none;margin-top:10px;font-size:14px;color:var(--t2);text-align:center;padding:6px;background:var(--surf2);border-radius:var(--rsm)">Uploading…</div>
 </div>
 </div>
 
@@ -851,8 +851,8 @@ function renderProjectNavTabs(){
 const el=document.getElementById('project-nav-tabs');if(!el)return;
 el.innerHTML=projects.map(p=>`<div style="display:flex;align-items:center;gap:0">
 <button class="pnav-tab" onclick="quickSwitchProject('${esc(p.name)}')" title="${esc(p.name)}" style="border-radius:var(--rsm) 0 0 var(--rsm);border-right:none"><div class="pnav-dot" style="background:${p.color}"></div>${esc(p.name.length>14?p.name.substring(0,14)+'…':p.name)}</button>
-<button onclick="openEditProject('${esc(p.name)}')" title="Edit project" style="display:flex;align-items:center;justify-content:center;padding:5px 7px;background:none;border:1px solid var(--b1);border-left:none;border-right:none;color:var(--t3);cursor:pointer;font-size:12px;transition:all .15s;margin:6px 0" onmouseover="this.style.background='var(--surf2)';this.style.color='var(--t1)'" onmouseout="this.style.background='none';this.style.color='var(--t3)'">&#9998;</button>
-<button onclick="quickDeleteProject('${esc(p.name)}')" title="Delete project" style="display:flex;align-items:center;justify-content:center;padding:5px 7px;background:none;border:1px solid var(--b1);border-left:none;border-radius:0 var(--rsm) var(--rsm) 0;color:#f07070;cursor:pointer;font-size:12px;font-weight:700;transition:all .15s;margin:6px 0" onmouseover="this.style.background='rgba(240,112,112,0.12)'" onmouseout="this.style.background='none'">&#x2715;</button>
+<button onclick="openEditProject('${esc(p.name)}')" title="Edit project" style="display:flex;align-items:center;justify-content:center;padding:5px 7px;background:none;border:1px solid var(--b1);border-left:none;border-right:none;color:var(--t3);cursor:pointer;font-size:14px;transition:all .15s;margin:6px 0" onmouseover="this.style.background='var(--surf2)';this.style.color='var(--t1)'" onmouseout="this.style.background='none';this.style.color='var(--t3)'">&#9998;</button>
+<button onclick="quickDeleteProject('${esc(p.name)}')" title="Delete project" style="display:flex;align-items:center;justify-content:center;padding:5px 7px;background:none;border:1px solid var(--b1);border-left:none;border-radius:0 var(--rsm) var(--rsm) 0;color:#f07070;cursor:pointer;font-size:14px;font-weight:700;transition:all .15s;margin:6px 0" onmouseover="this.style.background='rgba(240,112,112,0.12)'" onmouseout="this.style.background='none'">&#x2715;</button>
 </div>`).join('');
 }
 function quickSwitchProject(name){
@@ -927,12 +927,12 @@ const rankIcon=i===0?'🥇':i===1?'🥈':i===2?'🥉':`${i+1}`;
 const hasData=p.onTimeRate!==null;
 const barPct=hasData?p.onTimeRate:0;
 const barColor=!hasData?'var(--t3)':p.onTimeRate>=80?'#50d090':p.onTimeRate>=50?'#e67700':'#f07070';
-const lateLbl=p.overdueCount>0?`<span style="font-size:10px;color:#f07070;margin-left:6px">${p.overdueCount} late</span>`:'';
+const lateLbl=p.overdueCount>0?`<span style="font-size:12px;color:#f07070;margin-left:6px">${p.overdueCount} late</span>`:'';
 const rateLbl=hasData?`${p.onTimeRate}%`:'—';
 return`<div class="lb-row">
 <div class="lb-rank ${rankCls}">${rankIcon}</div>
-<div class="person-avatar o-${p.ok}" style="width:26px;height:26px;font-size:10px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0">${p.owner[0]}</div>
-<div class="lb-name">${p.owner}<span style="font-size:10px;color:var(--t3);margin-left:6px">${p.total} tasks</span>${lateLbl}</div>
+<div class="person-avatar o-${p.ok}" style="width:26px;height:26px;font-size:12px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0">${p.owner[0]}</div>
+<div class="lb-name">${p.owner}<span style="font-size:12px;color:var(--t3);margin-left:6px">${p.total} tasks</span>${lateLbl}</div>
 <div class="lb-bar-wrap"><div class="lb-bar-fill" style="width:${barPct}%;background:${barColor}"></div></div>
 <div class="lb-pct">${rateLbl}</div>
 </div>`;
@@ -948,7 +948,7 @@ return`<div style="background:var(--surf2);border-radius:8px;padding:12px 14px;b
 <div style="height:5px;background:var(--surf3);border-radius:3px;overflow:hidden;margin-bottom:8px">
 <div style="height:100%;width:${p.pct}%;background:${p.color};border-radius:3px;transition:width .6s"></div>
 </div>
-<div style="display:flex;gap:14px;font-size:11px;color:var(--t3)">
+<div style="display:flex;gap:14px;font-size:13px;color:var(--t3)">
 <span>📋 ${p.total} tasks</span>
 <span style="color:#50d090">✓ ${p.done} done</span>
 <span style="color:var(--gold)">⏳ ${remaining} left</span>
@@ -965,7 +965,7 @@ const lbl=s==='AW Release / Event Live'?'AW Release':s;
 return`<div class="flow-seg">
 <div class="flow-seg-bar" style="background:${STAGE_COLORS[i]};opacity:${cnt===0?0.2:0.7+w*0.003}">${cnt}</div>
 <div class="flow-seg-lbl">${lbl}</div>
-</div>${i<STAGES.length-1?'<div class="flow-arrow" style="margin-top:-12px;padding-bottom:18px;color:var(--t4);font-size:12px">›</div>':''}`;
+</div>${i<STAGES.length-1?'<div class="flow-arrow" style="margin-top:-12px;padding-bottom:18px;color:var(--t4);font-size:14px">›</div>':''}`;
 }).join('');
 // ── Overdue by owner ──
 const overdueByOwner=OWNERS.map(o=>({
@@ -1183,7 +1183,7 @@ return `<tr style="${rowStyle}">
 <td>
 <div class="ow-cell">
 <div class="ow-av o-${ok}">${t.owner[0]}</div>
-<select style="background:none;border:none;color:var(--t1);font-family:'DBHeavent','Sarabun',sans-serif;font-size:12px;outline:none;cursor:pointer" onchange="updateField(${t.id},'owner',this.value)">
+<select style="background:none;border:none;color:var(--t1);font-family:'DBHeavent','Sarabun',sans-serif;font-size:14px;outline:none;cursor:pointer" onchange="updateField(${t.id},'owner',this.value)">
 ${OWNERS.map(o=>`<option value="${o}"${o===t.owner?' selected':''}>${o}</option>`).join('')}
 </select>
 </div>
@@ -1235,8 +1235,8 @@ if(done.length){
   <td colspan="7" style="padding:10px 12px 6px;background:var(--surf2);border-top:2px solid var(--b2)">
     <div style="display:flex;align-items:center;gap:8px">
       <i class="ti ti-circle-check-filled" style="color:#50d090;font-size:15px" aria-hidden="true"></i>
-      <span style="font-size:12px;font-weight:700;color:#50d090;letter-spacing:.04em">COMPLETED</span>
-      <span style="font-size:11px;color:var(--t3);background:var(--surf3);padding:1px 8px;border-radius:10px">${done.length} task${done.length>1?'s':''}</span>
+      <span style="font-size:14px;font-weight:700;color:#50d090;letter-spacing:.04em">COMPLETED</span>
+      <span style="font-size:13px;color:var(--t3);background:var(--surf3);padding:1px 8px;border-radius:10px">${done.length} task${done.length>1?'s':''}</span>
     </div>
   </td>
 </tr>`;
@@ -1309,7 +1309,7 @@ const projs=['All',...projects.map(p=>p.name)];
 document.getElementById('proj-tabs').innerHTML=projs.map(p=>{
 const col=p==='All'?null:projColor(p);
 if(p==='All') return `<button class="pjtab${activeProj==='All'?' active':''}" onclick="switchProj('All',this)">All projects</button>`;
-return `<div style="display:inline-flex;align-items:center;gap:0;margin-right:2px"><button class="pjtab${p===activeProj?' active':''}" onclick="switchProj('${esc(p)}',this)" style="border-radius:var(--rsm) 0 0 var(--rsm);border-right:none"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${col};margin-right:5px;vertical-align:middle"></span>${esc(p)}</button><button onclick="quickDeleteProject('${esc(p)}')" title="Delete project" style="display:flex;align-items:center;justify-content:center;height:100%;padding:0 7px;background:none;border:1px solid var(--b1);border-left:none;border-radius:0 var(--rsm) var(--rsm) 0;color:#f07070;cursor:pointer;font-size:11px;font-weight:700;transition:all .15s" onmouseover="this.style.background='rgba(240,112,112,0.12)'" onmouseout="this.style.background='none'">&#x2715;</button></div>`;
+return `<div style="display:inline-flex;align-items:center;gap:0;margin-right:2px"><button class="pjtab${p===activeProj?' active':''}" onclick="switchProj('${esc(p)}',this)" style="border-radius:var(--rsm) 0 0 var(--rsm);border-right:none"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${col};margin-right:5px;vertical-align:middle"></span>${esc(p)}</button><button onclick="quickDeleteProject('${esc(p)}')" title="Delete project" style="display:flex;align-items:center;justify-content:center;height:100%;padding:0 7px;background:none;border:1px solid var(--b1);border-left:none;border-radius:0 var(--rsm) var(--rsm) 0;color:#f07070;cursor:pointer;font-size:13px;font-weight:700;transition:all .15s" onmouseover="this.style.background='rgba(240,112,112,0.12)'" onmouseout="this.style.background='none'">&#x2715;</button></div>`;
 }).join('');
 }
 function switchProj(p,el){
@@ -1352,7 +1352,7 @@ const list=activeProj==='All'?tasks:tasks.filter(t=>t.project===activeProj);
 const g={};list.forEach(t=>{g[t.stage]=(g[t.stage]||0)+1;});
 document.getElementById('sb-stats').innerHTML=STAGES.filter(s=>g[s]).map(s=>{
 const k=SKEY(s);
-return `<div style="display:flex;align-items:center;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--b0)"><div style="display:flex;align-items:center;gap:6px"><div style="width:6px;height:6px;border-radius:50%" class="d-${k}"></div><span style="font-size:11px">${s==='AW Release / Event Live'?'AW Release':s}</span></div><span style="font-family:'DBHeavent',monospace;font-size:11px;color:var(--t3)">${g[s]}</span></div>`;
+return `<div style="display:flex;align-items:center;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--b0)"><div style="display:flex;align-items:center;gap:6px"><div style="width:6px;height:6px;border-radius:50%" class="d-${k}"></div><span style="font-size:13px">${s==='AW Release / Event Live'?'AW Release':s}</span></div><span style="font-family:'DBHeavent',monospace;font-size:13px;color:var(--t3)">${g[s]}</span></div>`;
 }).join('');
 }
 // ═════════════ DRAG & DROP & CARD ACTIONS ═════════════
@@ -1582,12 +1582,12 @@ async function openTeamEmailsModal(){
   list.innerHTML=OWNERS.map(name=>{
     const d=emailMap[name]||{email:'',notify:true};
     return `<div style="display:flex;align-items:center;gap:8px">
-      <div style="width:26px;height:26px;border-radius:50%;background:var(--surf3);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;color:var(--t1)">${name[0]}</div>
-      <span style="width:64px;font-size:13px;font-weight:600;flex-shrink:0">${name}</span>
+      <div style="width:26px;height:26px;border-radius:50%;background:var(--surf3);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;color:var(--t1)">${name[0]}</div>
+      <span style="width:64px;font-size:15px;font-weight:600;flex-shrink:0">${name}</span>
       <input type="email" placeholder="email@company.com" value="${d.email||''}" data-owner="${name}"
-        style="flex:1;background:var(--surf2);border:1px solid var(--b1);border-radius:6px;padding:6px 9px;color:var(--t1);font-size:12px;outline:none;transition:border .15s"
+        style="flex:1;background:var(--surf2);border:1px solid var(--b1);border-radius:6px;padding:6px 9px;color:var(--t1);font-size:14px;outline:none;transition:border .15s"
         onfocus="this.style.borderColor='var(--gold2)'" onblur="this.style.borderColor='var(--b1)'">
-      <label style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--t3);flex-shrink:0;cursor:pointer">
+      <label style="display:flex;align-items:center;gap:4px;font-size:13px;color:var(--t3);flex-shrink:0;cursor:pointer">
         <input type="checkbox" data-owner-notify="${name}" ${d.notify?'checked':''} style="cursor:pointer">Notify
       </label>
     </div>`;
