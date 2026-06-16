@@ -966,7 +966,7 @@ document.getElementById('dash-inner').innerHTML=`
 </div>
 <div class="chart-card">
 <div class="chart-title"><i class="ti ti-chart-bar" aria-hidden="true"></i>Workload per person</div>
-<div class="chart-subtitle">In-progress tasks only (excl. Complete &amp; On Hold)</div>
+<div class="chart-subtitle">All active tasks per person (excl. Complete)</div>
 <div class="chart-wrap" style="height:180px"><canvas id="bar-chart"></canvas></div>
 </div>
 <div class="chart-card">
@@ -1043,9 +1043,9 @@ options:{responsive:true,maintainAspectRatio:true,cutout:'65%',
 plugins:{legend:{position:'right',labels:{boxWidth:10,padding:10,font:{size:10}}},
 tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${ctx.parsed} tasks`}}}}
 });
-// 2. Bar chart – in-progress tasks per person (excludes Complete & On Hold)
-const activePersons=OWNERS.filter(o=>tasks.some(t=>t.owner===o&&!['Complete','On Hold'].includes(t.stage)));
-const taskCounts=activePersons.map(o=>tasks.filter(t=>t.owner===o&&!['Complete','On Hold'].includes(t.stage)).length);
+// 2. Bar chart – all tasks per person except Complete
+const activePersons=OWNERS.filter(o=>tasks.some(t=>t.owner===o&&t.stage!=='Complete'));
+const taskCounts=activePersons.map(o=>tasks.filter(t=>t.owner===o&&t.stage!=='Complete').length);
 const barColors=activePersons.map(o=>{
 const p=personData.find(x=>x.owner===o);
 return p&&p.pct>=70?'#50d090':p&&p.pct>=40?'#5aaaf0':'#e67700';
