@@ -1679,8 +1679,8 @@ async function loadFromSupabase(){
     populateAllProjectSelects();
     renderProjectNavTabs();
     renderDash();
-    const av=document.querySelector('.ptab.active');
-    if(av){const v=av.getAttribute('data-view');if(v==='list'){renderListPills();renderList();}else if(v==='board'){renderProjTabs();renderKanban();}}
+    if(document.getElementById('view-list').classList.contains('active')){populateAllProjectSelects();renderListPills();renderList();}
+    else if(document.getElementById('view-board').classList.contains('active')){populateAllProjectSelects();renderProjTabs();renderKanban();}
   }catch(err){
     _sync('err','⚠ Offline');
     console.error('Supabase error:',err);
