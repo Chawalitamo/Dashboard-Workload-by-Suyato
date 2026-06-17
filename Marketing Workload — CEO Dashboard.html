@@ -384,7 +384,7 @@ if(window._pendingLoad) window._pendingLoad();
 </div>
 <div class="chart-card">
 <div class="chart-title"><i class="ti ti-trophy" aria-hidden="true"></i>Progress leaderboard</div>
-<div class="chart-subtitle">On-time delivery rate — ranked best to worst</div>
+<div class="chart-subtitle">Ranked by weighted completion %</div>
 <div><div class="lb-row">
 <div class="lb-rank gold">🥇</div>
 <div class="person-avatar o-benz" style="width:26px;height:26px;font-size:12px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0">B</div>
@@ -892,25 +892,14 @@ const overdue=tasks.filter(t=>t.due&&new Date(t.due)<new Date()&&t.stage!=='Comp
 const avgPct=total?Math.round(tasks.reduce((s,t)=>s+STAGE_PCT[t.stage],0)/total):0;
 const projs=[...new Set(tasks.map(t=>t.project))];
 // ── Person progress data (sorted) ──
-const _today=new Date();_today.setHours(0,0,0,0);
 const personData=OWNERS.map(owner=>{
 const ot=tasks.filter(t=>t.owner===owner);
 if(!ot.length)return null;
 const pct=Math.round(ot.reduce((s,t)=>s+STAGE_PCT[t.stage],0)/ot.length);
 const active=ot.filter(t=>!['Complete','On Hold'].includes(t.stage)).length;
 const done=ot.filter(t=>t.stage==='Complete').length;
-// On-time delivery: active tasks with a due date
-const activeDue=ot.filter(t=>t.stage!=='Complete'&&t.due&&t.due.trim());
-const overdueCount=activeDue.filter(t=>new Date(t.due)<_today).length;
-const onTimeRate=activeDue.length>0?Math.round((1-overdueCount/activeDue.length)*100):null;
-return{owner,pct,total:ot.length,active,done,ok:OKEY(owner),overdueCount,onTimeRate,activeDue:activeDue.length};
-}).filter(Boolean).sort((a,b)=>{
-// Sort by on-time rate desc; nulls last
-if(a.onTimeRate===null&&b.onTimeRate===null)return 0;
-if(a.onTimeRate===null)return 1;
-if(b.onTimeRate===null)return -1;
-return b.onTimeRate-a.onTimeRate;
-});
+return{owner,pct,total:ot.length,active,done,ok:OKEY(owner)};
+}).filter(Boolean).sort((a,b)=>b.pct-a.pct);
 // ── Stage counts ──
 const stageCounts=STAGES.map(s=>tasks.filter(t=>t.stage===s).length);
 // ── Project data ──
@@ -921,20 +910,16 @@ const done=pt.filter(t=>t.stage==='Complete').length;
 return{name:p,total:pt.length,done,pct,color:projColor(p)};
 });
 // ── Leaderboard HTML ──
-const lbHTML=personData.filter(p=>p.total>0).slice(0,8).map((p,i)=>{
+const lbHTML=personData.slice(0,8).map((p,i)=>{
 const rankCls=i===0?'gold':i===1?'silver':i===2?'bronze':'';
 const rankIcon=i===0?'🥇':i===1?'🥈':i===2?'🥉':`${i+1}`;
-const hasData=p.onTimeRate!==null;
-const barPct=hasData?p.onTimeRate:0;
-const barColor=!hasData?'var(--t3)':p.onTimeRate>=80?'#50d090':p.onTimeRate>=50?'#e67700':'#f07070';
-const lateLbl=p.overdueCount>0?`<span style="font-size:12px;color:#f07070;margin-left:6px">${p.overdueCount} late</span>`:'';
-const rateLbl=hasData?`${p.onTimeRate}%`:'—';
+const barColor=p.pct>=80?'#50d090':p.pct>=50?'#5aaaf0':p.pct>=30?'#e67700':'#f07070';
 return`<div class="lb-row">
 <div class="lb-rank ${rankCls}">${rankIcon}</div>
 <div class="person-avatar o-${p.ok}" style="width:26px;height:26px;font-size:12px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0">${p.owner[0]}</div>
-<div class="lb-name">${p.owner}<span style="font-size:12px;color:var(--t3);margin-left:6px">${p.total} tasks</span>${lateLbl}</div>
-<div class="lb-bar-wrap"><div class="lb-bar-fill" style="width:${barPct}%;background:${barColor}"></div></div>
-<div class="lb-pct">${rateLbl}</div>
+<div class="lb-name">${p.owner}<span style="font-size:12px;color:var(--t3);margin-left:6px">${p.total} tasks</span></div>
+<div class="lb-bar-wrap"><div class="lb-bar-fill" style="width:${p.pct}%;background:${barColor}"></div></div>
+<div class="lb-pct">${p.pct}%</div>
 </div>`;
 }).join('');
 // ── Project cards ──
@@ -1025,7 +1010,7 @@ document.getElementById('dash-inner').innerHTML=`
 </div>
 <div class="chart-card">
 <div class="chart-title"><i class="ti ti-trophy" aria-hidden="true"></i>Progress leaderboard</div>
-<div class="chart-subtitle">On-time delivery rate — ranked best to worst</div>
+<div class="chart-subtitle">Ranked by weighted completion %</div>
 <div>${lbHTML}</div>
 </div>
 </div>
