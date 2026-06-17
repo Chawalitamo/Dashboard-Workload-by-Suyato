@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260617c -->
+<!-- v20260617d -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -507,12 +507,13 @@ if(window._pendingLoad) window._pendingLoad();
 <table class="lt">
 <thead>
 <tr>
-<th style="width:24%">Task</th>
-<th style="width:14%">Owner</th>
-<th style="width:11%">Stage</th>
-<th style="width:22%">Progress</th>
-<th style="width:10%">Due date</th>
-<th style="width:10%">Note</th>
+<th style="width:20%">Task</th>
+<th style="width:12%">Person in charge</th>
+<th style="width:10%">Owner</th>
+<th style="width:10%">Stage</th>
+<th style="width:20%">Progress</th>
+<th style="width:9%">Due date</th>
+<th style="width:9%">Note</th>
 <th style="width:4%"></th>
 </tr>
 </thead>
@@ -541,6 +542,12 @@ if(window._pendingLoad) window._pendingLoad();
 <div class="field"><label>Task name *</label><input type="text" id="f-title" placeholder="e.g. Brand refresh…"></div>
 <div class="field"><label>Project</label>
 <select id="f-project"><option value="Spot &amp; Production">Spot &amp; Production</option><option value="CJx Commu2026">CJx Commu2026</option><option value="xxxx">xxxx</option><option value="zzz">zzz</option></select>
+</div>
+<div class="field"><label>Owner *</label>
+<select id="f-lead"><option value="">— Select —</option>
+<option>Por</option><option>Jew</option><option>Sun</option><option>Nod</option>
+<option>Ji</option><option>Donut</option><option>Aom</option>
+</select>
 </div>
 <div class="field"><label>Person in charge *</label>
 <select id="f-owner"><option value="">— Select —</option>
@@ -577,6 +584,12 @@ if(window._pendingLoad) window._pendingLoad();
 <div class="field"><label>Project</label>
 <select id="e-project"><option value="Spot &amp; Production">Spot &amp; Production</option><option value="CJx Commu2026">CJx Commu2026</option><option value="xxxx">xxxx</option><option value="zzz">zzz</option></select>
 </div>
+<div class="field"><label>Owner</label>
+<select id="e-lead"><option value="">— Select —</option>
+<option>Por</option><option>Jew</option><option>Sun</option><option>Nod</option>
+<option>Ji</option><option>Donut</option><option>Aom</option>
+</select>
+</div>
 <div class="field"><label>Person in charge</label>
 <select id="e-owner">
 <option>Por</option><option>Sun</option><option>Jew</option><option>Nod</option>
@@ -608,6 +621,12 @@ if(window._pendingLoad) window._pendingLoad();
 <div class="field full"><label>Task name *</label><input type="text" id="a-title" placeholder="e.g. PACKSHOT BAKERY NPD…"></div>
 <div class="field"><label>Project</label>
 <select id="a-project"><option value="Spot &amp; Production">Spot &amp; Production</option><option value="CJx Commu2026">CJx Commu2026</option><option value="xxxx">xxxx</option><option value="zzz">zzz</option></select>
+</div>
+<div class="field"><label>Owner *</label>
+<select id="a-lead"><option value="">— Select —</option>
+<option>Por</option><option>Jew</option><option>Sun</option><option>Nod</option>
+<option>Ji</option><option>Donut</option><option>Aom</option>
+</select>
 </div>
 <div class="field"><label>Person in charge *</label>
 <select id="a-owner"><option value="">— Select —</option>
@@ -868,6 +887,7 @@ activeProj=name;
 renderProjTabs();renderKanban();
 }
 const OWNERS=['Por','Sun','Jew','Nod','Donut','Ming','Ji','Kanom','Ton','Nick','Benz','Ju','Toon','Witch','Aom'];
+const LEADS=['Por','Jew','Sun','Nod','Ji','Donut','Aom'];
 const OKEY=n=>n.toLowerCase().replace(/\s/g,'');
 let tasks=[];
 // nextId → Supabase UUIDs
@@ -1026,6 +1046,7 @@ document.getElementById('dash-inner').innerHTML=`
 <div class="chart-card">
 <div class="chart-title"><i class="ti ti-trophy" aria-hidden="true"></i>Progress leaderboard</div>
 <div class="chart-subtitle">Ranked by weighted completion %</div>
+<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px">${LEADS.map(l=>`<span style="font-size:11px;background:var(--surf3);color:var(--t3);border-radius:10px;padding:2px 8px">&#128100; ${l}</span>`).join('')}</div>
 <div>${lbHTML}</div>
 </div>
 </div>
@@ -1189,6 +1210,7 @@ ${OWNERS.map(o=>`<option value="${o}"${o===t.owner?' selected':''}>${o}</option>
 </select>
 </div>
 </td>
+<td><span style="font-size:13px;font-weight:500">${esc(t.lead||'—')}</span></td>
 <td><span class="sbadge s-${sk}">${t.stage==='AW Release / Event Live'?'AW Release':t.stage}</span></td>
 <td>
 <div class="prog-wrap">
@@ -1216,7 +1238,7 @@ if(listStageFilter!=='All') list=list.filter(t=>t.stage===listStageFilter);
 if(fo) list=list.filter(t=>t.owner===fo);
 if(fp) list=list.filter(t=>t.project===fp);
 const tbody=document.getElementById('list-tbody');
-if(!list.length){tbody.innerHTML=`<tr><td colspan="7" style="text-align:center;padding:3rem;color:var(--t3)"><i class="ti ti-inbox" style="font-size:24px;display:block;margin-bottom:8px" aria-hidden="true"></i>No tasks found</td></tr>`;return;}
+if(!list.length){tbody.innerHTML=`<tr><td colspan="8" style="text-align:center;padding:3rem;color:var(--t3)"><i class="ti ti-inbox" style="font-size:24px;display:block;margin-bottom:8px" aria-hidden="true"></i>No tasks found</td></tr>`;return;}
 
 // When showing "Complete" filter only, render flat (no split needed)
 if(listStageFilter==='Complete'){
@@ -1233,7 +1255,7 @@ let html=active.map(t=>taskRowHTML(t)).join('');
 // Completed zone divider + rows
 if(done.length){
   html+=`<tr>
-  <td colspan="7" style="padding:10px 12px 6px;background:var(--surf2);border-top:2px solid var(--b2)">
+  <td colspan="8" style="padding:10px 12px 6px;background:var(--surf2);border-top:2px solid var(--b2)">
     <div style="display:flex;align-items:center;gap:8px">
       <i class="ti ti-circle-check-filled" style="color:#50d090;font-size:15px" aria-hidden="true"></i>
       <span style="font-size:14px;font-weight:700;color:#50d090;letter-spacing:.04em">COMPLETED</span>
@@ -1295,12 +1317,13 @@ function openAddModal(){ document.getElementById('add-modal').classList.add('ope
 async function addTaskModal(){
 const title=document.getElementById('a-title').value.trim();
 const owner=document.getElementById('a-owner').value;
+const lead=document.getElementById('a-lead').value;
 if(!title||!owner){ alert('Please fill in task name and owner.'); return; }
-const _nt={title,owner,project:document.getElementById('a-project').value,stage:document.getElementById('a-stage').value,due:document.getElementById('a-due').value||null,note:document.getElementById('a-note').value.trim()};
+const _nt={title,owner,lead,project:document.getElementById('a-project').value,stage:document.getElementById('a-stage').value,due:document.getElementById('a-due').value||null,note:document.getElementById('a-note').value.trim()};
 const{data:_nd,error:_ne}=await window._sb.from('mkt_tasks').insert(_nt).select().single();
 if(_ne){alert('Save failed');return;}
 tasks.unshift({id:_nd.id,..._nt,due:_nt.due||''});
-document.getElementById('a-title').value=''; document.getElementById('a-due').value=''; document.getElementById('a-note').value=''; document.getElementById('a-owner').value='';
+document.getElementById('a-title').value=''; document.getElementById('a-due').value=''; document.getElementById('a-note').value=''; document.getElementById('a-owner').value=''; document.getElementById('a-lead').value='';
 closeModal('add-modal'); renderList();
 postToTeams('created',{title:_nt.title,owner:_nt.owner,project:_nt.project,stage:_nt.stage,due:_nt.due||''});
 }
@@ -1346,7 +1369,7 @@ dueHTML=`<span class="due-tag ${cls}">${lbl}</span>`;
 }
 const ac=(t.attachments||[]).length;
 const attachBtn=`<button class="cta k-attach" title="Attachments">&#128206;${ac>0?`<span class="attach-badge">${ac}</span>`:''}</button>`;
-return `<div class="kcard" data-id="${t.id}" data-can-l="${canL?1:0}" data-can-r="${canR?1:0}"><div class="kcard-proj"><span style="width:6px;height:6px;border-radius:50%;background:${pc};flex-shrink:0;display:inline-block"></span>${esc(t.project)}</div><div class="kcard-title">${esc(t.title)}</div>${t.note?`<div class="kcard-note">${esc(t.note)}</div>`:''}<div class="kcard-foot"><span class="owner-pip o-${ok}">${t.owner}</span>${dueHTML}</div><div class="kcard-actions">${canL?'<button class="cta k-prev">&#8592; Prev</button>':''}<button class="cta k-edit">&#9998; Edit</button>${canR?'<button class="cta k-next">Next &#8594;</button>':''}${attachBtn}<button class="cta del k-del">&#x2715; Del</button></div></div>`;
+return `<div class="kcard" data-id="${t.id}" data-can-l="${canL?1:0}" data-can-r="${canR?1:0}"><div class="kcard-proj"><span style="width:6px;height:6px;border-radius:50%;background:${pc};flex-shrink:0;display:inline-block"></span>${esc(t.project)}</div><div class="kcard-title">${esc(t.title)}</div>${t.note?`<div class="kcard-note">${esc(t.note)}</div>`:''}<div class="kcard-foot"><span class="owner-pip o-${ok}">${t.owner}</span>${t.lead?`<span style="font-size:11px;color:var(--t3);background:var(--surf3);border-radius:10px;padding:1px 7px;margin-left:4px">&#128100; ${esc(t.lead)}</span>`:''} ${dueHTML}</div><div class="kcard-actions">${canL?'<button class="cta k-prev">&#8592; Prev</button>':''}<button class="cta k-edit">&#9998; Edit</button>${canR?'<button class="cta k-next">Next &#8594;</button>':''}${attachBtn}<button class="cta del k-del">&#x2715; Del</button></div></div>`;
 }
 function renderSbStats(){
 const list=activeProj==='All'?tasks:tasks.filter(t=>t.project===activeProj);
@@ -1522,6 +1545,7 @@ editId=t.id;
 document.getElementById('e-title').value=t.title;
 document.getElementById('e-project').value=t.project;
 document.getElementById('e-owner').value=t.owner;
+document.getElementById('e-lead').value=t.lead||'';
 document.getElementById('e-stage').value=t.stage;
 document.getElementById('e-due').value=t.due||'';
 document.getElementById('e-note').value=t.note||'';
@@ -1532,10 +1556,11 @@ const t=findTask(editId);if(!t)return;
 t.title=document.getElementById('e-title').value.trim()||t.title;
 t.project=document.getElementById('e-project').value;
 t.owner=document.getElementById('e-owner').value;
+t.lead=document.getElementById('e-lead').value;
 t.stage=document.getElementById('e-stage').value;
 t.due=document.getElementById('e-due').value;
 t.note=document.getElementById('e-note').value.trim();
-await window._sb.from('mkt_tasks').update({title:t.title,owner:t.owner,project:t.project,stage:t.stage,due:t.due||null,note:t.note}).eq('id',editId);
+await window._sb.from('mkt_tasks').update({title:t.title,owner:t.owner,lead:t.lead,project:t.project,stage:t.stage,due:t.due||null,note:t.note}).eq('id',editId);
 postToTeams('updated',{title:t.title,owner:t.owner,project:t.project,stage:t.stage,due:t.due||''});
 closeModal('edit-modal');
 renderKanban();
@@ -1545,13 +1570,14 @@ renderList();
 async function addTask(){
 const title=document.getElementById('f-title').value.trim();
 const owner=document.getElementById('f-owner').value;
-if(!title||!owner){document.getElementById('f-title').style.borderColor=!title?'#f07070':'';document.getElementById('f-owner').style.borderColor=!owner?'#f07070':'';return;}
-document.getElementById('f-title').style.borderColor='';document.getElementById('f-owner').style.borderColor='';
-const _ft={title,owner,project:document.getElementById('f-project').value,stage:document.getElementById('f-stage').value,due:document.getElementById('f-due').value||null,note:document.getElementById('f-note').value.trim()};
+const lead=document.getElementById('f-lead').value;
+if(!title||!owner||!lead){document.getElementById('f-title').style.borderColor=!title?'#f07070':'';document.getElementById('f-owner').style.borderColor=!owner?'#f07070':'';document.getElementById('f-lead').style.borderColor=!lead?'#f07070':'';return;}
+document.getElementById('f-title').style.borderColor='';document.getElementById('f-owner').style.borderColor='';document.getElementById('f-lead').style.borderColor='';
+const _ft={title,owner,lead,project:document.getElementById('f-project').value,stage:document.getElementById('f-stage').value,due:document.getElementById('f-due').value||null,note:document.getElementById('f-note').value.trim()};
 const{data:_fd,error:_fe}=await window._sb.from('mkt_tasks').insert(_ft).select().single();
 if(_fe){alert('Save failed');return;}
 tasks.unshift({id:_fd.id,..._ft,due:_ft.due||''});
-document.getElementById('f-title').value='';document.getElementById('f-due').value='';document.getElementById('f-note').value='';
+document.getElementById('f-title').value='';document.getElementById('f-due').value='';document.getElementById('f-note').value='';document.getElementById('f-lead').value='';
 postToTeams('created',{title:_ft.title,owner:_ft.owner,project:_ft.project,stage:_ft.stage,due:_ft.due||''});
 renderKanban();
 }
@@ -1676,7 +1702,7 @@ async function loadFromSupabase(){
     if(e1) throw e1;
     if(e2) throw e2;
     projects=projs.map(p=>({name:p.name,color:p.color,id:p.id}));
-    tasks=tks.map(t=>({id:t.id,title:t.title||'(untitled)',owner:t.owner||'',project:t.project||'',stage:t.stage||'Job Brief',due:t.due||'',note:t.note||'',attachments:t.attachments||[]}));
+    tasks=tks.map(t=>({id:t.id,title:t.title||'(untitled)',owner:t.owner||'',lead:t.lead||'',project:t.project||'',stage:t.stage||'Job Brief',due:t.due||'',note:t.note||'',attachments:t.attachments||[]}));
   }catch(err){
     _sync('err','⚠ Offline');
     console.error('Supabase error:',err);
