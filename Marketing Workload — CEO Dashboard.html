@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260617d -->
+<!-- v20260617e -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -243,7 +243,7 @@ nav h1{font-size:17px;font-weight:600;letter-spacing:-.01em}
 .o-aom{background:#28102e;color:#d090e0}
 button{font-family:'DBHeavent','Sarabun',sans-serif}
 /* ── DASHBOARD CHARTS ── */
-.dash-grid-top{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px}
+.dash-grid-top{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
 .dash-grid-mid{display:grid;grid-template-columns:1.4fr 1fr;gap:14px;margin-bottom:14px}
 .dash-grid-bot{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
 .chart-card{background:var(--surf);border:1px solid var(--b1);border-radius:var(--r);padding:18px 20px}
@@ -993,7 +993,7 @@ owner:o,
 count:tasks.filter(t=>t.owner===o&&t.due&&new Date(t.due)<new Date()&&t.stage!=='Complete').length
 })).filter(x=>x.count>0).sort((a,b)=>b.count-a.count);
 // ── Destroy old charts before replacing DOM ──
-['donut-chart','bar-chart','radar-chart','pipeline-chart','proj-chart','bubble-chart'].forEach(id=>{
+['donut-chart','bar-chart','bar-chart2','radar-chart','pipeline-chart','proj-chart','bubble-chart'].forEach(id=>{
 const el=document.getElementById(id);if(el){const inst=Chart.getChart(el);if(inst)inst.destroy();}
 });
 document.getElementById('dash-inner').innerHTML=`
@@ -1004,14 +1004,19 @@ document.getElementById('dash-inner').innerHTML=`
 <div class="chart-wrap" style="height:180px"><canvas id="donut-chart"></canvas></div>
 </div>
 <div class="chart-card">
-<div class="chart-title"><i class="ti ti-chart-bar" aria-hidden="true"></i>Workload per person</div>
-<div class="chart-subtitle">All active tasks per person (excl. Complete)</div>
+<div class="chart-title"><i class="ti ti-chart-bar" aria-hidden="true"></i>Workload — Owner</div>
+<div class="chart-subtitle">Active tasks per owner (excl. Complete)</div>
 <div class="chart-wrap" style="height:180px"><canvas id="bar-chart"></canvas></div>
 </div>
 <div class="chart-card">
 <div class="chart-title"><i class="ti ti-chart-radar" aria-hidden="true"></i>Progress radar</div>
 <div class="chart-subtitle">Top 6 members by % completion</div>
 <div class="chart-wrap" style="height:180px"><canvas id="radar-chart"></canvas></div>
+</div>
+<div class="chart-card">
+<div class="chart-title"><i class="ti ti-chart-bar-popular" aria-hidden="true"></i>Workload — PIC</div>
+<div class="chart-subtitle">Active tasks per person in charge (excl. Complete)</div>
+<div class="chart-wrap" style="height:180px"><canvas id="bar-chart2"></canvas></div>
 </div>
 </div>
 <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:14px">
@@ -1080,16 +1085,22 @@ options:{responsive:true,maintainAspectRatio:true,cutout:'65%',
 plugins:{legend:{position:'right',labels:{boxWidth:10,padding:10,font:{size:10}}},
 tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${ctx.parsed} tasks`}}}}
 });
-// 2. Bar chart – all tasks per person except Complete
-const activePersons=OWNERS.filter(o=>tasks.some(t=>t.owner===o&&t.stage!=='Complete'));
-const taskCounts=activePersons.map(o=>tasks.filter(t=>t.owner===o&&t.stage!=='Complete').length);
-const barColors=activePersons.map(o=>{
-const p=personData.find(x=>x.owner===o);
-return p&&p.pct>=70?'#50d090':p&&p.pct>=40?'#5aaaf0':'#e67700';
-});
+// 2. Bar chart – active tasks per owner (lead field)
+const activeLeads=LEADS.filter(l=>tasks.some(t=>t.lead===l&&t.stage!=='Complete'));
+const leadCounts=activeLeads.map(l=>tasks.filter(t=>t.lead===l&&t.stage!=='Complete').length);
 new Chart(document.getElementById('bar-chart'),{
 type:'bar',
-data:{labels:activePersons,datasets:[{label:'Tasks',data:taskCounts,backgroundColor:barColors,borderRadius:4,borderSkipped:false}]},
+data:{labels:activeLeads,datasets:[{label:'Tasks',data:leadCounts,backgroundColor:'#e8c547',borderRadius:4,borderSkipped:false}]},
+options:{responsive:true,maintainAspectRatio:true,
+plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${ctx.parsed.y} tasks`}}},
+scales:{x:{grid:{color:CHART_GRID},ticks:{font:{size:10}}},y:{grid:{color:CHART_GRID},ticks:{stepSize:1,font:{size:10}},beginAtZero:true}}}
+});
+// 2b. Bar chart 2 – active tasks per person in charge (owner field)
+const activePIC=OWNERS.filter(o=>tasks.some(t=>t.owner===o&&t.stage!=='Complete'));
+const picCounts=activePIC.map(o=>tasks.filter(t=>t.owner===o&&t.stage!=='Complete').length);
+new Chart(document.getElementById('bar-chart2'),{
+type:'bar',
+data:{labels:activePIC,datasets:[{label:'Tasks',data:picCounts,backgroundColor:'#7b9cf0',borderRadius:4,borderSkipped:false}]},
 options:{responsive:true,maintainAspectRatio:true,
 plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${ctx.parsed.y} tasks`}}},
 scales:{x:{grid:{color:CHART_GRID},ticks:{font:{size:10}}},y:{grid:{color:CHART_GRID},ticks:{stepSize:1,font:{size:10}},beginAtZero:true}}}
