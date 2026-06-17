@@ -1,6 +1,9 @@
 <!DOCTYPE html>
-<!-- saved from url=(0043)file:///Users/chawalit/Downloads/index.html -->
+<!-- v20260617 -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Marketing Workload — CEO Dashboard</title>
@@ -878,9 +881,11 @@ document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
 document.querySelectorAll('.ptab').forEach(x=>x.classList.remove('active'));
 document.getElementById('view-'+v).classList.add('active');
 el.classList.add('active');
-if(v==='dashboard') renderDash();
-if(v==='list'){populateAllProjectSelects();renderListPills();renderList();}
-if(v==='board'){populateAllProjectSelects();renderProjTabs();renderKanban();}
+try{
+  if(v==='dashboard') renderDash();
+  if(v==='list'){populateAllProjectSelects();renderListPills();renderList();}
+  if(v==='board'){populateAllProjectSelects();renderProjTabs();renderKanban();}
+}catch(e){console.warn('showView render error:',e);}
 }
 // ═════════════ DASHBOARD ═════════════
 function renderDash(){
@@ -1144,9 +1149,9 @@ el.classList.add('active');
 renderList();
 }
 function taskRowHTML(t){
-const ok=OKEY(t.owner);
-const sk=SKEY(t.stage);
-const pct=STAGE_PCT[t.stage];
+const ok=t.owner?OKEY(t.owner):'';
+const sk=SKEY(t.stage||'Job Brief');
+const pct=STAGE_PCT[t.stage]??0;
 const pc=projColor(t.project);
 const isDone=t.stage==='Complete';
 let dueCls='',dueLbl='';
@@ -1168,7 +1173,7 @@ return `<tr style="${rowStyle}">
 </td>
 <td>
 <div class="ow-cell">
-<div class="ow-av o-${ok}">${t.owner[0]}</div>
+<div class="ow-av o-${ok}">${(t.owner||'?')[0]}</div>
 <select style="background:none;border:none;color:var(--t1);font-family:'DBHeavent','Sarabun',sans-serif;font-size:14px;outline:none;cursor:pointer" onchange="updateField(${t.id},'owner',this.value)">
 ${OWNERS.map(o=>`<option value="${o}"${o===t.owner?' selected':''}>${o}</option>`).join('')}
 </select>
@@ -1661,7 +1666,7 @@ async function loadFromSupabase(){
     if(e1) throw e1;
     if(e2) throw e2;
     projects=projs.map(p=>({name:p.name,color:p.color,id:p.id}));
-    tasks=tks.map(t=>({id:t.id,title:t.title,owner:t.owner,project:t.project,stage:t.stage,due:t.due||'',note:t.note||'',attachments:t.attachments||[]}));
+    tasks=tks.map(t=>({id:t.id,title:t.title||'(untitled)',owner:t.owner||'',project:t.project||'',stage:t.stage||'Job Brief',due:t.due||'',note:t.note||'',attachments:t.attachments||[]}));
   }catch(err){
     _sync('err','⚠ Offline');
     console.error('Supabase error:',err);
