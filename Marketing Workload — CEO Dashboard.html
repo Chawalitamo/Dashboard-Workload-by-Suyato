@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260617e -->
+<!-- v20260617f -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -923,7 +923,7 @@ const total=tasks.length;
 const complete=tasks.filter(t=>t.stage==='Complete').length;
 const inprog=tasks.filter(t=>!['Complete','On Hold'].includes(t.stage)).length;
 const onhold=tasks.filter(t=>t.stage==='On Hold').length;
-const overdue=tasks.filter(t=>t.due&&new Date(t.due)<new Date()&&t.stage!=='Complete').length;
+const overdue=tasks.filter(t=>t.due&&new Date(t.due)<new Date()&&t.stage!=='Complete'&&t.stage!=='On Hold').length;
 const avgPct=total?Math.round(tasks.reduce((s,t)=>s+STAGE_PCT[t.stage],0)/total):0;
 const projs=[...new Set(tasks.map(t=>t.project))];
 // ── Person progress data (sorted) ──
@@ -990,7 +990,7 @@ return`<div class="flow-seg">
 // ── Overdue by owner ──
 const overdueByOwner=OWNERS.map(o=>({
 owner:o,
-count:tasks.filter(t=>t.owner===o&&t.due&&new Date(t.due)<new Date()&&t.stage!=='Complete').length
+count:tasks.filter(t=>t.owner===o&&t.due&&new Date(t.due)<new Date()&&t.stage!=='Complete'&&t.stage!=='On Hold').length
 })).filter(x=>x.count>0).sort((a,b)=>b.count-a.count);
 // ── Destroy old charts before replacing DOM ──
 ['donut-chart','bar-chart','bar-chart2','radar-chart','pipeline-chart','proj-chart','bubble-chart'].forEach(id=>{
@@ -1035,6 +1035,7 @@ document.getElementById('dash-inner').innerHTML=`
 <div class="kpi"><div class="kpi-icon" style="background:#2a1a08;color:#f0b040"><i class="ti ti-clock" aria-hidden="true"></i></div>
 <div class="kpi-big" style="color:${overdue>0?'#f07070':'var(--t1)'}">${overdue}</div><div class="kpi-lbl">Overdue</div>
 <div class="kpi-delta" style="color:${overdue>0?'#f07070':'#50d090'}">${overdue>0?'⚠ Needs attention':'✓ All on track'}</div>
+<div class="kpi-delta" style="color:var(--t3);font-size:10px">Excl. Complete & On Hold</div>
 </div>
 <div class="kpi"><div class="kpi-icon" style="background:#1a140a;color:var(--gold)"><i class="ti ti-chart-line" aria-hidden="true"></i></div>
 <div class="kpi-big" style="color:var(--gold)">${avgPct}%</div><div class="kpi-lbl">Avg progress</div>
