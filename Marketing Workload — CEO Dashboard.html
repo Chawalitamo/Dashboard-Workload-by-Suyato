@@ -1652,6 +1652,7 @@ function _sync(state,msg){
 async function loadFromSupabase(){
   if(!window._sb){_sync('err','Client not ready'); return;}
   _sync('busy','Loading…');
+  // ── 1. Data fetch — only this can cause ⚠ Offline ──
   try{
     const [{data:projs,error:e1},{data:tks,error:e2}]=await Promise.all([
       window._sb.from('mkt_projects').select('*').order('sort_order'),
@@ -1661,15 +1662,21 @@ async function loadFromSupabase(){
     if(e2) throw e2;
     projects=projs.map(p=>({name:p.name,color:p.color,id:p.id}));
     tasks=tks.map(t=>({id:t.id,title:t.title,owner:t.owner,project:t.project,stage:t.stage,due:t.due||'',note:t.note||'',attachments:t.attachments||[]}));
-    _sync('ok','● Live · '+new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}));
+  }catch(err){
+    _sync('err','⚠ Offline');
+    console.error('Supabase error:',err);
+    return;
+  }
+  // ── 2. Render — errors here are logged but never override Live status ──
+  _sync('ok','● Live · '+new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}));
+  try{
     populateAllProjectSelects();
     renderProjectNavTabs();
     renderDash();
     if(document.getElementById('view-list').classList.contains('active')){populateAllProjectSelects();renderListPills();renderList();}
     else if(document.getElementById('view-board').classList.contains('active')){populateAllProjectSelects();renderProjTabs();renderKanban();}
-  }catch(err){
-    _sync('err','⚠ Offline');
-    console.error('Supabase error:',err);
+  }catch(renderErr){
+    console.warn('Render error (data is live):',renderErr);
   }
 }
 
