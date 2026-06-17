@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260617b -->
+<!-- v20260617c -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -876,16 +876,26 @@ let noteId=null;
 let activeProj='All';
 let listStageFilter='All';
 // ═════════════ NAV ═════════════
+function _showErr(msg){
+  let d=document.getElementById('_dbg');
+  if(!d){d=document.createElement('div');d.id='_dbg';d.style.cssText='position:fixed;bottom:12px;left:12px;right:12px;background:#8b0000;color:#fff;font-size:13px;padding:10px 14px;border-radius:8px;z-index:9999;white-space:pre-wrap;max-height:200px;overflow:auto';document.body.appendChild(d);}
+  d.textContent=msg;
+}
 function showView(v,el){
 document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
 document.querySelectorAll('.ptab').forEach(x=>x.classList.remove('active'));
-document.getElementById('view-'+v).classList.add('active');
+const _tgt=document.getElementById('view-'+v);
+if(!_tgt){_showErr('ERROR: #view-'+v+' not found in DOM!\nThe page needs a hard refresh.\nPress Ctrl+Shift+R (Win) or Cmd+Shift+R (Mac).');el.classList.add('active');return;}
+_tgt.classList.add('active');
 el.classList.add('active');
 try{
   if(v==='dashboard') renderDash();
   if(v==='list'){populateAllProjectSelects();renderListPills();renderList();}
   if(v==='board'){populateAllProjectSelects();renderProjTabs();renderKanban();}
-}catch(e){console.warn('showView render error:',e);}
+}catch(e){
+  console.warn('showView render error:',e);
+  _showErr('Render error in view "'+v+'":\n'+e.message+'\n'+e.stack);
+}
 }
 // ═════════════ DASHBOARD ═════════════
 function renderDash(){
@@ -1685,6 +1695,10 @@ async function loadFromSupabase(){
   }
 }
 
+window.onerror=function(msg,src,line,col,err){
+  if(typeof _showErr==='function') _showErr('JS Error: '+msg+'\n'+(err&&err.stack||src+':'+line));
+  return false;
+};
 window._pendingLoad = function(){
   loadFromSupabase();
   setInterval(loadFromSupabase, 30000);
