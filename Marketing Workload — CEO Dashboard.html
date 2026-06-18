@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260618a -->
+<!-- v20260618b -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -180,6 +180,14 @@ nav h1{font-size:17px;font-weight:600;letter-spacing:-.01em}
 .kcard-foot{display:flex;align-items:center;justify-content:space-between}
 .kcard-note{font-size:12px;color:var(--t3);margin:5px 0;line-height:1.4}
 .kcard-actions{display:flex;gap:3px;margin-top:7px;padding-top:7px;border-top:1px solid var(--b0)}
+.kcard-thumbs{display:flex;gap:5px;margin:8px 0 4px;flex-wrap:wrap}
+.kcard-thumb{width:54px;height:54px;border-radius:6px;object-fit:cover;border:1px solid var(--b1);flex-shrink:0;cursor:pointer;transition:opacity .15s}
+.kcard-thumb:hover{opacity:.8}
+.kcard-thumb-icon{width:54px;height:54px;border-radius:6px;background:var(--surf2);border:1px solid var(--b1);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;cursor:pointer;transition:background .15s}
+.kcard-thumb-icon:hover{background:var(--surf3)}
+.kcard-thumb-icon span{font-size:9px;color:var(--t3);margin-top:2px;max-width:48px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center}
+.kcard-thumb-more{width:54px;height:54px;border-radius:6px;background:var(--surf3);border:1px solid var(--b1);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--t2);font-weight:700;flex-shrink:0;cursor:pointer;transition:background .15s}
+.kcard-thumb-more:hover{background:var(--b2)}
 .kcard.dragging{opacity:.3;border:1px dashed var(--gold);cursor:grabbing}
 .kcard{cursor:grab;user-select:none;-webkit-user-select:none}
 .kcol.drag-over>.kcol-body{background:var(--surf3);border-radius:var(--r);outline:2px dashed var(--gold);outline-offset:2px}
@@ -1370,6 +1378,23 @@ return `<div class="kcol" data-si="${si}"><div class="kcol-head"><div style="dis
 setupDragDrop();
 renderSbStats();
 }
+function thumbsHTML(t){
+  const list=t.attachments||[];
+  if(!list.length) return '';
+  const MAX=3;
+  const shown=list.slice(0,MAX);
+  const extra=list.length-MAX;
+  const items=shown.map(a=>{
+    if(a.type&&a.type.startsWith('image/')){
+      const url=pubUrl(a.path);
+      return `<img class="kcard-thumb k-attach" src="${url}" alt="${esc(a.name)}" title="${esc(a.name)}" loading="lazy">`;
+    }
+    const ext=(a.name||'').split('.').pop().toUpperCase().slice(0,4);
+    return `<div class="kcard-thumb-icon k-attach" title="${esc(a.name)}">${fileIcon(a.type)}<span>${ext}</span></div>`;
+  }).join('');
+  const more=extra>0?`<div class="kcard-thumb-more k-attach">+${extra}</div>`:'';
+  return `<div class="kcard-thumbs">${items}${more}</div>`;
+}
 function kcardHTML(t,stage,si){
 const ok=OKEY(t.owner);
 const canL=si>0,canR=si<STAGES.length-1;
@@ -1384,7 +1409,7 @@ dueHTML=`<span class="due-tag ${cls}">${lbl}</span>`;
 }
 const ac=(t.attachments||[]).length;
 const attachBtn=`<button class="cta k-attach" title="Attachments">&#128206;${ac>0?`<span class="attach-badge">${ac}</span>`:''}</button>`;
-return `<div class="kcard" data-id="${t.id}" data-can-l="${canL?1:0}" data-can-r="${canR?1:0}"><div class="kcard-proj"><span style="width:6px;height:6px;border-radius:50%;background:${pc};flex-shrink:0;display:inline-block"></span>${esc(t.project)}</div><div class="kcard-title">${esc(t.title)}</div>${t.note?`<div class="kcard-note">${esc(t.note)}</div>`:''}<div class="kcard-foot"><span class="owner-pip o-${ok}">${t.owner}</span>${t.lead?`<span style="font-size:11px;color:var(--t3);background:var(--surf3);border-radius:10px;padding:1px 7px;margin-left:4px">&#128100; ${esc(t.lead)}</span>`:''} ${dueHTML}</div><div class="kcard-actions">${canL?'<button class="cta k-prev">&#8592; Prev</button>':''}<button class="cta k-edit">&#9998; Edit</button>${canR?'<button class="cta k-next">Next &#8594;</button>':''}${attachBtn}<button class="cta del k-del">&#x2715; Del</button></div></div>`;
+return `<div class="kcard" data-id="${t.id}" data-can-l="${canL?1:0}" data-can-r="${canR?1:0}"><div class="kcard-proj"><span style="width:6px;height:6px;border-radius:50%;background:${pc};flex-shrink:0;display:inline-block"></span>${esc(t.project)}</div><div class="kcard-title">${esc(t.title)}</div>${t.note?`<div class="kcard-note">${esc(t.note)}</div>`:''}<div class="kcard-foot"><span class="owner-pip o-${ok}">${t.owner}</span>${t.lead?`<span style="font-size:11px;color:var(--t3);background:var(--surf3);border-radius:10px;padding:1px 7px;margin-left:4px">&#128100; ${esc(t.lead)}</span>`:''} ${dueHTML}</div>${thumbsHTML(t)}<div class="kcard-actions">${canL?'<button class="cta k-prev">&#8592; Prev</button>':''}<button class="cta k-edit">&#9998; Edit</button>${canR?'<button class="cta k-next">Next &#8594;</button>':''}${attachBtn}<button class="cta del k-del">&#x2715; Del</button></div></div>`;
 }
 function renderSbStats(){
 const list=activeProj==='All'?tasks:tasks.filter(t=>t.project===activeProj);
@@ -1414,8 +1439,7 @@ function setupDragDrop(){
     if(btnEdit)   btnEdit.addEventListener('click',e=>{e.stopPropagation();openEdit(rawId);});
     if(btnNext)   btnNext.addEventListener('click',e=>{e.stopPropagation();moveTask(rawId,1);});
     if(btnDel)    btnDel.addEventListener('click',e=>{e.stopPropagation();doDelete(rawId);});
-    const btnAttach=card.querySelector('.k-attach');
-    if(btnAttach) btnAttach.addEventListener('click',e=>{e.stopPropagation();openAttachModal(rawId);});
+    card.querySelectorAll('.k-attach').forEach(el=>el.addEventListener('click',e=>{e.stopPropagation();openAttachModal(rawId);}));
     card.setAttribute('draggable','true');
     card.addEventListener('dragstart',e=>{
       _dragId=rawId;
