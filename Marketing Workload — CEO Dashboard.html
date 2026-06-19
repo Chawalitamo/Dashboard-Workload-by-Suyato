@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260618b -->
+<!-- v20260619a -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -1349,6 +1349,7 @@ tasks.unshift({id:_nd.id,..._nt,due:_nt.due||''});
 document.getElementById('a-title').value=''; document.getElementById('a-due').value=''; document.getElementById('a-note').value=''; document.getElementById('a-owner').value=''; document.getElementById('a-lead').value='';
 closeModal('add-modal'); renderList();
 postToTeams('created',{title:_nt.title,owner:_nt.owner,project:_nt.project,stage:_nt.stage,due:_nt.due||''});
+fetch('https://fxmigukayxvieziseqil.supabase.co/functions/v1/notify-new-task',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:_nt.title,owner:_nt.owner,lead:_nt.lead,project:_nt.project,stage:_nt.stage,due:_nt.due||'',note:_nt.note})}).catch(()=>{});
 }
 // ═════════════ BOARD / KANBAN ═════════════
 function renderProjTabs(){
@@ -1618,6 +1619,7 @@ if(_fe){alert('Save failed');return;}
 tasks.unshift({id:_fd.id,..._ft,due:_ft.due||''});
 document.getElementById('f-title').value='';document.getElementById('f-due').value='';document.getElementById('f-note').value='';document.getElementById('f-lead').value='';
 postToTeams('created',{title:_ft.title,owner:_ft.owner,project:_ft.project,stage:_ft.stage,due:_ft.due||''});
+fetch('https://fxmigukayxvieziseqil.supabase.co/functions/v1/notify-new-task',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:_ft.title,owner:_ft.owner,lead:_ft.lead,project:_ft.project,stage:_ft.stage,due:_ft.due||'',note:_ft.note})}).catch(()=>{});
 renderKanban();
 }
 // ═════════════ UTILS ═════════════
