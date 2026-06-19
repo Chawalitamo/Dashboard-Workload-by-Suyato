@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260619b -->
+<!-- v20260619c -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -1003,8 +1003,45 @@ const overdueByOwner=OWNERS.map(o=>({
 owner:o,
 count:tasks.filter(t=>t.owner===o&&t.due&&_dMid(t.due)<_todayMid&&t.stage!=='Complete'&&t.stage!=='On Hold').length
 })).filter(x=>x.count>0).sort((a,b)=>b.count-a.count);
+// ── Previous month performance ──
+const _prevMonthStart=new Date(_todayMid.getFullYear(),_todayMid.getMonth()-1,1);
+const _prevMonthEnd=new Date(_todayMid.getFullYear(),_todayMid.getMonth(),0);
+const _prevMonthLabelEn=_prevMonthStart.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+const prevTasks=tasks.filter(t=>{
+if(!t.due)return false;
+const d=_dMid(t.due);
+return d>=_prevMonthStart&&d<=_prevMonthEnd;
+});
+const prevTotal=prevTasks.length;
+const prevDone=prevTasks.filter(t=>t.stage==='Complete').length;
+const prevInProg=prevTasks.filter(t=>!['Complete','On Hold'].includes(t.stage)).length;
+const prevOnHold=prevTasks.filter(t=>t.stage==='On Hold').length;
+const prevRate=prevTotal?Math.round(prevDone/prevTotal*100):0;
+const prevAvgPct=prevTotal?Math.round(prevTasks.reduce((s,t)=>s+STAGE_PCT[t.stage],0)/prevTotal):0;
+const prevPersonData=OWNERS.map(owner=>{
+const ot=prevTasks.filter(t=>t.owner===owner);
+if(!ot.length)return null;
+const done=ot.filter(t=>t.stage==='Complete').length;
+const rate=ot.length?Math.round(done/ot.length*100):0;
+return{owner,total:ot.length,done,notDone:ot.length-done,rate,ok:OKEY(owner)};
+}).filter(Boolean).sort((a,b)=>b.done-a.done);
+const prevPersonHTML=prevPersonData.map(p=>{
+const barColor=p.rate>=80?'#50d090':p.rate>=50?'#5aaaf0':p.rate>=30?'#e67700':'#f07070';
+return`<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+<div class="person-avatar o-${p.ok}" style="width:26px;height:26px;font-size:12px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0">${p.owner[0]}</div>
+<div style="flex:1;min-width:0">
+<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px">
+<span>${p.owner}<span style="color:var(--t3);margin-left:4px">${p.done}/${p.total} done</span></span>
+<span style="font-weight:600;color:${barColor}">${p.rate}%</span>
+</div>
+<div style="height:6px;background:var(--surf3);border-radius:3px;overflow:hidden">
+<div style="height:100%;width:${p.rate}%;background:${barColor};border-radius:3px;transition:width .6s"></div>
+</div>
+</div>
+</div>`;
+}).join('');
 // ── Destroy old charts before replacing DOM ──
-['donut-chart','bar-chart','bar-chart2','radar-chart','pipeline-chart','proj-chart','bubble-chart'].forEach(id=>{
+['donut-chart','bar-chart','bar-chart2','radar-chart','pipeline-chart','proj-chart','bubble-chart','prev-month-chart'].forEach(id=>{
 const el=document.getElementById(id);if(el){const inst=Chart.getChart(el);if(inst)inst.destroy();}
 });
 document.getElementById('dash-inner').innerHTML=`
@@ -1078,6 +1115,55 @@ document.getElementById('dash-inner').innerHTML=`
 <div class="chart-title"><i class="ti ti-users" aria-hidden="true"></i>Team capacity heat map</div>
 <div class="chart-subtitle">Active tasks vs completion per person</div>
 <div class="chart-wrap" style="height:300px"><canvas id="bubble-chart"></canvas></div>
+</div>
+</div>
+<div style="margin-top:14px">
+<div class="chart-card" style="border-top:2px solid var(--gold)">
+<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+<i class="ti ti-calendar-month" aria-hidden="true" style="font-size:20px;color:var(--gold)"></i>
+<div>
+<div style="font-size:15px;font-weight:700">Previous Month Performance</div>
+<div style="font-size:12px;color:var(--t3)">${_prevMonthLabelEn} · filtered by task due date</div>
+</div>
+</div>
+${prevTotal===0?`<div style="text-align:center;color:var(--t3);padding:20px 0;font-size:13px">No tasks with due dates in ${_prevMonthLabelEn}</div>`:`
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px">
+<div class="kpi" style="padding:14px 16px">
+<div class="kpi-icon" style="background:#1e2840;color:#7b9cf0"><i class="ti ti-clipboard-list" aria-hidden="true"></i></div>
+<div class="kpi-big">${prevTotal}</div>
+<div class="kpi-lbl">Total Tasks</div>
+<div class="kpi-delta" style="color:var(--t3)">Due in ${_prevMonthLabelEn}</div>
+</div>
+<div class="kpi" style="padding:14px 16px">
+<div class="kpi-icon" style="background:#0d2010;color:#40c060"><i class="ti ti-circle-check" aria-hidden="true"></i></div>
+<div class="kpi-big" style="color:#40c060">${prevDone}</div>
+<div class="kpi-lbl">Completed</div>
+<div class="kpi-delta" style="color:#40c060">${prevRate}% completion rate</div>
+</div>
+<div class="kpi" style="padding:14px 16px">
+<div class="kpi-icon" style="background:#2a0d0d;color:#f07070"><i class="ti ti-alert-circle" aria-hidden="true"></i></div>
+<div class="kpi-big" style="color:#f07070">${prevInProg}</div>
+<div class="kpi-lbl">Incomplete</div>
+<div class="kpi-delta" style="color:var(--t3)">${prevOnHold} on hold</div>
+</div>
+<div class="kpi" style="padding:14px 16px">
+<div class="kpi-icon" style="background:#1a140a;color:var(--gold)"><i class="ti ti-chart-line" aria-hidden="true"></i></div>
+<div class="kpi-big" style="color:var(--gold)">${prevAvgPct}%</div>
+<div class="kpi-lbl">Avg Progress</div>
+<div class="kpi-delta" style="color:var(--t3)">Weighted by stage</div>
+</div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start">
+<div>
+<div style="font-size:13px;font-weight:600;margin-bottom:10px;color:var(--t2)">Completion by team member</div>
+${prevPersonHTML}
+</div>
+<div>
+<div style="font-size:13px;font-weight:600;margin-bottom:10px;color:var(--t2)">Tasks breakdown</div>
+<div class="chart-wrap" style="height:${Math.max(120,prevPersonData.length*30)}px"><canvas id="prev-month-chart"></canvas></div>
+</div>
+</div>
+`}
 </div>
 </div>
 `;
@@ -1189,6 +1275,29 @@ plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>{const d=bubbleDa
 scales:{x:{title:{display:true,text:'Active tasks',font:{size:10}},grid:{color:CHART_GRID},ticks:{stepSize:1,font:{size:10}},beginAtZero:true},
 y:{title:{display:true,text:'Progress %',font:{size:10}},grid:{color:CHART_GRID},ticks:{font:{size:10}},min:0,max:105}}}
 });
+// 7. Previous month bar chart – done vs not-done per person
+if(prevPersonData.length>0){
+const prevChartEl=document.getElementById('prev-month-chart');
+if(prevChartEl){
+new Chart(prevChartEl,{
+type:'bar',
+data:{
+labels:prevPersonData.map(p=>p.owner),
+datasets:[
+{label:'Completed',data:prevPersonData.map(p=>p.done),backgroundColor:'#50d090',borderRadius:4,borderSkipped:false},
+{label:'Incomplete',data:prevPersonData.map(p=>p.notDone),backgroundColor:'rgba(240,112,112,0.55)',borderRadius:4,borderSkipped:false}
+]
+},
+options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+plugins:{legend:{position:'bottom',labels:{boxWidth:8,padding:8,font:{size:10}}},
+tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: ${ctx.parsed.x} task${ctx.parsed.x!==1?'s':''}`}}},
+scales:{
+x:{stacked:true,grid:{color:CHART_GRID},ticks:{stepSize:1,font:{size:10}},beginAtZero:true},
+y:{stacked:true,grid:{display:false},ticks:{font:{size:11},color:'#c0c0d8'}}
+}}
+});
+}
+}
 }catch(chartErr){console.warn('Chart render error:',chartErr);}
 }
 function renderListPills(){
