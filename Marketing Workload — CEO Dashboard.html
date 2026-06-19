@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260619c -->
+<!-- v20260619d -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -224,6 +224,24 @@ nav h1{font-size:17px;font-weight:600;letter-spacing:-.01em}
 .month-body{display:flex;gap:11px;overflow-x:auto;padding:12px 16px 14px;align-items:flex-start}
 .month-body::-webkit-scrollbar{height:4px}
 .month-body::-webkit-scrollbar-thumb{background:var(--surf3);border-radius:2px}
+.month-compact-row{display:flex;align-items:center;gap:14px;padding:12px 20px;cursor:pointer;transition:all .15s;border-radius:var(--r);border:1px solid var(--b1);background:var(--surf)}
+.month-compact-row:hover{border-color:var(--b2);background:var(--surf2)}
+.month-compact-label{font-size:13px;font-weight:700;color:var(--t1);min-width:100px}
+.month-compact-stat{font-size:12px;color:var(--t3)}
+.month-compact-od{font-size:12px;color:#f07070}
+.month-compact-arrow{margin-left:auto;color:var(--t3);font-size:13px}
+.month-sec.current .kcol{width:235px}
+.month-sec.current .kcol-body{max-height:620px}
+.month-detail-overlay{position:fixed;inset:0;background:rgba(0,0,10,.85);z-index:900;display:none;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto}
+.month-detail-overlay.open{display:flex}
+.month-detail-box{background:var(--bg);border:1px solid var(--b1);border-radius:var(--r);width:100%;max-width:1500px;display:flex;flex-direction:column;max-height:calc(100vh - 40px)}
+.month-detail-hdr{display:flex;align-items:center;justify-content:space-between;padding:18px 26px;border-bottom:1px solid var(--b1);flex-shrink:0;gap:12px}
+.month-detail-title{font-size:20px;font-weight:700;color:var(--t1)}
+.month-detail-sub{font-size:13px;color:var(--t3);margin-top:4px}
+.month-detail-close{background:var(--surf2);border:1px solid var(--b1);border-radius:var(--rsm);color:var(--t1);padding:9px 20px;cursor:pointer;font-size:13px;font-weight:500;flex-shrink:0}
+.month-detail-close:hover{background:var(--surf3)}
+.month-detail-kanban{display:flex;gap:11px;overflow-x:auto;padding:16px 26px 22px;align-items:flex-start;flex:1;overflow-y:hidden}
+.month-detail-kanban .kcol-body{max-height:calc(100vh - 220px)}
 .owner-pip{font-size:13px;font-weight:500;padding:2px 7px;border-radius:10px}
 .due-tag{font-family:'DBHeavent',monospace;font-size:12px;color:var(--t3)}
 .due-tag.hot{color:#f07070}
@@ -1380,67 +1398,82 @@ return `<div style="display:inline-flex;align-items:center;gap:0;margin-right:2p
 function switchProj(p,el){
 activeProj=p; document.querySelectorAll('.pjtab').forEach(x=>x.classList.remove('active')); el.classList.add('active'); renderKanban();
 }
+function _mk(due){if(!due)return'no-date';const d=new Date(due);return`${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}`;}
+function _monthLabel(k){if(k==='no-date')return'📌 No Deadline';const[y,m]=k.split('-');return['January','February','March','April','May','June','July','August','September','October','November','December'][parseInt(m)-1]+' '+y;}
 function toggleMonth(mk){if(_expandedMonths.has(mk))_expandedMonths.delete(mk);else _expandedMonths.add(mk);renderKanban();}
+let _openMonthKey=null;
+function openMonthDetail(mk){_openMonthKey=mk;_renderMonthModal();}
+function closeMonthDetail(){_openMonthKey=null;document.getElementById('month-detail-overlay').classList.remove('open');}
+function _renderMonthModal(){
+  const mk=_openMonthKey;if(!mk)return;
+  const nowK2=new Date();
+  const curMK=`${nowK2.getFullYear()}-${String(nowK2.getMonth()+1).padStart(2,'0')}`;
+  const mTasks=tasks.filter(t=>_mk(t.due)===mk);
+  const total=mTasks.length;
+  const done=mTasks.filter(t=>t.stage==='Complete').length;
+  const colsHTML=STAGES.map((stage,si)=>{
+    const cards=mTasks.filter(t=>t.stage===stage);
+    const key=SKEY(stage);
+    return `<div class="kcol" data-si="${si}"><div class="kcol-head"><div style="display:flex;align-items:center;gap:6px"><div style="width:7px;height:7px;border-radius:50%;flex-shrink:0" class="d-${key}"></div><span class="kcol-ttl">${stage==='AW Release / Event Live'?'AW Release':stage}</span></div><span class="kcol-cnt">${cards.length}</span></div><div class="kcol-body" style="min-height:60px">${cards.length===0?'<div class="kcol-empty">Empty</div>':cards.map(t=>kcardHTML(t,stage,si)).join('')}</div></div>`;
+  }).join('');
+  document.getElementById('month-detail-title').textContent=_monthLabel(mk);
+  document.getElementById('month-detail-sub').textContent=`${total} tasks · ${done} complete`;
+  const kanbanEl=document.getElementById('month-detail-kanban');
+  kanbanEl.innerHTML=colsHTML;
+  document.getElementById('month-detail-overlay').classList.add('open');
+  kanbanEl.querySelectorAll('.kcard').forEach(card=>{
+    const rawId=card.dataset.id;
+    card.addEventListener('click',e=>{if(!e.target.closest('.kcard-actions'))openEdit(rawId);});
+    const btnPrev=card.querySelector('.k-prev');const btnEdit=card.querySelector('.k-edit');const btnNext=card.querySelector('.k-next');const btnDel=card.querySelector('.k-del');
+    if(btnPrev)btnPrev.addEventListener('click',e=>{e.stopPropagation();moveTask(rawId,-1);});
+    if(btnEdit)btnEdit.addEventListener('click',e=>{e.stopPropagation();openEdit(rawId);});
+    if(btnNext)btnNext.addEventListener('click',e=>{e.stopPropagation();moveTask(rawId,1);});
+    if(btnDel)btnDel.addEventListener('click',e=>{e.stopPropagation();doDelete(rawId);});
+    card.querySelectorAll('.k-attach').forEach(el=>el.addEventListener('click',e=>{e.stopPropagation();openAttachModal(rawId);}));
+  });
+}
 function renderKanban(){
 const fo=document.getElementById('bf-owner').value;
 let list=tasks;
 if(activeProj!=='All') list=list.filter(t=>t.project===activeProj);
 if(fo) list=list.filter(t=>t.owner===fo);
-// sync sidebar project dropdown to active project filter
 const fp=document.getElementById('f-project');
 if(fp&&activeProj!=='All'&&Array.from(fp.options).some(o=>o.value===activeProj))fp.value=activeProj;
-// ── Group tasks by due-date month ──────────────────────
 const nowK=new Date();
 const todayMid2=new Date(nowK.getFullYear(),nowK.getMonth(),nowK.getDate());
 const curMonthKey=`${nowK.getFullYear()}-${String(nowK.getMonth()+1).padStart(2,'0')}`;
-function _mk(due){if(!due)return'no-date';const d=new Date(due);return`${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}`;}
 const grp={};
 list.forEach(t=>{const k=_mk(t.due);if(!grp[k])grp[k]=[];grp[k].push(t);});
 const dateKeys=Object.keys(grp).filter(k=>k!=='no-date').sort();
 const pastKeys=[...dateKeys.filter(k=>k<curMonthKey)].reverse();
 const nowFutKeys=dateKeys.filter(k=>k>=curMonthKey);
 const orderedKeys=[...(grp['no-date']?['no-date']:[]),...nowFutKeys,...pastKeys];
-
-function _monthLabel(k){
-  if(k==='no-date')return'📌 No Deadline';
-  const[y,m]=k.split('-');
-  return['January','February','March','April','May','June','July','August','September','October','November','December'][parseInt(m)-1]+' '+y;
-}
-function _monthColsHTML(monthTasks){
+function _colsHTML(monthTasks){
   return STAGES.map((stage,si)=>{
     const cards=monthTasks.filter(t=>t.stage===stage);
     const key=SKEY(stage);
     return `<div class="kcol" data-si="${si}"><div class="kcol-head"><div style="display:flex;align-items:center;gap:6px"><div style="width:7px;height:7px;border-radius:50%;flex-shrink:0" class="d-${key}"></div><span class="kcol-ttl">${stage==='AW Release / Event Live'?'AW Release':stage}</span></div><span class="kcol-cnt">${cards.length}</span></div><div class="kcol-body" style="min-height:60px">${cards.length===0?'<div class="kcol-empty">Empty</div>':cards.map(t=>kcardHTML(t,stage,si)).join('')}</div></div>`;
   }).join('');
 }
-
 document.getElementById('kanban').innerHTML=orderedKeys.length===0?'<div style="padding:40px;color:var(--t3);text-align:center;font-size:14px">No tasks found</div>':orderedKeys.map(mk=>{
   const mTasks=grp[mk];
   const isPast=mk!=='no-date'&&mk<curMonthKey;
   const isCurrent=mk===curMonthKey;
-  const isExpanded=!isPast||_expandedMonths.has(mk);
   const total=mTasks.length;
   const done=mTasks.filter(t=>t.stage==='Complete').length;
   const od=mTasks.filter(t=>{if(!t.due||t.stage==='Complete'||t.stage==='On Hold')return false;const d=new Date(t.due);const dl=new Date(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate());return dl<todayMid2;}).length;
-  const pills=STAGES.filter(s=>mTasks.some(t=>t.stage===s)).map(s=>{const cnt=mTasks.filter(t=>t.stage===s).length;const k=SKEY(s);const lb=s==='AW Release / Event Live'?'AW Release':s;return`<span class="sbadge s-${k}" style="font-size:10px;padding:1px 7px">${lb} ${cnt}</span>`;}).join('');
-  const odChip=od>0?`<span style="background:#3a1010;color:#f07070;font-size:11px;padding:2px 8px;border-radius:10px">⚠ ${od} overdue</span>`:'';
+  const odChip=od>0?`<span class="month-compact-od">⚠ ${od} overdue</span>`:'';
   const curBadge=isCurrent?`<span class="month-hdr-badge" style="background:var(--gold3);color:var(--gold)">CURRENT</span>`:'';
-  const arrow=isPast?(isExpanded?'▼':'▶'):'';
-  const hdrClick=isPast?`onclick="toggleMonth('${mk}')" `:'';
-  const hdr=`<div class="month-hdr" ${hdrClick}>
-    ${isPast?`<span class="month-hdr-arrow">${arrow}</span>`:''}
-    <span class="month-hdr-label">${_monthLabel(mk)}</span>
-    ${curBadge}
-    <span class="month-hdr-meta">${done}/${total} complete</span>
-    ${odChip}
-    <div class="month-hdr-pills">${pills}</div>
-  </div>`;
-  const cls=['month-sec',isPast?'past':'',isCurrent?'current':'',isPast&&!isExpanded?'collapsed':''].filter(Boolean).join(' ');
-  const body=isExpanded?`<div class="month-body">${_monthColsHTML(mTasks)}</div>`:'';
-  return`<div class="${cls}" data-month="${mk}">${hdr}${body}</div>`;
+  if(isPast){
+    return `<div class="month-compact-row" onclick="openMonthDetail('${mk}')"><span class="month-compact-label">${_monthLabel(mk)}</span><span class="month-compact-stat">${total} tasks</span><span class="month-compact-stat">${done} complete</span>${odChip}<span class="month-compact-arrow">View details →</span></div>`;
+  }
+  const pills=STAGES.filter(s=>mTasks.some(t=>t.stage===s)).map(s=>{const cnt=mTasks.filter(t=>t.stage===s).length;const k=SKEY(s);const lb=s==='AW Release / Event Live'?'AW Release':s;return`<span class="sbadge s-${k}" style="font-size:10px;padding:1px 7px">${lb} ${cnt}</span>`;}).join('');
+  const cls=['month-sec',isCurrent?'current':''].filter(Boolean).join(' ');
+  return`<div class="${cls}" data-month="${mk}"><div class="month-hdr"><span class="month-hdr-label">${_monthLabel(mk)}</span>${curBadge}<span class="month-hdr-meta">${done}/${total} complete</span>${od>0?`<span style="color:#f07070;font-size:12px">⚠ ${od} overdue</span>`:''}<div class="month-hdr-pills">${pills}</div></div><div class="month-body">${_colsHTML(mTasks)}</div></div>`;
 }).join('');
 setupDragDrop();
 renderSbStats();
+if(_openMonthKey) _renderMonthModal();
 }
 function thumbsHTML(t){
   const list=t.attachments||[];
@@ -1690,7 +1723,7 @@ function closeModal(id){document.getElementById(id).classList.remove('open');edi
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function clock(){const d=new Date();document.getElementById('clock').textContent=d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short',year:'numeric'})+' · '+d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});}
 document.querySelectorAll('.modal-bg').forEach(bg=>bg.addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal(bg.id);}));
-document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal-bg.open').forEach(m=>closeModal(m.id));});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelectorAll('.modal-bg.open').forEach(m=>closeModal(m.id));closeMonthDetail();}});
 clock(); setInterval(clock,60000);
 initAttachZone();
 
@@ -1836,4 +1869,13 @@ window._pendingLoad = function(){
 if(window._sbReady) window._pendingLoad();
 </script>
 
+<div id="month-detail-overlay" class="month-detail-overlay">
+  <div class="month-detail-box">
+    <div class="month-detail-hdr">
+      <div><div class="month-detail-title" id="month-detail-title"></div><div class="month-detail-sub" id="month-detail-sub"></div></div>
+      <button class="month-detail-close" onclick="closeMonthDetail()">✕ Close</button>
+    </div>
+    <div class="month-detail-kanban" id="month-detail-kanban"></div>
+  </div>
+</div>
 </body></html>
