@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260619a -->
+<!-- v20260619b -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -870,7 +870,7 @@ const setEl=(id,inner,preserve)=>{
   const e=document.getElementById(id);if(!e)return;
   const prev=e.value;
   e.innerHTML=inner;
-  if(preserve&&prev&&e.querySelector(`option[value="${prev.replace(/"/g,'\\"')}"]`))e.value=prev;
+  if(preserve&&prev&&Array.from(e.options).some(o=>o.value===prev))e.value=prev;
 };
 setEl('lf-project',allOpts,true);
 setEl('f-project',opts,true);
