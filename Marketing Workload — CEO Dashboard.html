@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260619d -->
+<!-- v20260619b -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -162,14 +162,14 @@ nav h1{font-size:17px;font-weight:600;letter-spacing:-.01em}
 .field select option{background:var(--surf2)}
 .btn-add-sb{display:flex;align-items:center;justify-content:center;gap:7px;background:var(--gold);color:#0d0d0c;border:none;border-radius:var(--rsm);padding:9px;font-family:'DBHeavent','Sarabun',sans-serif;font-size:14px;font-weight:600;cursor:pointer;width:100%}
 .btn-add-sb:hover{background:var(--gold2)}
-.kanban{flex:1;overflow-x:hidden;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:14px}
+.kanban{flex:1;overflow-x:auto;overflow-y:hidden;padding:16px;display:flex;gap:11px;align-items:flex-start}
 .kanban::-webkit-scrollbar{height:4px}
 .kanban::-webkit-scrollbar-thumb{background:var(--surf3);border-radius:2px}
-.kcol{flex-shrink:0;width:205px;display:flex;flex-direction:column;gap:8px}
+.kcol{flex-shrink:0;width:205px;display:flex;flex-direction:column;gap:8px;max-height:100%}
 .kcol-head{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;border-radius:var(--rsm);background:var(--surf2);border:1px solid var(--b1)}
 .kcol-ttl{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--t2)}
 .kcol-cnt{font-family:'DBHeavent',monospace;font-size:12px;color:var(--t3);background:var(--surf3);padding:2px 6px;border-radius:10px}
-.kcol-body{overflow-y:auto;display:flex;flex-direction:column;gap:7px;padding-right:2px;max-height:520px}
+.kcol-body{overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:7px;padding-right:2px}
 .kcol-body::-webkit-scrollbar{width:2px}
 .kcol-body::-webkit-scrollbar-thumb{background:var(--surf3)}
 .kcard{background:var(--surf);border:1px solid var(--b1);border-radius:var(--r);padding:11px 12px;cursor:pointer;transition:border-color .15s;animation:cin .18s ease}
@@ -208,40 +208,6 @@ nav h1{font-size:17px;font-weight:600;letter-spacing:-.01em}
 .attach-badge{display:inline-flex;align-items:center;justify-content:center;background:var(--gold);color:#0d0d0c;border-radius:10px;font-size:11px;font-weight:700;padding:1px 5px;margin-left:2px;line-height:1;vertical-align:middle}
 .kcol-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:22px 10px;color:var(--t3);font-size:13px;border:1px dashed var(--b1);border-radius:var(--r)}
 .kcol-empty i{font-size:18px}
-.month-sec{background:var(--surf);border:1px solid var(--b1);border-radius:var(--r);overflow:hidden}
-.month-sec.current{border-color:rgba(232,197,71,.35);background:linear-gradient(180deg,rgba(232,197,71,.05) 0%,var(--surf) 60px)}
-.month-sec.past{opacity:.85}
-.month-sec.past.collapsed{opacity:.7}
-.month-hdr{display:flex;align-items:center;gap:9px;padding:11px 16px;border-bottom:1px solid var(--b1)}
-.month-sec.past .month-hdr{cursor:pointer;transition:background .15s}
-.month-sec.past .month-hdr:hover{background:var(--surf2)}
-.month-sec.collapsed .month-hdr{border-bottom:none}
-.month-hdr-arrow{font-size:10px;color:var(--t3);transition:transform .2s;flex-shrink:0}
-.month-hdr-label{font-size:13px;font-weight:700;color:var(--t1);flex-shrink:0}
-.month-hdr-badge{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:700;letter-spacing:.5px;flex-shrink:0}
-.month-hdr-meta{font-size:12px;color:var(--t3);flex-shrink:0}
-.month-hdr-pills{display:flex;gap:5px;flex-wrap:wrap;margin-left:auto}
-.month-body{display:flex;gap:11px;overflow-x:auto;padding:12px 16px 14px;align-items:flex-start}
-.month-body::-webkit-scrollbar{height:4px}
-.month-body::-webkit-scrollbar-thumb{background:var(--surf3);border-radius:2px}
-.month-compact-row{display:flex;align-items:center;gap:14px;padding:12px 20px;cursor:pointer;transition:all .15s;border-radius:var(--r);border:1px solid var(--b1);background:var(--surf)}
-.month-compact-row:hover{border-color:var(--b2);background:var(--surf2)}
-.month-compact-label{font-size:13px;font-weight:700;color:var(--t1);min-width:100px}
-.month-compact-stat{font-size:12px;color:var(--t3)}
-.month-compact-od{font-size:12px;color:#f07070}
-.month-compact-arrow{margin-left:auto;color:var(--t3);font-size:13px}
-.month-sec.current .kcol{width:235px}
-.month-sec.current .kcol-body{max-height:620px}
-.month-detail-overlay{position:fixed;inset:0;background:rgba(0,0,10,.85);z-index:900;display:none;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto}
-.month-detail-overlay.open{display:flex}
-.month-detail-box{background:var(--bg);border:1px solid var(--b1);border-radius:var(--r);width:100%;max-width:1500px;display:flex;flex-direction:column;max-height:calc(100vh - 40px)}
-.month-detail-hdr{display:flex;align-items:center;justify-content:space-between;padding:18px 26px;border-bottom:1px solid var(--b1);flex-shrink:0;gap:12px}
-.month-detail-title{font-size:20px;font-weight:700;color:var(--t1)}
-.month-detail-sub{font-size:13px;color:var(--t3);margin-top:4px}
-.month-detail-close{background:var(--surf2);border:1px solid var(--b1);border-radius:var(--rsm);color:var(--t1);padding:9px 20px;cursor:pointer;font-size:13px;font-weight:500;flex-shrink:0}
-.month-detail-close:hover{background:var(--surf3)}
-.month-detail-kanban{display:flex;gap:11px;overflow-x:auto;padding:16px 26px 22px;align-items:flex-start;flex:1;overflow-y:hidden}
-.month-detail-kanban .kcol-body{max-height:calc(100vh - 220px)}
 .owner-pip{font-size:13px;font-weight:500;padding:2px 7px;border-radius:10px}
 .due-tag{font-family:'DBHeavent',monospace;font-size:12px;color:var(--t3)}
 .due-tag.hot{color:#f07070}
@@ -934,7 +900,6 @@ const OKEY=n=>n.toLowerCase().replace(/\s/g,'');
 let tasks=[];
 // nextId → Supabase UUIDs
 let editId=null;
-let _expandedMonths=new Set();
 let noteId=null;
 let activeProj='All';
 let listStageFilter='All';
@@ -1398,82 +1363,21 @@ return `<div style="display:inline-flex;align-items:center;gap:0;margin-right:2p
 function switchProj(p,el){
 activeProj=p; document.querySelectorAll('.pjtab').forEach(x=>x.classList.remove('active')); el.classList.add('active'); renderKanban();
 }
-function _mk(due){if(!due)return'no-date';const d=new Date(due);return`${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}`;}
-function _monthLabel(k){if(k==='no-date')return'📌 No Deadline';const[y,m]=k.split('-');return['January','February','March','April','May','June','July','August','September','October','November','December'][parseInt(m)-1]+' '+y;}
-function toggleMonth(mk){if(_expandedMonths.has(mk))_expandedMonths.delete(mk);else _expandedMonths.add(mk);renderKanban();}
-let _openMonthKey=null;
-function openMonthDetail(mk){_openMonthKey=mk;_renderMonthModal();}
-function closeMonthDetail(){_openMonthKey=null;document.getElementById('month-detail-overlay').classList.remove('open');}
-function _renderMonthModal(){
-  const mk=_openMonthKey;if(!mk)return;
-  const nowK2=new Date();
-  const curMK=`${nowK2.getFullYear()}-${String(nowK2.getMonth()+1).padStart(2,'0')}`;
-  const mTasks=tasks.filter(t=>_mk(t.due)===mk);
-  const total=mTasks.length;
-  const done=mTasks.filter(t=>t.stage==='Complete').length;
-  const colsHTML=STAGES.map((stage,si)=>{
-    const cards=mTasks.filter(t=>t.stage===stage);
-    const key=SKEY(stage);
-    return `<div class="kcol" data-si="${si}"><div class="kcol-head"><div style="display:flex;align-items:center;gap:6px"><div style="width:7px;height:7px;border-radius:50%;flex-shrink:0" class="d-${key}"></div><span class="kcol-ttl">${stage==='AW Release / Event Live'?'AW Release':stage}</span></div><span class="kcol-cnt">${cards.length}</span></div><div class="kcol-body" style="min-height:60px">${cards.length===0?'<div class="kcol-empty">Empty</div>':cards.map(t=>kcardHTML(t,stage,si)).join('')}</div></div>`;
-  }).join('');
-  document.getElementById('month-detail-title').textContent=_monthLabel(mk);
-  document.getElementById('month-detail-sub').textContent=`${total} tasks · ${done} complete`;
-  const kanbanEl=document.getElementById('month-detail-kanban');
-  kanbanEl.innerHTML=colsHTML;
-  document.getElementById('month-detail-overlay').classList.add('open');
-  kanbanEl.querySelectorAll('.kcard').forEach(card=>{
-    const rawId=card.dataset.id;
-    card.addEventListener('click',e=>{if(!e.target.closest('.kcard-actions'))openEdit(rawId);});
-    const btnPrev=card.querySelector('.k-prev');const btnEdit=card.querySelector('.k-edit');const btnNext=card.querySelector('.k-next');const btnDel=card.querySelector('.k-del');
-    if(btnPrev)btnPrev.addEventListener('click',e=>{e.stopPropagation();moveTask(rawId,-1);});
-    if(btnEdit)btnEdit.addEventListener('click',e=>{e.stopPropagation();openEdit(rawId);});
-    if(btnNext)btnNext.addEventListener('click',e=>{e.stopPropagation();moveTask(rawId,1);});
-    if(btnDel)btnDel.addEventListener('click',e=>{e.stopPropagation();doDelete(rawId);});
-    card.querySelectorAll('.k-attach').forEach(el=>el.addEventListener('click',e=>{e.stopPropagation();openAttachModal(rawId);}));
-  });
-}
 function renderKanban(){
 const fo=document.getElementById('bf-owner').value;
 let list=tasks;
 if(activeProj!=='All') list=list.filter(t=>t.project===activeProj);
 if(fo) list=list.filter(t=>t.owner===fo);
+// sync sidebar project dropdown to active project filter
 const fp=document.getElementById('f-project');
-if(fp&&activeProj!=='All'&&Array.from(fp.options).some(o=>o.value===activeProj))fp.value=activeProj;
-const nowK=new Date();
-const todayMid2=new Date(nowK.getFullYear(),nowK.getMonth(),nowK.getDate());
-const curMonthKey=`${nowK.getFullYear()}-${String(nowK.getMonth()+1).padStart(2,'0')}`;
-const grp={};
-list.forEach(t=>{const k=_mk(t.due);if(!grp[k])grp[k]=[];grp[k].push(t);});
-const dateKeys=Object.keys(grp).filter(k=>k!=='no-date').sort();
-const pastKeys=[...dateKeys.filter(k=>k<curMonthKey)].reverse();
-const nowFutKeys=dateKeys.filter(k=>k>=curMonthKey);
-const orderedKeys=[...(grp['no-date']?['no-date']:[]),...nowFutKeys,...pastKeys];
-function _colsHTML(monthTasks){
-  return STAGES.map((stage,si)=>{
-    const cards=monthTasks.filter(t=>t.stage===stage);
-    const key=SKEY(stage);
-    return `<div class="kcol" data-si="${si}"><div class="kcol-head"><div style="display:flex;align-items:center;gap:6px"><div style="width:7px;height:7px;border-radius:50%;flex-shrink:0" class="d-${key}"></div><span class="kcol-ttl">${stage==='AW Release / Event Live'?'AW Release':stage}</span></div><span class="kcol-cnt">${cards.length}</span></div><div class="kcol-body" style="min-height:60px">${cards.length===0?'<div class="kcol-empty">Empty</div>':cards.map(t=>kcardHTML(t,stage,si)).join('')}</div></div>`;
-  }).join('');
-}
-document.getElementById('kanban').innerHTML=orderedKeys.length===0?'<div style="padding:40px;color:var(--t3);text-align:center;font-size:14px">No tasks found</div>':orderedKeys.map(mk=>{
-  const mTasks=grp[mk];
-  const isPast=mk!=='no-date'&&mk<curMonthKey;
-  const isCurrent=mk===curMonthKey;
-  const total=mTasks.length;
-  const done=mTasks.filter(t=>t.stage==='Complete').length;
-  const od=mTasks.filter(t=>{if(!t.due||t.stage==='Complete'||t.stage==='On Hold')return false;const d=new Date(t.due);const dl=new Date(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate());return dl<todayMid2;}).length;
-  const odChip=od>0?`<span class="month-compact-od">⚠ ${od} overdue</span>`:'';
-  const curBadge=isCurrent?`<span class="month-hdr-badge" style="background:var(--gold3);color:var(--gold)">CURRENT</span>`:'';
-  if(isPast){
-    return `<div class="month-compact-row" onclick="openMonthDetail('${mk}')"><span class="month-compact-label">${_monthLabel(mk)}</span><span class="month-compact-stat">${total} tasks</span><span class="month-compact-stat">${done} complete</span>${odChip}<span class="month-compact-arrow">View details →</span></div>`;
-  }
-  const pills=STAGES.filter(s=>mTasks.some(t=>t.stage===s)).map(s=>{const cnt=mTasks.filter(t=>t.stage===s).length;const k=SKEY(s);const lb=s==='AW Release / Event Live'?'AW Release':s;return`<span class="sbadge s-${k}" style="font-size:10px;padding:1px 7px">${lb} ${cnt}</span>`;}).join('');
-  const cls=['month-sec',isCurrent?'current':''].filter(Boolean).join(' ');
-  return`<div class="${cls}" data-month="${mk}"><div class="month-hdr"><span class="month-hdr-label">${_monthLabel(mk)}</span>${curBadge}<span class="month-hdr-meta">${done}/${total} complete</span>${od>0?`<span style="color:#f07070;font-size:12px">⚠ ${od} overdue</span>`:''}<div class="month-hdr-pills">${pills}</div></div><div class="month-body">${_colsHTML(mTasks)}</div></div>`;
+if(fp&&activeProj!=='All'&&fp.querySelector(`option[value="${activeProj.replace(/"/g,'\\"')}"]`))fp.value=activeProj;
+document.getElementById('kanban').innerHTML=STAGES.map((stage,si)=>{
+const cards=list.filter(t=>t.stage===stage);
+const key=SKEY(stage);
+return `<div class="kcol" data-si="${si}"><div class="kcol-head"><div style="display:flex;align-items:center;gap:6px"><div style="width:7px;height:7px;border-radius:50%;flex-shrink:0" class="d-${key}"></div><span class="kcol-ttl">${stage==='AW Release / Event Live'?'AW Release':stage}</span></div><span class="kcol-cnt">${cards.length}</span></div><div class="kcol-body" style="min-height:80px">${cards.length===0?'<div class="kcol-empty">Empty</div>':cards.map(t=>kcardHTML(t,stage,si)).join('')}</div></div>`;
 }).join('');
 setupDragDrop();
 renderSbStats();
-if(_openMonthKey) _renderMonthModal();
 }
 function thumbsHTML(t){
   const list=t.attachments||[];
@@ -1723,7 +1627,7 @@ function closeModal(id){document.getElementById(id).classList.remove('open');edi
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function clock(){const d=new Date();document.getElementById('clock').textContent=d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short',year:'numeric'})+' · '+d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});}
 document.querySelectorAll('.modal-bg').forEach(bg=>bg.addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal(bg.id);}));
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelectorAll('.modal-bg.open').forEach(m=>closeModal(m.id));closeMonthDetail();}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal-bg.open').forEach(m=>closeModal(m.id));});
 clock(); setInterval(clock,60000);
 initAttachZone();
 
@@ -1869,13 +1773,4 @@ window._pendingLoad = function(){
 if(window._sbReady) window._pendingLoad();
 </script>
 
-<div id="month-detail-overlay" class="month-detail-overlay">
-  <div class="month-detail-box">
-    <div class="month-detail-hdr">
-      <div><div class="month-detail-title" id="month-detail-title"></div><div class="month-detail-sub" id="month-detail-sub"></div></div>
-      <button class="month-detail-close" onclick="closeMonthDetail()">✕ Close</button>
-    </div>
-    <div class="month-detail-kanban" id="month-detail-kanban"></div>
-  </div>
-</div>
 </body></html>
