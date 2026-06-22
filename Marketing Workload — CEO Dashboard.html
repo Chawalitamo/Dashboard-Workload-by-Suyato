@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260622b -->
+<!-- v20260622c -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -303,6 +303,19 @@ button{font-family:'DBHeavent','Sarabun',sans-serif}
 /* Summary numbers in KPI */
 .kpi-big{font-family:'DBHeavent',monospace;font-size:36px;font-weight:700;line-height:1;margin-bottom:4px}
 .kpi-delta{font-size:13px;margin-top:4px}
+/* WHO-ARE-YOU MODAL */
+#who-modal{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:9999;display:flex;align-items:center;justify-content:center}
+.who-card{background:var(--surf);border:1px solid var(--b2);border-radius:var(--rxl);padding:36px 40px;width:520px;max-width:94vw;text-align:center}
+.who-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:24px 0}
+.who-btn{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 6px;background:var(--surf2);border:2px solid var(--b1);border-radius:10px;cursor:pointer;transition:all .15s;font-family:'DBHeavent','Sarabun',sans-serif}
+.who-btn:hover{background:var(--surf3);border-color:var(--b2)}
+.who-btn.chosen{border-color:var(--gold);background:var(--gold3)}
+.who-btn .wa{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;flex-shrink:0}
+.who-btn span{font-size:13px;color:var(--t2)}
+.who-btn.chosen span{color:var(--gold);font-weight:600}
+.who-confirm{width:100%;padding:13px;background:var(--gold);color:#13131f;border:none;border-radius:var(--rsm);font-family:'DBHeavent','Sarabun',sans-serif;font-size:16px;font-weight:700;cursor:pointer;transition:opacity .15s;margin-top:4px}
+.who-confirm:disabled{opacity:.35;cursor:not-allowed}
+.who-confirm:not(:disabled):hover{opacity:.88}
 </style>
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
@@ -1821,18 +1834,12 @@ renderKanban();
 function closeModal(id){document.getElementById(id).classList.remove('open');editId=null;noteId=null;if(id==='edit-project-modal')editingProjectName=null;}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 // ═════════════ ACTIVITY LOG ═════════════
-let _currentUser=localStorage.getItem('mkt_current_user')||'';
+let _currentUser='';
 function setCurrentUser(name){
 _currentUser=name;
-localStorage.setItem('mkt_current_user',name);
 const sel=document.getElementById('current-user-sel');
 if(sel){sel.value=name;sel.classList.toggle('unset',!name);}
 }
-// Restore saved user on load
-(function(){
-const sel=document.getElementById('current-user-sel');
-if(sel&&_currentUser){sel.value=_currentUser;sel.classList.remove('unset');}
-})();
 async function logActivity(taskId,taskTitle,project,action,field,oldVal,newVal){
 try{
 await window._sb.from('mkt_activity_log').insert({
@@ -2061,11 +2068,63 @@ window.onerror=function(msg,src,line,col,err){
   if(typeof _showErr==='function') _showErr('JS Error: '+msg+'\n'+(err&&err.stack||src+':'+line));
   return false;
 };
+
+// ═════════════ WHO-ARE-YOU MODAL ═════════════
+const MEMBER_COLORS={por:'#c4a8ff',sun:'#7dd4a0',jew:'#f4a0a0',nod:'#7ab8f5',donut:'#f5c870',ming:'#a4d870',ji:'#f59ab8',kanom:'#70d4d4',ton:'#f5a870',nick:'#b07af5',benz:'#70a8f5',ju:'#f57070',toon:'#60d0a0',witch:'#e0b860',aom:'#d090e0'};
+let _whoChosen='';
+function _buildWhoModal(){
+const grid=document.getElementById('who-grid');
+if(!grid)return;
+grid.innerHTML=OWNERS.map(name=>{
+const col=MEMBER_COLORS[OKEY(name)]||'#888';
+return`<button class="who-btn" onclick="pickWho('${name}',this)" type="button">
+<div class="wa o-${OKEY(name)}" style="background:${col}22;color:${col}">${name[0]}</div>
+<span>${name}</span>
+</button>`;
+}).join('');
+}
+function pickWho(name,el){
+_whoChosen=name;
+document.querySelectorAll('.who-btn').forEach(b=>b.classList.remove('chosen'));
+el.classList.add('chosen');
+const btn=document.getElementById('who-confirm-btn');
+btn.disabled=false;
+btn.textContent='Continue as '+name+' →';
+}
+function confirmWho(){
+if(!_whoChosen)return;
+setCurrentUser(_whoChosen);
+document.getElementById('who-modal').style.display='none';
+}
+function showWhoModal(){
+_whoChosen='';
+_currentUser='';
+const sel=document.getElementById('current-user-sel');
+if(sel){sel.value='';sel.classList.add('unset');}
+_buildWhoModal();
+const btn=document.getElementById('who-confirm-btn');
+if(btn){btn.disabled=true;btn.textContent='Select your name to continue →';}
+document.getElementById('who-modal').style.display='flex';
+}
+
 window._pendingLoad = function(){
+  // Load data in background while user picks name
   loadFromSupabase();
   setInterval(loadFromSupabase, 30000);
+  showWhoModal();
 };
 if(window._sbReady) window._pendingLoad();
 </script>
+
+<!-- WHO-ARE-YOU MODAL -->
+<div id="who-modal" style="display:none">
+<div class="who-card">
+<div style="font-size:28px;margin-bottom:6px">👋</div>
+<div style="font-size:20px;font-weight:700;margin-bottom:6px">Who are you?</div>
+<div style="font-size:14px;color:var(--t3)">Select your name — this will be recorded with every change you make.</div>
+<div class="who-grid" id="who-grid"></div>
+<button class="who-confirm" id="who-confirm-btn" disabled onclick="confirmWho()">Select your name to continue →</button>
+</div>
+</div>
 
 </body></html>
