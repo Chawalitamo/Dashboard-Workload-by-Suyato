@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260619c -->
+<!-- v20260622a -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -44,6 +44,21 @@ nav h1{font-size:17px;font-weight:600;letter-spacing:-.01em}
 .view.active{display:flex}
 /* ══════════ DASHBOARD ══════════ */
 #view-dashboard{flex-direction:column;overflow-y:auto}
+#view-activity{flex-direction:column;overflow-y:auto}
+.act-toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:14px 24px;border-bottom:1px solid var(--b1);flex-shrink:0;background:var(--bg)}
+.act-select{background:var(--surf2);border:1px solid var(--b1);color:var(--t1);border-radius:var(--rsm);padding:6px 10px;font-family:'DBHeavent','Sarabun',sans-serif;font-size:14px;cursor:pointer}
+.act-search{background:var(--surf2);border:1px solid var(--b1);color:var(--t1);border-radius:var(--rsm);padding:6px 12px;font-family:'DBHeavent','Sarabun',sans-serif;font-size:14px;min-width:200px}
+.act-search::placeholder{color:var(--t3)}
+.act-export-btn{display:flex;align-items:center;gap:6px;padding:7px 16px;background:var(--gold3);border:1px solid rgba(232,197,71,.3);border-radius:var(--rsm);color:var(--gold);font-family:'DBHeavent','Sarabun',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:background .15s;white-space:nowrap}
+.act-export-btn:hover{background:rgba(232,197,71,.2)}
+.act-table{width:100%;border-collapse:collapse;font-size:14px}
+.act-table th{padding:10px 14px;text-align:left;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);border-bottom:1px solid var(--b2);position:sticky;top:0;background:var(--bg);z-index:2}
+.act-table td{padding:10px 14px;border-bottom:1px solid var(--b0);vertical-align:middle}
+.act-table tr:hover td{background:var(--surf)}
+.act-badge{display:inline-flex;align-items:center;gap:4px;border-radius:4px;padding:2px 9px;font-size:12px;font-weight:600}
+.act-badge.created{background:rgba(80,208,144,.15);color:#50d090}
+.act-badge.updated{background:rgba(90,170,240,.15);color:#5aaaf0}
+.act-badge.deleted{background:rgba(240,112,112,.15);color:#f07070}
 .dash-inner{padding:24px;display:flex;flex-direction:column;gap:20px}
 .kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
 .kpi{background:var(--surf);border:1px solid var(--b1);border-radius:var(--r);padding:16px 18px;display:flex;flex-direction:column;gap:6px}
@@ -304,6 +319,7 @@ if(window._pendingLoad) window._pendingLoad();
 <button class="ptab active" onclick="showView(&#39;dashboard&#39;,this)"><i class="ti ti-layout-dashboard" aria-hidden="true"></i>CEO Dashboard</button>
 <button class="ptab" onclick="showView(&#39;list&#39;,this)"><i class="ti ti-list-details" aria-hidden="true"></i>Task List</button>
 <button class="ptab" onclick="showView(&#39;board&#39;,this)"><i class="ti ti-layout-kanban" aria-hidden="true"></i>Kanban Board</button>
+<button class="ptab" onclick="showView(&#39;activity&#39;,this)"><i class="ti ti-history" aria-hidden="true"></i>Activity Log</button>
 <div style="flex:1"></div>
 <button class="ptab" onclick="openTeamEmailsModal()" title="Notification settings" style="margin-right:6px"><i class="ti ti-bell-ringing" aria-hidden="true"></i>Notify</button>
 <div id="project-nav-tabs" style="display:flex;align-items:center;gap:4px;padding:0 4px"><div style="display:flex;align-items:center;gap:0">
@@ -584,6 +600,38 @@ if(window._pendingLoad) window._pendingLoad();
 </div>
 </div>
 </div>
+<!-- ═════ ACTIVITY LOG VIEW ═════ -->
+<div class="view" id="view-activity">
+<div class="act-toolbar">
+<select class="act-select" id="act-filter-action" onchange="filterActivity()">
+<option value="all">All actions</option>
+<option value="created">Created</option>
+<option value="updated">Updated</option>
+<option value="deleted">Deleted</option>
+</select>
+<select class="act-select" id="act-filter-project" onchange="filterActivity()">
+<option value="all">All projects</option>
+</select>
+<input class="act-search" id="act-search" type="text" placeholder="Search task or project…" oninput="filterActivity()">
+<div style="flex:1"></div>
+<span id="act-count" style="font-size:13px;color:var(--t3)"></span>
+<button class="act-export-btn" onclick="exportActivityCSV()"><i class="ti ti-file-spreadsheet" aria-hidden="true"></i>Export Excel</button>
+<button class="act-export-btn" onclick="renderActivity()" style="background:var(--surf3);border-color:var(--b2);color:var(--t2)"><i class="ti ti-refresh" aria-hidden="true"></i>Refresh</button>
+</div>
+<div style="flex:1;overflow-y:auto;padding:0 24px 24px">
+<table class="act-table">
+<thead><tr>
+<th style="width:160px">Date / Time</th>
+<th style="width:90px">Action</th>
+<th>Task</th>
+<th style="width:160px">Project</th>
+<th style="width:110px">Field</th>
+<th>Change</th>
+</tr></thead>
+<tbody id="act-table-body"><tr><td colspan="6" style="text-align:center;padding:40px;color:var(--t3)">Click "Activity Log" tab to load</td></tr></tbody>
+</table>
+</div>
+</div>
 <div class="modal-bg" id="edit-modal">
 <div class="modal">
 <div class="modal-head"><h3>Edit task</h3><button class="modal-close" onclick="closeModal(&#39;edit-modal&#39;)"><i class="ti ti-x" aria-hidden="true"></i></button></div>
@@ -818,7 +866,7 @@ await Promise.all([
 ]);
 p.name=newName; p.color=selectedEpColor;
 // Update all tasks that referenced old project name
-tasks.forEach(t=>{if(t.project===oldName)t.project=newName;});
+tasks.forEach(t=>{if(t.project===oldName){if(newName!==oldName)logActivity(t.id,t.title,newName,'updated','project',oldName,newName);t.project=newName;}});
 if(activeProj===oldName)activeProj=newName;
 closeModal('edit-project-modal');
 populateAllProjectSelects();
@@ -833,6 +881,7 @@ const msg=taskCount>0
 ?`Delete "${editingProjectName}"? This will also delete its ${taskCount} task${taskCount!==1?'s':''}. This cannot be undone.`
 :`Delete "${editingProjectName}"? This cannot be undone.`;
 if(!confirm(msg))return;
+tasks.filter(t=>t.project===editingProjectName).forEach(t=>logActivity(t.id,t.title,t.project,'deleted',null,null,null));
 await Promise.all([
   window._sb.from('mkt_projects').delete().eq('name',editingProjectName),
   window._sb.from('mkt_tasks').delete().eq('project',editingProjectName)
@@ -854,6 +903,7 @@ const msg=taskCount>0
 ?`Delete "${name}"?\nThis will also delete ${taskCount} task${taskCount!==1?'s':''}.\nThis cannot be undone.`
 :`Delete "${name}"? This cannot be undone.`;
 if(!confirm(msg))return;
+tasks.filter(t=>t.project===name).forEach(t=>logActivity(t.id,t.title,t.project,'deleted',null,null,null));
 try{await Promise.all([window._sb.from('mkt_projects').delete().eq('name',name),window._sb.from('mkt_tasks').delete().eq('project',name)]);}catch(err){console.error(err);}
 tasks=tasks.filter(t=>t.project!==name);
 projects=projects.filter(x=>x.name!==name);
@@ -920,6 +970,7 @@ try{
   if(v==='dashboard') renderDash();
   if(v==='list'){populateAllProjectSelects();renderListPills();renderList();}
   if(v==='board'){populateAllProjectSelects();renderProjTabs();renderKanban();}
+  if(v==='activity') renderActivity();
 }catch(e){
   console.warn('showView render error:',e);
   _showErr('Render error in view "'+v+'":\n'+e.message+'\n'+e.stack);
@@ -1406,6 +1457,7 @@ const entries=Object.entries(STAGE_PCT);
 let best=entries[0];
 entries.forEach(([s,p])=>{ if(Math.abs(p-val)<Math.abs(best[1]-val)) best=[s,p]; });
 const t=tasks.find(t=>t.id===id); if(!t) return;
+const _oldStage=t.stage;
 t.stage=best[0];
 const pct=best[1];
 inp.value=pct;
@@ -1414,21 +1466,28 @@ const pbEl=document.getElementById('pb-'+id);
 if(pctEl) pctEl.textContent=pct+'%';
 if(pbEl){ pbEl.style.width=pct+'%'; const sk=SKEY(best[0]); pbEl.className='pb-fill pf-'+sk; }
 await window._sb.from('mkt_tasks').update({stage:best[0]}).eq('id',id);
+if(_oldStage!==best[0]) logActivity(id,t.title,t.project,'updated','stage',_oldStage,best[0]);
 renderList();
 }
 async function updateStage(id,val){
 const t=tasks.find(t=>t.id===id); if(!t) return;
+const _oldStage=t.stage;
 t.stage=val;
 await window._sb.from('mkt_tasks').update({stage:val}).eq('id',id);
+if(_oldStage!==val) logActivity(id,t.title,t.project,'updated','stage',_oldStage,val);
 renderList();
 }
 async function updateField(id,field,val){
 const t=tasks.find(t=>t.id===id); if(!t) return;
+const _oldVal=t[field];
 t[field]=val;
 await window._sb.from('mkt_tasks').update({[field]:val}).eq('id',id);
+if(String(_oldVal||'')!==String(val||'')) logActivity(id,t.title,t.project,'updated',field,_oldVal,val);
 }
 async function deleteTaskList(id){
 if(!confirm('Delete this task?')) return;
+const _dt=tasks.find(t=>t.id===id);
+if(_dt) logActivity(_dt.id,_dt.title,_dt.project,'deleted',null,null,null);
 await window._sb.from('mkt_tasks').delete().eq('id',id);
 tasks=tasks.filter(t=>t.id!==id); renderList();
 }
@@ -1455,6 +1514,7 @@ const _nt={title,owner,lead,project:document.getElementById('a-project').value,s
 const{data:_nd,error:_ne}=await window._sb.from('mkt_tasks').insert(_nt).select().single();
 if(_ne){alert('Save failed');return;}
 tasks.unshift({id:_nd.id,..._nt,due:_nt.due||''});
+logActivity(_nd.id,_nt.title,_nt.project,'created',null,null,null);
 document.getElementById('a-title').value=''; document.getElementById('a-due').value=''; document.getElementById('a-note').value=''; document.getElementById('a-owner').value=''; document.getElementById('a-lead').value='';
 closeModal('add-modal'); renderList();
 postToTeams('created',{title:_nt.title,owner:_nt.owner,project:_nt.project,stage:_nt.stage,due:_nt.due||''});
@@ -1585,8 +1645,10 @@ function setupDragDrop(){
       if(!t){console.warn('[drag] task not found:',rawId);return;}
       const newStage=STAGES[si];
       if(t.stage===newStage) return;
+      const _oldDragStage=t.stage;
       t.stage=newStage;
       try{await window._sb.from('mkt_tasks').update({stage:newStage}).eq('id',t.id);}catch(err){console.error(err);}
+      logActivity(t.id,t.title,t.project,'updated','stage',_oldDragStage,newStage);
       postToTeams('moved',{title:t.title,owner:t.owner,project:t.project,stage:newStage,due:t.due||''});
       renderKanban();
     });
@@ -1596,15 +1658,18 @@ async function moveTask(rawId,dir){
   const t=findTask(rawId); if(!t){console.warn('[move] task not found:',rawId);return;}
   const si=STAGES.indexOf(t.stage); const ni=si+dir;
   if(ni<0||ni>=STAGES.length) return;
+  const _oldMoveStage=t.stage;
   t.stage=STAGES[ni];
   console.log('[move] id:',rawId,'→',t.stage);
   try{await window._sb.from('mkt_tasks').update({stage:t.stage}).eq('id',t.id);}catch(err){console.error(err);}
+  logActivity(t.id,t.title,t.project,'updated','stage',_oldMoveStage,t.stage);
   postToTeams('moved',{title:t.title,owner:t.owner,project:t.project,stage:t.stage,due:t.due||''});
   renderKanban();
 }
 async function doDelete(rawId){
   if(!confirm('Delete this task?')) return;
   const t=findTask(rawId); if(!t) return;
+  logActivity(t.id,t.title,t.project,'deleted',null,null,null);
   postToTeams('deleted',{title:t.title,owner:t.owner,project:t.project,stage:t.stage,due:t.due||''});
   try{await window._sb.from('mkt_tasks').delete().eq('id',t.id);}catch(err){console.error(err);}
   tasks=tasks.filter(t=>String(t.id)!==String(rawId));
@@ -1702,6 +1767,7 @@ document.getElementById('edit-modal').classList.add('open');
 }
 async function saveEdit(){
 const t=findTask(editId);if(!t)return;
+const _snap={title:t.title,project:t.project,owner:t.owner,lead:t.lead,stage:t.stage,due:t.due||'',note:t.note||''};
 t.title=document.getElementById('e-title').value.trim()||t.title;
 t.project=document.getElementById('e-project').value;
 t.owner=document.getElementById('e-owner').value;
@@ -1710,6 +1776,7 @@ t.stage=document.getElementById('e-stage').value;
 t.due=document.getElementById('e-due').value;
 t.note=document.getElementById('e-note').value.trim();
 await window._sb.from('mkt_tasks').update({title:t.title,owner:t.owner,lead:t.lead,project:t.project,stage:t.stage,due:t.due||null,note:t.note}).eq('id',editId);
+['title','project','owner','lead','stage','due','note'].forEach(f=>{const ov=_snap[f]||'';const nv=f==='due'?(t.due||''):(t[f]||'');if(ov!==nv)logActivity(editId,t.title,t.project,'updated',f,ov,nv);});
 postToTeams('updated',{title:t.title,owner:t.owner,project:t.project,stage:t.stage,due:t.due||''});
 closeModal('edit-modal');
 renderKanban();
@@ -1726,6 +1793,7 @@ const _ft={title,owner,lead,project:document.getElementById('f-project').value,s
 const{data:_fd,error:_fe}=await window._sb.from('mkt_tasks').insert(_ft).select().single();
 if(_fe){alert('Save failed');return;}
 tasks.unshift({id:_fd.id,..._ft,due:_ft.due||''});
+logActivity(_fd.id,_ft.title,_ft.project,'created',null,null,null);
 document.getElementById('f-title').value='';document.getElementById('f-due').value='';document.getElementById('f-note').value='';document.getElementById('f-lead').value='';
 postToTeams('created',{title:_ft.title,owner:_ft.owner,project:_ft.project,stage:_ft.stage,due:_ft.due||''});
 fetch('https://fxmigukayxvieziseqil.supabase.co/functions/v1/notify-new-task',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:_ft.title,owner:_ft.owner,lead:_ft.lead,project:_ft.project,stage:_ft.stage,due:_ft.due||'',note:_ft.note})}).catch(()=>{});
@@ -1734,6 +1802,82 @@ renderKanban();
 // ═════════════ UTILS ═════════════
 function closeModal(id){document.getElementById(id).classList.remove('open');editId=null;noteId=null;if(id==='edit-project-modal')editingProjectName=null;}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+// ═════════════ ACTIVITY LOG ═════════════
+async function logActivity(taskId,taskTitle,project,action,field,oldVal,newVal){
+try{
+await window._sb.from('mkt_activity_log').insert({
+task_id:taskId?String(taskId):null,
+task_title:taskTitle||'',
+project:project||'',
+action,
+field:field||null,
+old_value:oldVal!=null?String(oldVal):null,
+new_value:newVal!=null?String(newVal):null
+});
+}catch(e){console.warn('Activity log:',e);}
+}
+let _actData=[];
+async function renderActivity(){
+document.getElementById('act-table-body').innerHTML='<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--t3)">Loading…</td></tr>';
+const{data,error}=await window._sb.from('mkt_activity_log').select('*').order('created_at',{ascending:false}).limit(1000);
+if(error){document.getElementById('act-table-body').innerHTML=`<tr><td colspan="6" style="color:#f07070;padding:20px">${error.message}</td></tr>`;return;}
+_actData=data||[];
+// populate project filter
+const actProjs=[...new Set(_actData.map(r=>r.project).filter(Boolean))].sort();
+const pSel=document.getElementById('act-filter-project');
+const prevP=pSel.value;
+pSel.innerHTML='<option value="all">All projects</option>'+actProjs.map(p=>`<option value="${esc(p)}">${esc(p)}</option>`).join('');
+if(actProjs.includes(prevP))pSel.value=prevP;
+renderActivityTable();
+}
+function filterActivity(){renderActivityTable();}
+function renderActivityTable(){
+const actAction=document.getElementById('act-filter-action').value;
+const actProj=document.getElementById('act-filter-project').value;
+const actSearch=(document.getElementById('act-search').value||'').toLowerCase().trim();
+let list=_actData;
+if(actAction!=='all')list=list.filter(r=>r.action===actAction);
+if(actProj!=='all')list=list.filter(r=>r.project===actProj);
+if(actSearch)list=list.filter(r=>(r.task_title||'').toLowerCase().includes(actSearch)||(r.project||'').toLowerCase().includes(actSearch)||(r.field||'').toLowerCase().includes(actSearch));
+const rows=list.map(r=>{
+const dt=new Date(r.created_at).toLocaleString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+const badge=`<span class="act-badge ${r.action}"><i class="ti ti-${r.action==='created'?'plus':r.action==='deleted'?'trash':'edit'}" style="font-size:11px"></i>${r.action}</span>`;
+const fieldCell=r.field?`<span style="background:var(--surf3);border-radius:4px;padding:2px 8px;font-size:12px">${esc(r.field)}</span>`:'';
+const changeCell=r.field?`<span style="color:#aaa">${esc(r.old_value||'—')}</span><span style="color:var(--t3);margin:0 6px">→</span><span style="color:#50d090">${esc(r.new_value||'—')}</span>`:'';
+return`<tr>
+<td style="color:var(--t3);font-size:12px;white-space:nowrap">${dt}</td>
+<td>${badge}</td>
+<td><div style="max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.task_title||'')}</div></td>
+<td style="font-size:13px;color:var(--t3)">${esc(r.project||'')}</td>
+<td>${fieldCell}</td>
+<td style="font-size:13px">${changeCell}</td>
+</tr>`;
+}).join('');
+document.getElementById('act-table-body').innerHTML=rows||'<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--t3)">No records match the filter</td></tr>';
+document.getElementById('act-count').textContent=list.length+' records';
+}
+function exportActivityCSV(){
+if(!_actData.length){alert('Load the Activity Log tab first.');return;}
+const actAction=document.getElementById('act-filter-action').value;
+const actProj=document.getElementById('act-filter-project').value;
+const actSearch=(document.getElementById('act-search').value||'').toLowerCase().trim();
+let list=_actData;
+if(actAction!=='all')list=list.filter(r=>r.action===actAction);
+if(actProj!=='all')list=list.filter(r=>r.project===actProj);
+if(actSearch)list=list.filter(r=>(r.task_title||'').toLowerCase().includes(actSearch)||(r.project||'').toLowerCase().includes(actSearch));
+const headers=['Date/Time (Bangkok)','Action','Task Title','Project','Field Changed','Old Value','New Value'];
+const csvRows=list.map(r=>{
+const dt=new Date(r.created_at).toLocaleString('en-GB',{timeZone:'Asia/Bangkok',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+return[dt,r.action||'',r.task_title||'',r.project||'',r.field||'',r.old_value||'',r.new_value||''];
+});
+const csv=[headers,...csvRows].map(row=>row.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\r\n');
+const blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'});
+const url=URL.createObjectURL(blob);
+const a=document.createElement('a');
+a.href=url;a.download=`activity_log_${new Date().toISOString().split('T')[0]}.csv`;
+document.body.appendChild(a);a.click();document.body.removeChild(a);
+URL.revokeObjectURL(url);
+}
 function clock(){const d=new Date();document.getElementById('clock').textContent=d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short',year:'numeric'})+' · '+d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});}
 document.querySelectorAll('.modal-bg').forEach(bg=>bg.addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal(bg.id);}));
 document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal-bg.open').forEach(m=>closeModal(m.id));});
