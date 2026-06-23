@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260623l -->
+<!-- v20260623m -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -1436,13 +1436,13 @@ return `<tr data-task-id="${t.id}" style="${rowStyle}">
 <td>
 <div style="display:flex;align-items:center;gap:6px">
 <span class="proj-dot" style="background:${pc}" title="${esc(t.project)}"></span>
-<input class="task-name-inp" value="${esc(t.title)}" onchange="updateField(${t.id},'title',this.value)" title="${esc(t.title)}" style="${isDone?'text-decoration:line-through;color:var(--t3)':''}"/>
+<input class="task-name-inp" value="${esc(t.title)}" onchange="updateField('${t.id}','title',this.value)" title="${esc(t.title)}" style="${isDone?'text-decoration:line-through;color:var(--t3)':''}"/>
 </div>
 </td>
 <td>
 <div class="ow-cell">
 <div class="ow-av o-${ok}">${(t.owner||'?')[0]}</div>
-<select style="background:none;border:none;color:var(--t1);font-family:'DBHeavent','Sarabun',sans-serif;font-size:14px;outline:none;cursor:pointer" onchange="updateField(${t.id},'owner',this.value)">
+<select style="background:none;border:none;color:var(--t1);font-family:'DBHeavent','Sarabun',sans-serif;font-size:14px;outline:none;cursor:pointer" onchange="updateField('${t.id}','owner',this.value)">
 ${OWNERS.map(o=>`<option value="${o}"${o===t.owner?' selected':''}>${o}</option>`).join('')}
 </select>
 </div>
@@ -1452,18 +1452,18 @@ ${OWNERS.map(o=>`<option value="${o}"${o===t.owner?' selected':''}>${o}</option>
 <td>
 <div class="prog-wrap">
 <div class="prog-slider-row">
-<input type="range" min="0" max="100" step="5" value="${pct}" oninput="slideProgress(${t.id},parseInt(this.value),this)"/>
+<input type="range" min="0" max="100" step="5" value="${pct}" oninput="slideProgress('${t.id}',parseInt(this.value),this)"/>
 <span class="prog-pct" id="pct-${t.id}">${pct}%</span>
 </div>
 <div class="prog-bar-row">
 <div class="pb"><div class="pb-fill pf-${sk}" id="pb-${t.id}" style="width:${pct}%"></div></div>
-<select class="prog-stage-sel" onchange="updateStage(${t.id},this.value)">${stageOpts}</select>
+<select class="prog-stage-sel" onchange="updateStage('${t.id}',this.value)">${stageOpts}</select>
 </div>
 </div>
 </td>
-<td><input class="due-inp ${dueCls}" type="date" value="${t.due||''}" onchange="updateField(${t.id},'due',this.value)" title="${dueLbl}"/></td>
-<td><button class="note-btn${hasNote?' has':''}" onclick="openNote(${t.id})">${hasNote?'View note':'Add note'}</button></td>
-<td><button class="del-btn" onclick="deleteTaskList(${t.id})" title="Delete"><i class="ti ti-trash" aria-hidden="true"></i></button></td>
+<td><input class="due-inp ${dueCls}" type="date" value="${t.due||''}" onchange="updateField('${t.id}','due',this.value)" title="${dueLbl}"/></td>
+<td><button class="note-btn${hasNote?' has':''}" onclick="openNote('${t.id}')">${hasNote?'View note':'Add note'}</button></td>
+<td><button class="del-btn" onclick="deleteTaskList('${t.id}')" title="Delete"><i class="ti ti-trash" aria-hidden="true"></i></button></td>
 </tr>`;
 }
 
