@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260623e -->
+<!-- v20260623f -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -2070,7 +2070,8 @@ async function loadFromSupabase(){
     if(e1) throw e1;
     if(e2) throw e2;
     projects=projs.map(p=>({name:p.name,color:p.color,id:p.id}));
-    tasks=tks.map(t=>({id:t.id,title:t.title||'(untitled)',owner:t.owner||'',lead:t.lead||'',project:t.project||'',stage:t.stage||'Job Brief',due:t.due||'',note:t.note||'',attachments:t.attachments||[]}));
+    tasks=tks.map(t=>({id:t.id,title:t.title||'(untitled)',owner:t.owner||'',lead:t.lead||'',project:t.project||'',stage:t.stage||'Job Brief',due:t.due||'',note:t.note||'',attachments:t.attachments||[],created_at:t.created_at||''}));
+    checkForNewAssignedTasks();
   }catch(err){
     _sync('err','⚠ Offline');
     console.error('Supabase error:',err);
@@ -2169,27 +2170,43 @@ document.getElementById('login-btn').disabled=false;
 document.getElementById('login-btn').textContent='Sign in';
 document.getElementById('login-screen').style.display='flex';
 }
-// ═════════════ REALTIME NEW-BRIEF NOTIFICATION ═════════════
-const BCAST_CHANNEL='mkt-new-brief';
-let _realtimeSub=null,_toastTimer=null,_toastTaskId=null;
+// ═════════════ NEW-BRIEF NOTIFICATION (poll-based, reliable) ═════════════
+// Detects tasks newly assigned to the current PIC during the 30s data poll.
+// Works even if the PIC wasn't online at the exact moment of creation.
+let _toastTimer=null,_toastTaskId=null,_notifiedIds=new Set();
+function _lastSeenKey(){return 'mkt_lastSeen_'+(_currentUser||'');}
 function setupRealtimeNotification(){
-if(_realtimeSub){window._sb.removeChannel(_realtimeSub);_realtimeSub=null;}
-_realtimeSub=window._sb.channel(BCAST_CHANNEL,{config:{broadcast:{self:false}}})
-.on('broadcast',{event:'new-task'},({payload})=>{
-if(payload&&payload.owner&&payload.owner===_currentUser) showNewTaskNotification(payload);
-})
-.subscribe();
+// Reset per-session dedupe state when a user logs in / session restores.
+_notifiedIds=new Set();
 }
-function broadcastNewTask(task){
-if(!_realtimeSub)return;
-_realtimeSub.send({type:'broadcast',event:'new-task',payload:{
-id:task.id,title:task.title,owner:task.owner,
-lead:task.lead,project:task.project,due:task.due||''
-}}).catch(()=>{});
+// Called by task creators so they never get notified about their own new task.
+function broadcastNewTask(task){ if(task&&task.id) _notifiedIds.add(task.id); }
+function teardownRealtimeNotification(){ dismissToast(); }
+function checkForNewAssignedTasks(){
+if(!_currentUser) return;
+const key=_lastSeenKey();
+let lastSeen=localStorage.getItem(key);
+// First time on this browser for this user → baseline silently, no pop-ups
+// for tasks that already existed before they started watching.
+if(lastSeen===null){
+let maxTs='';
+tasks.forEach(t=>{ if(t.created_at&&t.created_at>maxTs) maxTs=t.created_at; });
+localStorage.setItem(key, maxTs||new Date().toISOString());
+return;
 }
-function teardownRealtimeNotification(){
-if(_realtimeSub){window._sb.removeChannel(_realtimeSub);_realtimeSub=null;}
-dismissToast();
+let newMax=lastSeen;
+const fresh=[];
+tasks.forEach(t=>{
+if(t.owner===_currentUser && t.created_at && t.created_at>lastSeen && !_notifiedIds.has(t.id)){
+fresh.push(t); _notifiedIds.add(t.id);
+if(t.created_at>newMax) newMax=t.created_at;
+}
+});
+if(newMax>lastSeen) localStorage.setItem(key,newMax);
+if(fresh.length){
+fresh.sort((a,b)=>a.created_at<b.created_at?1:-1);
+showNewTaskNotification(fresh.length>1?{...fresh[0],_extra:fresh.length-1}:fresh[0]);
+}
 }
 function showNewTaskNotification(t){
 _toastTaskId=t.id;
@@ -2198,10 +2215,12 @@ const proj=projects.find(p=>p.name===t.project);
 const pc=proj?proj.color:'#888';
 const dueText=t.due?'📅 '+t.due:'No due date';
 const leadText=t.lead?'👤 Assigned by: '+t.lead:'';
+const extraText=t._extra?'➕ +'+t._extra+' more new task'+(t._extra>1?'s':''):'';
 document.getElementById('toast-meta').innerHTML=
 `<span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${pc};margin-right:2px"></span>${esc(t.project||'No project')}</span>`+
 `<span>${esc(dueText)}</span>`+
-(leadText?`<span>${esc(leadText)}</span>`:'');
+(leadText?`<span>${esc(leadText)}</span>`:'')+
+(extraText?`<span style="font-weight:600;color:var(--gold)">${esc(extraText)}</span>`:'');
 const toast=document.getElementById('new-task-toast');
 toast.classList.add('show');
 const bar=document.getElementById('toast-bar');
