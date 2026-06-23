@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260623d -->
+<!-- v20260623e -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -1543,9 +1543,17 @@ document.getElementById('note-modal-title').textContent='Note — '+t.title.subs
 document.getElementById('nm-text').value=t.note||'';
 document.getElementById('note-modal').classList.add('open');
 }
-function saveNote(){
-const t=tasks.find(t=>t.id===noteId); if(t) t.note=document.getElementById('nm-text').value.trim();
+async function saveNote(){
+const t=tasks.find(t=>t.id===noteId);
+if(!t){closeModal('note-modal');return;}
+const _id=t.id,_title=t.title,_project=t.project;
+const _oldNote=t.note||'';
+const newNote=document.getElementById('nm-text').value.trim();
+t.note=newNote;
 closeModal('note-modal'); renderList();
+const{error}=await window._sb.from('mkt_tasks').update({note:newNote}).eq('id',_id);
+if(error){alert('Failed to save note — please try again.');return;}
+if(_oldNote!==newNote) logActivity(_id,_title,_project,'updated','note',_oldNote,newNote);
 }
 // Add via modal
 function openAddModal(){ document.getElementById('add-modal').classList.add('open'); }
@@ -1553,7 +1561,7 @@ async function addTaskModal(){
 const title=document.getElementById('a-title').value.trim();
 const owner=document.getElementById('a-owner').value;
 const lead=document.getElementById('a-lead').value;
-if(!title||!owner){ alert('Please fill in task name and owner.'); return; }
+if(!title||!owner||!lead){ alert('Please fill in task name, owner, and person in charge.'); return; }
 const _nt={title,owner,lead,project:document.getElementById('a-project').value,stage:document.getElementById('a-stage').value,due:document.getElementById('a-due').value||null,note:document.getElementById('a-note').value.trim()};
 const{data:_nd,error:_ne}=await window._sb.from('mkt_tasks').insert(_nt).select().single();
 if(_ne){alert('Save failed');return;}
@@ -2271,8 +2279,8 @@ if(window._sbReady) window._pendingLoad();
 <div style="font-size:32px;margin-bottom:12px">🔐</div>
 <div style="font-size:20px;font-weight:700;margin-bottom:6px">Set a new password</div>
 <div style="font-size:14px;color:var(--t3);margin-bottom:24px">This is your first login. Please set a new password to continue.</div>
-<input id="new-pw" class="login-field" type="password" placeholder="New password (min 8 chars)" autocomplete="new-password">
-<input id="confirm-pw" class="login-field" type="password" placeholder="Confirm new password" autocomplete="new-password">
+<input id="new-pw" class="login-field" type="password" placeholder="New password (min 8 chars)" autocomplete="new-password" onkeydown="if(event.key==='Enter')doChangePassword()">
+<input id="confirm-pw" class="login-field" type="password" placeholder="Confirm new password" autocomplete="new-password" onkeydown="if(event.key==='Enter')doChangePassword()">
 <button id="change-pw-btn" class="login-btn" onclick="doChangePassword()">Update password</button>
 <div id="change-pw-error" class="login-error"></div>
 </div>
