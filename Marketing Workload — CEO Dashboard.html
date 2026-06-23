@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260623m -->
+<!-- v20260623n -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -193,7 +193,12 @@ nav h1{font-size:17px;font-weight:600;letter-spacing:-.01em}
 .kcard-proj{font-size:12px;color:var(--t3);margin-bottom:5px;display:flex;align-items:center;gap:4px}
 .kcard-title{font-size:14px;font-weight:500;line-height:1.45;margin-bottom:8px}
 .kcard-foot{display:flex;align-items:center;justify-content:space-between}
-.kcard-note{font-size:12px;color:var(--t3);margin:5px 0;line-height:1.4}
+.kcard-note{font-size:12px;color:var(--t3);margin:5px 0;line-height:1.4;word-break:break-word}
+.kcard-links{display:flex;flex-wrap:wrap;gap:4px;margin:6px 0 2px}
+.klink{display:inline-flex;align-items:center;gap:4px;max-width:100%;background:var(--surf2);border:1px solid var(--b1);border-radius:12px;padding:2px 8px 2px 6px;font-size:11px;color:var(--t2);text-decoration:none;transition:background .15s,border-color .15s,color .15s;cursor:pointer}
+.klink:hover{background:var(--surf3);border-color:var(--gold);color:var(--t1)}
+.klink-ico{width:14px;height:14px;border-radius:3px;flex-shrink:0;object-fit:contain}
+.klink span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:160px}
 .kcard-actions{display:flex;gap:3px;margin-top:7px;padding-top:7px;border-top:1px solid var(--b0)}
 .kcard-thumbs{display:flex;gap:5px;margin:8px 0 4px;flex-wrap:wrap}
 .kcard-thumb{width:54px;height:54px;border-radius:6px;object-fit:cover;border:1px solid var(--b1);flex-shrink:0;cursor:pointer;transition:opacity .15s}
@@ -1628,6 +1633,40 @@ function thumbsHTML(t){
   const more=extra>0?`<div class="kcard-thumb-more k-attach">+${extra}</div>`:'';
   return `<div class="kcard-thumbs">${items}${more}</div>`;
 }
+// ── URL link chips (favicon + friendly label) for card notes ──
+function _linkFavicon(u){try{const url=new URL(u);return 'https://www.google.com/s2/favicons?sz=64&domain='+encodeURIComponent(url.hostname);}catch(e){return '';}}
+function _linkLabel(u){
+try{
+const url=new URL(u);
+const h=url.hostname.replace(/^www\./,'');
+const p=url.pathname||'';
+if(h.includes('sharepoint.com'))return 'SharePoint';
+if(h==='docs.google.com'){if(p.includes('/presentation'))return 'Google Slides';if(p.includes('/spreadsheets'))return 'Google Sheets';if(p.includes('/document'))return 'Google Docs';if(p.includes('/forms'))return 'Google Forms';return 'Google Docs';}
+if(h==='drive.google.com')return 'Google Drive';
+if(h.includes('youtube.com')||h==='youtu.be')return 'YouTube';
+if(h.includes('canva.com'))return 'Canva';
+if(h.includes('figma.com'))return 'Figma';
+if(h.includes('facebook.com')||h==='fb.com')return 'Facebook';
+if(h.includes('dropbox.com'))return 'Dropbox';
+const base=h.split('.')[0];
+return base.charAt(0).toUpperCase()+base.slice(1);
+}catch(e){return 'Link';}
+}
+function noteHTML(note){
+const urlRe=/(https?:\/\/[^\s]+)/g;
+const urls=note.match(urlRe)||[];
+const text=note.replace(urlRe,' ').replace(/\s+/g,' ').trim();
+let html='';
+if(text)html+=`<div class="kcard-note">${esc(text)}</div>`;
+if(urls.length){
+html+='<div class="kcard-links">'+urls.map(u=>{
+const fav=_linkFavicon(u),lbl=_linkLabel(u);
+const ico=fav?`<img src="${fav}" class="klink-ico" alt="" loading="lazy" draggable="false" onerror="this.style.display='none'">`:'';
+return `<a class="klink k-link" href="${esc(u)}" target="_blank" rel="noopener noreferrer" draggable="false" title="${esc(u)}">${ico}<span>${esc(lbl)}</span></a>`;
+}).join('')+'</div>';
+}
+return html;
+}
 function kcardHTML(t,stage,si){
 const ok=OKEY(t.owner);
 const canL=si>0,canR=si<STAGES.length-1;
@@ -1642,7 +1681,7 @@ dueHTML=`<span class="due-tag ${cls}">${lbl}</span>`;
 }
 const ac=(t.attachments||[]).length;
 const attachBtn=`<button class="cta k-attach" title="Attachments">&#128206;${ac>0?`<span class="attach-badge">${ac}</span>`:''}</button>`;
-return `<div class="kcard" data-id="${t.id}" data-can-l="${canL?1:0}" data-can-r="${canR?1:0}"><div class="kcard-proj"><span style="width:6px;height:6px;border-radius:50%;background:${pc};flex-shrink:0;display:inline-block"></span>${esc(t.project)}</div><div class="kcard-title">${esc(t.title)}</div>${t.note?`<div class="kcard-note">${esc(t.note)}</div>`:''}<div class="kcard-foot"><span class="owner-pip o-${ok}">${t.owner}</span>${t.lead?`<span style="font-size:11px;color:var(--t3);background:var(--surf3);border-radius:10px;padding:1px 7px;margin-left:4px">&#128100; ${esc(t.lead)}</span>`:''} ${dueHTML}</div>${thumbsHTML(t)}<div class="kcard-actions">${canL?'<button class="cta k-prev">&#8592; Prev</button>':''}<button class="cta k-edit">&#9998; Edit</button>${canR?'<button class="cta k-next">Next &#8594;</button>':''}${attachBtn}<button class="cta del k-del">&#x2715; Del</button></div></div>`;
+return `<div class="kcard" data-id="${t.id}" data-can-l="${canL?1:0}" data-can-r="${canR?1:0}"><div class="kcard-proj"><span style="width:6px;height:6px;border-radius:50%;background:${pc};flex-shrink:0;display:inline-block"></span>${esc(t.project)}</div><div class="kcard-title">${esc(t.title)}</div>${t.note?noteHTML(t.note):''}<div class="kcard-foot"><span class="owner-pip o-${ok}">${t.owner}</span>${t.lead?`<span style="font-size:11px;color:var(--t3);background:var(--surf3);border-radius:10px;padding:1px 7px;margin-left:4px">&#128100; ${esc(t.lead)}</span>`:''} ${dueHTML}</div>${thumbsHTML(t)}<div class="kcard-actions">${canL?'<button class="cta k-prev">&#8592; Prev</button>':''}<button class="cta k-edit">&#9998; Edit</button>${canR?'<button class="cta k-next">Next &#8594;</button>':''}${attachBtn}<button class="cta del k-del">&#x2715; Del</button></div></div>`;
 }
 function renderSbStats(){
 const list=activeProj==='All'?tasks:tasks.filter(t=>t.project===activeProj);
@@ -1673,6 +1712,8 @@ function setupDragDrop(){
     if(btnNext)   btnNext.addEventListener('click',e=>{e.stopPropagation();moveTask(rawId,1);});
     if(btnDel)    btnDel.addEventListener('click',e=>{e.stopPropagation();doDelete(rawId);});
     card.querySelectorAll('.k-attach').forEach(el=>el.addEventListener('click',e=>{e.stopPropagation();openAttachModal(rawId);}));
+    // Link chips: open the URL without triggering the card's edit/drag.
+    card.querySelectorAll('.k-link').forEach(el=>el.addEventListener('click',e=>{e.stopPropagation();}));
     card.setAttribute('draggable','true');
     card.addEventListener('dragstart',e=>{
       _dragId=rawId;
