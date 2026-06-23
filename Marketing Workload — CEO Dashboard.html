@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260623k -->
+<!-- v20260623l -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -359,7 +359,7 @@ if(window._pendingLoad) window._pendingLoad();
 <button class="ptab active" onclick="showView(&#39;dashboard&#39;,this)"><i class="ti ti-layout-dashboard" aria-hidden="true"></i>CEO Dashboard</button>
 <button class="ptab" onclick="showView(&#39;list&#39;,this)"><i class="ti ti-list-details" aria-hidden="true"></i>Task List</button>
 <button class="ptab" onclick="showView(&#39;board&#39;,this)"><i class="ti ti-layout-kanban" aria-hidden="true"></i>Kanban Board</button>
-<button class="ptab" onclick="showView(&#39;activity&#39;,this)"><i class="ti ti-history" aria-hidden="true"></i>Activity Log</button>
+<button id="activity-tab" class="ptab" onclick="showView(&#39;activity&#39;,this)" style="display:none"><i class="ti ti-history" aria-hidden="true"></i>Activity Log</button>
 <div style="flex:1"></div>
 <button class="ptab" onclick="openTeamEmailsModal()" title="Notification settings" style="margin-right:6px"><i class="ti ti-bell-ringing" aria-hidden="true"></i>Notify</button>
 <div id="project-nav-tabs" style="display:flex;align-items:center;gap:4px;padding:0 4px"><div style="display:flex;align-items:center;gap:0">
@@ -1013,6 +1013,7 @@ function _showErr(msg){
   d.textContent=msg;
 }
 function showView(v,el){
+if(v==='activity'&&!_isAdminUser()){return;} // Activity Log: Super Admins only
 document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
 document.querySelectorAll('.ptab').forEach(x=>x.classList.remove('active'));
 const _tgt=document.getElementById('view-'+v);
@@ -1873,6 +1874,9 @@ const disp=document.getElementById('user-display-name');
 if(disp)disp.textContent=name;
 const info=document.getElementById('user-info');
 if(info)info.style.display=name?'flex':'none';
+// Activity Log is for Super Administrators only.
+const at=document.getElementById('activity-tab');
+if(at)at.style.display=_isAdminUser()?'':'none';
 }
 async function logActivity(taskId,taskTitle,project,action,field,oldVal,newVal){
 try{
