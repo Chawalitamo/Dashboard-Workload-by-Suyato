@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260623j -->
+<!-- v20260623k -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -994,8 +994,8 @@ const OKEY=n=>n.toLowerCase().replace(/\s/g,'');
 let tasks=[];
 // ── Per-user task visibility ──
 // Each account sees only tasks they're involved in (PIC/owner OR lead),
-// except admins (Sun) who keep the full company-wide overview.
-const ADMIN_USERS=['Sun'];
+// except Super Administrators (Sun, Por) who keep the full company-wide overview.
+const ADMIN_USERS=['Sun','Por'];
 function _isAdminUser(){return ADMIN_USERS.includes(_currentUser);}
 function applyUserFilter(list){
 if(!_currentUser||_isAdminUser()) return list;
