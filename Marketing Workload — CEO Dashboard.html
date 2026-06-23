@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260623i -->
+<!-- v20260623j -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -992,6 +992,15 @@ const OWNERS=['Por','Sun','Jew','Nod','Donut','Ming','Ji','Kanom','Ton','Nick','
 const LEADS=['Por','Jew','Sun','Nod','Ji','Donut','Aom','Ming'];
 const OKEY=n=>n.toLowerCase().replace(/\s/g,'');
 let tasks=[];
+// ── Per-user task visibility ──
+// Each account sees only tasks they're involved in (PIC/owner OR lead),
+// except admins (Sun) who keep the full company-wide overview.
+const ADMIN_USERS=['Sun'];
+function _isAdminUser(){return ADMIN_USERS.includes(_currentUser);}
+function applyUserFilter(list){
+if(!_currentUser||_isAdminUser()) return list;
+return list.filter(t=>t.owner===_currentUser||t.lead===_currentUser);
+}
 // nextId → Supabase UUIDs
 let editId=null;
 let noteId=null;
@@ -2070,7 +2079,8 @@ async function loadFromSupabase(){
     if(e1) throw e1;
     if(e2) throw e2;
     projects=projs.map(p=>({name:p.name,color:p.color,id:p.id}));
-    tasks=tks.map(t=>({id:t.id,title:t.title||'(untitled)',owner:t.owner||'',lead:t.lead||'',project:t.project||'',stage:t.stage||'Job Brief',due:t.due||'',note:t.note||'',attachments:t.attachments||[],created_at:t.created_at||''}));
+    const _all=tks.map(t=>({id:t.id,title:t.title||'(untitled)',owner:t.owner||'',lead:t.lead||'',project:t.project||'',stage:t.stage||'Job Brief',due:t.due||'',note:t.note||'',attachments:t.attachments||[],created_at:t.created_at||''}));
+    tasks=applyUserFilter(_all);
     checkForNewAssignedTasks();
   }catch(err){
     _sync('err','⚠ Offline');
@@ -2142,6 +2152,7 @@ localStorage.setItem('mkt_login_time',Date.now().toString());
 document.getElementById('login-screen').style.display='none';
 btn.disabled=false;btn.textContent='Sign in';
 setupRealtimeNotification();
+loadFromSupabase();
 }
 async function doChangePassword(){
 const newPw=document.getElementById('new-pw').value;
@@ -2157,6 +2168,7 @@ if(error){errEl.textContent=error.message;btn.disabled=false;btn.textContent='Up
 localStorage.setItem('mkt_login_time',Date.now().toString());
 document.getElementById('change-pw-modal').style.display='none';
 setupRealtimeNotification();
+loadFromSupabase();
 }
 async function doSignOut(){
 teardownRealtimeNotification();
@@ -2252,6 +2264,7 @@ window._pendingLoad = async function(){
     const name=EMAIL_TO_NAME[email]||email;
     setCurrentUser(name);
     setupRealtimeNotification();
+    loadFromSupabase();
   } else {
     if(session) await window._sb.auth.signOut();
     localStorage.removeItem('mkt_login_time');
