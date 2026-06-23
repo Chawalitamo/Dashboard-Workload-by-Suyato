@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260623g -->
+<!-- v20260623h -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -2223,27 +2223,25 @@ document.getElementById('toast-meta').innerHTML=
 `<span>${esc(dueText)}</span>`+
 (leadText?`<span>${esc(leadText)}</span>`:'')+
 (extraText?`<span style="font-weight:600;color:var(--gold)">${esc(extraText)}</span>`:'');
-const toast=document.getElementById('new-task-overlay');
-toast.classList.add('show');
-const bar=document.getElementById('toast-bar');
-bar.style.transition='none';bar.style.width='100%';
-requestAnimationFrame(()=>requestAnimationFrame(()=>{bar.style.transition='width 8s linear';bar.style.width='0%';}));
-if(_toastTimer)clearTimeout(_toastTimer);
-_toastTimer=setTimeout(()=>dismissToast(),8000);
+// Permanent pop-up: stays until the PIC clicks "Acknowledge" or "Go to Task".
+document.getElementById('new-task-overlay').classList.add('show');
 }
 function dismissToast(){
-if(_toastTimer){clearTimeout(_toastTimer);_toastTimer=null;}
 document.getElementById('new-task-overlay').classList.remove('show');
 }
 function toastViewTask(){
+const id=_toastTaskId;
 dismissToast();
-const listTab=document.querySelector('.ptab:nth-child(2)');
-showView('list',listTab);
-if(_toastTaskId){
+// Make sure the card is visible: show all projects, clear owner filter, open board.
+activeProj='All';
+const bfo=document.getElementById('bf-owner'); if(bfo) bfo.value='';
+const boardTab=document.querySelector('.ptab:nth-child(3)');
+showView('board',boardTab);
+if(id){
 setTimeout(()=>{
-const row=document.querySelector(`[data-task-id="${_toastTaskId}"]`);
-if(row){row.scrollIntoView({behavior:'smooth',block:'center'});row.style.background='rgba(232,197,71,0.15)';setTimeout(()=>{row.style.background='';},2500);}
-},350);
+const card=document.querySelector(`.kcard[data-id="${id}"]`);
+if(card){card.scrollIntoView({behavior:'smooth',block:'center'});card.style.borderColor='var(--gold)';card.style.boxShadow='0 0 0 2px var(--gold)';setTimeout(()=>{card.style.borderColor='';card.style.boxShadow='';},2800);}
+},400);
 }
 }
 function handleLoginKey(e){if(e.key==='Enter')doLogin();}
@@ -2283,15 +2281,14 @@ if(window._sbReady) window._pendingLoad();
 </div>
 
 <!-- NEW-BRIEF TOAST NOTIFICATION -->
-<div id="new-task-overlay" onclick="if(event.target===this)dismissToast()">
+<div id="new-task-overlay">
 <div id="new-task-toast">
 <div class="toast-hdr"><i class="ti ti-bell-ringing"></i> New brief assigned to you</div>
 <div class="toast-ttl" id="toast-ttl"></div>
 <div class="toast-meta" id="toast-meta"></div>
-<div class="toast-prog"><div class="toast-prog-bar" id="toast-bar"></div></div>
 <div class="toast-acts">
-<button class="toast-view" onclick="toastViewTask()"><i class="ti ti-arrow-right" style="vertical-align:-1px"></i> View task</button>
-<button class="toast-dismiss" onclick="dismissToast()">Dismiss</button>
+<button class="toast-view" onclick="toastViewTask()"><i class="ti ti-layout-kanban" style="vertical-align:-2px"></i> Go to Task</button>
+<button class="toast-dismiss" onclick="dismissToast()"><i class="ti ti-check" style="vertical-align:-2px"></i> Acknowledge</button>
 </div>
 </div>
 </div>
