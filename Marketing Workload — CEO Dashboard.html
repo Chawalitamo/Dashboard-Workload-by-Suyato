@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260623c -->
+<!-- v20260623d -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -1559,6 +1559,7 @@ const{data:_nd,error:_ne}=await window._sb.from('mkt_tasks').insert(_nt).select(
 if(_ne){alert('Save failed');return;}
 tasks.unshift({id:_nd.id,..._nt,due:_nt.due||''});
 logActivity(_nd.id,_nt.title,_nt.project,'created',null,null,null);
+broadcastNewTask({id:_nd.id,..._nt});
 document.getElementById('a-title').value=''; document.getElementById('a-due').value=''; document.getElementById('a-note').value=''; document.getElementById('a-owner').value=''; document.getElementById('a-lead').value='';
 closeModal('add-modal'); renderList();
 postToTeams('created',{title:_nt.title,owner:_nt.owner,project:_nt.project,stage:_nt.stage,due:_nt.due||''});
@@ -1838,6 +1839,7 @@ const{data:_fd,error:_fe}=await window._sb.from('mkt_tasks').insert(_ft).select(
 if(_fe){alert('Save failed');return;}
 tasks.unshift({id:_fd.id,..._ft,due:_ft.due||''});
 logActivity(_fd.id,_ft.title,_ft.project,'created',null,null,null);
+broadcastNewTask({id:_fd.id,..._ft});
 document.getElementById('f-title').value='';document.getElementById('f-due').value='';document.getElementById('f-note').value='';document.getElementById('f-lead').value='';
 postToTeams('created',{title:_ft.title,owner:_ft.owner,project:_ft.project,stage:_ft.stage,due:_ft.due||''});
 fetch('https://fxmigukayxvieziseqil.supabase.co/functions/v1/notify-new-task',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:_ft.title,owner:_ft.owner,lead:_ft.lead,project:_ft.project,stage:_ft.stage,due:_ft.due||'',note:_ft.note})}).catch(()=>{});
@@ -2160,15 +2162,22 @@ document.getElementById('login-btn').textContent='Sign in';
 document.getElementById('login-screen').style.display='flex';
 }
 // ═════════════ REALTIME NEW-BRIEF NOTIFICATION ═════════════
+const BCAST_CHANNEL='mkt-new-brief';
 let _realtimeSub=null,_toastTimer=null,_toastTaskId=null;
 function setupRealtimeNotification(){
 if(_realtimeSub){window._sb.removeChannel(_realtimeSub);_realtimeSub=null;}
-_realtimeSub=window._sb.channel('new-task-'+Date.now())
-.on('postgres_changes',{event:'INSERT',schema:'public',table:'mkt_tasks'},payload=>{
-const t=payload.new;
-if(t.owner&&t.owner===_currentUser) showNewTaskNotification(t);
+_realtimeSub=window._sb.channel(BCAST_CHANNEL,{config:{broadcast:{self:false}}})
+.on('broadcast',{event:'new-task'},({payload})=>{
+if(payload&&payload.owner&&payload.owner===_currentUser) showNewTaskNotification(payload);
 })
 .subscribe();
+}
+function broadcastNewTask(task){
+if(!_realtimeSub)return;
+_realtimeSub.send({type:'broadcast',event:'new-task',payload:{
+id:task.id,title:task.title,owner:task.owner,
+lead:task.lead,project:task.project,due:task.due||''
+}}).catch(()=>{});
 }
 function teardownRealtimeNotification(){
 if(_realtimeSub){window._sb.removeChannel(_realtimeSub);_realtimeSub=null;}
