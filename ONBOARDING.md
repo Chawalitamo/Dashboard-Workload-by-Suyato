@@ -1,7 +1,7 @@
 # Marketing Workload — CEO Dashboard · Session Handoff
 
 Single-file web app for tracking the marketing team's workload. This doc lets a
-fresh session pick up instantly. Current version: **v20260623n** (tag `version-A`).
+fresh session pick up instantly. Current version: **v20260623p** (`version-A` tag is at v20260623n).
 
 ## Where everything lives
 
@@ -69,6 +69,23 @@ fresh session pick up instantly. Current version: **v20260623n** (tag `version-A
   **Acknowledge** (`dismissToast` → `_ackPending`) or **Go to Task** (`toastViewTask`
   → opens Kanban, clears filters, highlights the card). Acknowledged IDs persist in
   `localStorage['mkt_ack_<user>']`. Creators are auto-acknowledged for their own briefs.
+
+## PIC Calendar (timeline)
+
+- Tab between Kanban and Activity Log. `renderCalendar()` draws a Gantt-style
+  timeline grouped by PIC (`owner`): each ongoing task (not Complete, has both
+  `created_at` and `due`) is a bar from **brief date → deadline**. Bar colour =
+  project; overdue = red outline; On Hold = dimmed; gold line = today. Click a bar
+  → `openEdit`.
+
+## Date inputs (flatpickr) & the Buddhist-year gotcha
+
+- All due-date fields are **flatpickr** click-only calendar dropdowns (CDN), not
+  typed inputs — Thai-locale browsers were saving Buddhist years (e.g. `2569`
+  instead of `2026`), which broke the calendar (bars spanned ~543 years).
+- `_normDue(v)` is a backstop on every save path: any year > 2200 → subtract 543.
+- `_initDP()` (re)initialises pickers; called on load + after `renderList()`.
+  `_setDP(el,val)` sets a picker's value programmatically (use instead of `.value`).
 
 ## Kanban specifics
 
