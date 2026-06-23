@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260622c -->
+<!-- v20260623a -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -28,10 +28,6 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:0 24px
 .badge-logo{font-family:'DBHeavent',monospace;font-size:14px;font-weight:500;color:var(--gold);background:var(--gold3);border:1px solid rgba(232,197,71,.25);padding:4px 10px;border-radius:var(--rsm);letter-spacing:.04em}
 nav h1{font-size:17px;font-weight:600;letter-spacing:-.01em}
 #clock{font-family:'DBHeavent',monospace;font-size:13px;color:var(--t3)}
-.who-wrap{display:flex;align-items:center;gap:7px;margin-right:16px}
-.who-wrap label{font-size:12px;color:var(--t3);white-space:nowrap}
-.who-sel{background:var(--surf2);border:1px solid var(--b2);color:var(--t1);border-radius:var(--rsm);padding:5px 10px;font-family:'DBHeavent','Sarabun',sans-serif;font-size:14px;cursor:pointer;min-width:110px}
-.who-sel.unset{border-color:#f07070;color:#f07070}
 /* PAGE TABS */
 .page-tabs{display:flex;border-bottom:1px solid var(--b1);flex-shrink:0;padding:0 24px;background:var(--bg)}
 .ptab{display:flex;align-items:center;gap:7px;padding:10px 18px;font-size:15px;font-weight:500;color:var(--t3);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;margin-bottom:-1px}
@@ -303,23 +299,30 @@ button{font-family:'DBHeavent','Sarabun',sans-serif}
 /* Summary numbers in KPI */
 .kpi-big{font-family:'DBHeavent',monospace;font-size:36px;font-weight:700;line-height:1;margin-bottom:4px}
 .kpi-delta{font-size:13px;margin-top:4px}
-/* WHO-ARE-YOU MODAL */
-#who-modal{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:9999;display:flex;align-items:center;justify-content:center}
-.who-card{background:var(--surf);border:1px solid var(--b2);border-radius:var(--rxl);padding:36px 40px;width:520px;max-width:94vw;text-align:center}
-.who-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:24px 0}
-.who-btn{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 6px;background:var(--surf2);border:2px solid var(--b1);border-radius:10px;cursor:pointer;transition:all .15s;font-family:'DBHeavent','Sarabun',sans-serif}
-.who-btn:hover{background:var(--surf3);border-color:var(--b2)}
-.who-btn.chosen{border-color:var(--gold);background:var(--gold3)}
-.who-btn .wa{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;flex-shrink:0}
-.who-btn span{font-size:13px;color:var(--t2)}
-.who-btn.chosen span{color:var(--gold);font-weight:600}
-.who-confirm{width:100%;padding:13px;background:var(--gold);color:#13131f;border:none;border-radius:var(--rsm);font-family:'DBHeavent','Sarabun',sans-serif;font-size:16px;font-weight:700;cursor:pointer;transition:opacity .15s;margin-top:4px}
-.who-confirm:disabled{opacity:.35;cursor:not-allowed}
-.who-confirm:not(:disabled):hover{opacity:.88}
+/* LOGIN SCREEN */
+#login-screen{position:fixed;inset:0;background:#0d0d0c;z-index:9999;display:flex;align-items:center;justify-content:center}
+.login-card{background:var(--surf);border:1px solid var(--b2);border-radius:var(--rxl);padding:44px 48px;width:420px;max-width:94vw;text-align:center}
+.login-logo{width:64px;height:64px;object-fit:cover;border-radius:12px;margin-bottom:20px}
+.login-title{font-size:22px;font-weight:700;margin-bottom:6px;letter-spacing:-.01em}
+.login-sub{font-size:14px;color:var(--t3);margin-bottom:28px}
+.login-field{width:100%;background:var(--surf2);border:1px solid var(--b2);color:var(--t1);border-radius:var(--rsm);padding:12px 14px;font-family:'DBHeavent','Sarabun',sans-serif;font-size:15px;margin-bottom:12px;outline:none;transition:border-color .15s}
+.login-field:focus{border-color:var(--gold)}
+.login-btn{width:100%;padding:13px;background:var(--gold);color:#13131f;border:none;border-radius:var(--rsm);font-family:'DBHeavent','Sarabun',sans-serif;font-size:16px;font-weight:700;cursor:pointer;transition:opacity .15s;margin-top:4px}
+.login-btn:hover:not(:disabled){opacity:.88}
+.login-btn:disabled{opacity:.4;cursor:not-allowed}
+.login-error{font-size:13px;color:#f07070;margin-top:10px;min-height:18px}
+/* CHANGE PASSWORD MODAL */
+#change-pw-modal{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:9999;display:none;align-items:center;justify-content:center}
+.change-pw-card{background:var(--surf);border:1px solid var(--b2);border-radius:var(--rxl);padding:40px 44px;width:400px;max-width:94vw;text-align:center}
+/* NAV USER INFO */
+#user-info{display:none;align-items:center;gap:10px;margin-right:14px}
+#user-display-name{font-size:14px;font-weight:600;color:var(--gold)}
+.signout-btn{background:var(--surf2);border:1px solid var(--b2);color:var(--t2);border-radius:var(--rsm);padding:5px 12px;font-family:'DBHeavent','Sarabun',sans-serif;font-size:13px;cursor:pointer;transition:all .15s}
+.signout-btn:hover{background:var(--surf3);color:var(--t1)}
 </style>
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-window._sb = createClient('https://fxmigukayxvieziseqil.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ4bWlndWtheXh2aWV6aXNlcWlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0Mjg5NzcsImV4cCI6MjA5NTAwNDk3N30.ZGqBI_QfJdp68hYBxW0rw78Z2u9tIV5Ru3AFydYozEA');
+window._sb = createClient('https://fxmigukayxvieziseqil.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ4bWlndWtheXh2aWV6aXNlcWlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0Mjg5NzcsImV4cCI6MjA5NTAwNDk3N30.ZGqBI_QfJdp68hYBxW0rw78Z2u9tIV5Ru3AFydYozEA',{auth:{persistSession:false}});
 window._sbReady = true;
 if(window._pendingLoad) window._pendingLoad();
 </script>
@@ -330,15 +333,10 @@ if(window._pendingLoad) window._pendingLoad();
 <img src="data:image/webp;base64,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" alt="CJx" style="height:38px;width:38px;object-fit:cover;border-radius:7px;flex-shrink:0">
 <h1>Marketing Workload</h1>
 </div>
-<div class="who-wrap">
-<label><i class="ti ti-user" style="vertical-align:-2px"></i> You are:</label>
-<select id="current-user-sel" class="who-sel unset" onchange="setCurrentUser(this.value)">
-<option value="">— Select name —</option>
-<option>Por</option><option>Sun</option><option>Jew</option><option>Nod</option>
-<option>Donut</option><option>Ming</option><option>Ji</option><option>Kanom</option>
-<option>Ton</option><option>Nick</option><option>Benz</option><option>Ju</option>
-<option>Toon</option><option>Witch</option><option>Aom</option>
-</select>
+<div id="user-info">
+<i class="ti ti-user-circle" style="font-size:18px;color:var(--gold)"></i>
+<span id="user-display-name"></span>
+<button class="signout-btn" onclick="doSignOut()"><i class="ti ti-logout" style="font-size:14px;vertical-align:-1px"></i> Sign out</button>
 </div>
 <span id="sync-dot" style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: rgb(80, 208, 144); margin-right: 5px;"></span><span id="sync-lbl" style="font-size:13px;color:var(--t3);margin-right:12px">● Live · 11:58</span><span id="clock">Wed, 27 May 2026 · 11:58</span>
 </nav>
@@ -1837,8 +1835,10 @@ function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').repl
 let _currentUser='';
 function setCurrentUser(name){
 _currentUser=name;
-const sel=document.getElementById('current-user-sel');
-if(sel){sel.value=name;sel.classList.toggle('unset',!name);}
+const disp=document.getElementById('user-display-name');
+if(disp)disp.textContent=name;
+const info=document.getElementById('user-info');
+if(info)info.style.display=name?'flex':'none';
 }
 async function logActivity(taskId,taskTitle,project,action,field,oldVal,newVal){
 try{
@@ -2069,61 +2069,109 @@ window.onerror=function(msg,src,line,col,err){
   return false;
 };
 
-// ═════════════ WHO-ARE-YOU MODAL ═════════════
-const MEMBER_COLORS={por:'#c4a8ff',sun:'#7dd4a0',jew:'#f4a0a0',nod:'#7ab8f5',donut:'#f5c870',ming:'#a4d870',ji:'#f59ab8',kanom:'#70d4d4',ton:'#f5a870',nick:'#b07af5',benz:'#70a8f5',ju:'#f57070',toon:'#60d0a0',witch:'#e0b860',aom:'#d090e0'};
-let _whoChosen='';
-function _buildWhoModal(){
-const grid=document.getElementById('who-grid');
-if(!grid)return;
-grid.innerHTML=OWNERS.map(name=>{
-const col=MEMBER_COLORS[OKEY(name)]||'#888';
-return`<button class="who-btn" onclick="pickWho('${name}',this)" type="button">
-<div class="wa o-${OKEY(name)}" style="background:${col}22;color:${col}">${name[0]}</div>
-<span>${name}</span>
-</button>`;
-}).join('');
+// ═════════════ AUTH ═════════════
+const EMAIL_TO_NAME={
+'chawalit.amo@cjmart.co.th':'Sun',
+'prapat.kav@cjmart.co.th':'Nick',
+'siriyaporn.sa@cjmart.co.th':'Ming',
+'pornsawan.ji@cjmart.co.th':'Kanom',
+'warut.ka@cjmart.co.th':'Ton',
+'jutharat.su@cjmart.co.th':'Ju',
+'suthida.li@cjmart.co.th':'Jew',
+'surasit.wa@cjmart.co.th':'Benz',
+'witch.me@cjmart.co.th':'Witch',
+'pimkamon.ki@cjmart.co.th':'Nod',
+'thanatchaporn.ch@cjmart.co.th':'Donut',
+'rungkit.tu@cjmart.co.th':'Toon',
+'jomkwan.sr@cjmart.co.th':'Por',
+'adirut.nar@cjmart.co.th':'Ji',
+'narueporn.vit@cjmart.co.th':'Aom'
+};
+async function doLogin(){
+const email=document.getElementById('login-email').value.trim().toLowerCase();
+const pw=document.getElementById('login-password').value;
+const errEl=document.getElementById('login-error');
+const btn=document.getElementById('login-btn');
+errEl.textContent='';
+btn.disabled=true;btn.textContent='Signing in…';
+const{data,error}=await window._sb.auth.signInWithPassword({email,password:pw});
+if(error){
+errEl.textContent=error.message==='Invalid login credentials'?'Incorrect email or password.':error.message;
+btn.disabled=false;btn.textContent='Sign in';
+return;
 }
-function pickWho(name,el){
-_whoChosen=name;
-document.querySelectorAll('.who-btn').forEach(b=>b.classList.remove('chosen'));
-el.classList.add('chosen');
-const btn=document.getElementById('who-confirm-btn');
-btn.disabled=false;
-btn.textContent='Continue as '+name+' →';
+const name=EMAIL_TO_NAME[email]||email;
+setCurrentUser(name);
+if(data.user?.user_metadata?.must_change_password){
+document.getElementById('login-screen').style.display='none';
+document.getElementById('change-pw-modal').style.display='flex';
+document.getElementById('new-pw').value='';
+document.getElementById('confirm-pw').value='';
+document.getElementById('change-pw-error').textContent='';
+const cpb=document.getElementById('change-pw-btn');
+if(cpb){cpb.disabled=false;cpb.textContent='Update password';}
+return;
 }
-function confirmWho(){
-if(!_whoChosen)return;
-setCurrentUser(_whoChosen);
-document.getElementById('who-modal').style.display='none';
+document.getElementById('login-screen').style.display='none';
+btn.disabled=false;btn.textContent='Sign in';
 }
-function showWhoModal(){
-_whoChosen='';
-_currentUser='';
-const sel=document.getElementById('current-user-sel');
-if(sel){sel.value='';sel.classList.add('unset');}
-_buildWhoModal();
-const btn=document.getElementById('who-confirm-btn');
-if(btn){btn.disabled=true;btn.textContent='Select your name to continue →';}
-document.getElementById('who-modal').style.display='flex';
+async function doChangePassword(){
+const newPw=document.getElementById('new-pw').value;
+const confirmPw=document.getElementById('confirm-pw').value;
+const errEl=document.getElementById('change-pw-error');
+const btn=document.getElementById('change-pw-btn');
+errEl.textContent='';
+if(newPw.length<8){errEl.textContent='Password must be at least 8 characters.';return;}
+if(newPw!==confirmPw){errEl.textContent='Passwords do not match.';return;}
+btn.disabled=true;btn.textContent='Updating…';
+const{error}=await window._sb.auth.updateUser({password:newPw,data:{must_change_password:false}});
+if(error){errEl.textContent=error.message;btn.disabled=false;btn.textContent='Update password';return;}
+document.getElementById('change-pw-modal').style.display='none';
 }
+async function doSignOut(){
+await window._sb.auth.signOut();
+setCurrentUser('');
+document.getElementById('login-email').value='';
+document.getElementById('login-password').value='';
+document.getElementById('login-error').textContent='';
+document.getElementById('login-btn').disabled=false;
+document.getElementById('login-btn').textContent='Sign in';
+document.getElementById('login-screen').style.display='flex';
+}
+function handleLoginKey(e){if(e.key==='Enter')doLogin();}
 
-window._pendingLoad = function(){
-  // Load data in background while user picks name
+window._pendingLoad = async function(){
+  await window._sb.auth.signOut();
   loadFromSupabase();
   setInterval(loadFromSupabase, 30000);
-  showWhoModal();
+  document.getElementById('login-screen').style.display='flex';
 };
 if(window._sbReady) window._pendingLoad();
 </script>
 
-<!-- WHO-ARE-YOU MODAL -->
-<div id="who-modal" style="display:none">
-<div class="who-card">
-<div style="font-size:28px;margin-bottom:6px">👋</div>
-<div style="font-size:20px;font-weight:700;margin-bottom:6px">Who are you?</div>
-<div style="font-size:14px;color:var(--t3)">Select your name — this will be recorded with every change you make.</div>
-<div class="who-grid" id="who-grid"></div>
-<button class="who-confirm" id="who-confirm-btn" disabled onclick="confirmWho()">Select your name to continue →</button>
+<!-- LOGIN SCREEN -->
+<div id="login-screen" style="display:none">
+<div class="login-card">
+<img class="login-logo" src="data:image/webp;base64,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" alt="CJx">
+<div class="login-title">Marketing Dashboard</div>
+<div class="login-sub">Sign in with your @cjmart.co.th email</div>
+<input id="login-email" class="login-field" type="email" placeholder="your.name@cjmart.co.th" autocomplete="username" onkeydown="handleLoginKey(event)">
+<input id="login-password" class="login-field" type="password" placeholder="Password" autocomplete="current-password" onkeydown="handleLoginKey(event)">
+<button id="login-btn" class="login-btn" onclick="doLogin()">Sign in</button>
+<div id="login-error" class="login-error"></div>
+</div>
+</div>
+
+<!-- CHANGE PASSWORD MODAL -->
+<div id="change-pw-modal">
+<div class="change-pw-card">
+<div style="font-size:32px;margin-bottom:12px">🔐</div>
+<div style="font-size:20px;font-weight:700;margin-bottom:6px">Set a new password</div>
+<div style="font-size:14px;color:var(--t3);margin-bottom:24px">This is your first login. Please set a new password to continue.</div>
+<input id="new-pw" class="login-field" type="password" placeholder="New password (min 8 chars)" autocomplete="new-password">
+<input id="confirm-pw" class="login-field" type="password" placeholder="Confirm new password" autocomplete="new-password">
+<button id="change-pw-btn" class="login-btn" onclick="doChangePassword()">Update password</button>
+<div id="change-pw-error" class="login-error"></div>
 </div>
 </div>
 
