@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260623b -->
+<!-- v20260623c -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -337,7 +337,7 @@ button{font-family:'DBHeavent','Sarabun',sans-serif}
 </style>
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-window._sb = createClient('https://fxmigukayxvieziseqil.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ4bWlndWtheXh2aWV6aXNlcWlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0Mjg5NzcsImV4cCI6MjA5NTAwNDk3N30.ZGqBI_QfJdp68hYBxW0rw78Z2u9tIV5Ru3AFydYozEA',{auth:{persistSession:false}});
+window._sb = createClient('https://fxmigukayxvieziseqil.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ4bWlndWtheXh2aWV6aXNlcWlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0Mjg5NzcsImV4cCI6MjA5NTAwNDk3N30.ZGqBI_QfJdp68hYBxW0rw78Z2u9tIV5Ru3AFydYozEA',{auth:{persistSession:true}});
 window._sbReady = true;
 if(window._pendingLoad) window._pendingLoad();
 </script>
@@ -2127,6 +2127,7 @@ const cpb=document.getElementById('change-pw-btn');
 if(cpb){cpb.disabled=false;cpb.textContent='Update password';}
 return;
 }
+localStorage.setItem('mkt_login_time',Date.now().toString());
 document.getElementById('login-screen').style.display='none';
 btn.disabled=false;btn.textContent='Sign in';
 setupRealtimeNotification();
@@ -2142,11 +2143,13 @@ if(newPw!==confirmPw){errEl.textContent='Passwords do not match.';return;}
 btn.disabled=true;btn.textContent='Updating…';
 const{error}=await window._sb.auth.updateUser({password:newPw,data:{must_change_password:false}});
 if(error){errEl.textContent=error.message;btn.disabled=false;btn.textContent='Update password';return;}
+localStorage.setItem('mkt_login_time',Date.now().toString());
 document.getElementById('change-pw-modal').style.display='none';
 setupRealtimeNotification();
 }
 async function doSignOut(){
 teardownRealtimeNotification();
+localStorage.removeItem('mkt_login_time');
 await window._sb.auth.signOut();
 setCurrentUser('');
 document.getElementById('login-email').value='';
@@ -2208,10 +2211,22 @@ if(row){row.scrollIntoView({behavior:'smooth',block:'center'});row.style.backgro
 function handleLoginKey(e){if(e.key==='Enter')doLogin();}
 
 window._pendingLoad = async function(){
-  await window._sb.auth.signOut();
   loadFromSupabase();
-  setInterval(loadFromSupabase, 30000);
-  document.getElementById('login-screen').style.display='flex';
+  setInterval(loadFromSupabase,30000);
+  // Restore session if within 24 hours
+  const{data:{session}}=await window._sb.auth.getSession();
+  const loginTime=parseInt(localStorage.getItem('mkt_login_time')||'0');
+  const within24h=(Date.now()-loginTime)<(24*60*60*1000);
+  if(session&&session.user&&within24h){
+    const email=(session.user.email||'').toLowerCase();
+    const name=EMAIL_TO_NAME[email]||email;
+    setCurrentUser(name);
+    setupRealtimeNotification();
+  } else {
+    if(session) await window._sb.auth.signOut();
+    localStorage.removeItem('mkt_login_time');
+    document.getElementById('login-screen').style.display='flex';
+  }
 };
 if(window._sbReady) window._pendingLoad();
 </script>
