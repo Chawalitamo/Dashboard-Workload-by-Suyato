@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260623r -->
+<!-- v20260623s -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -371,6 +371,15 @@ button{font-family:'DBHeavent','Sarabun',sans-serif}
 .cal-bar.overdue{outline:2px solid #f07070;outline-offset:-2px}
 .cal-tlabel{font-size:13px;font-weight:600;color:var(--t2);padding:6px 14px;flex-shrink:0;width:150px}
 .cal-empty{padding:40px;text-align:center;color:var(--t3)}
+/* ── Online presence (Super Admins only) ── */
+#online-chip{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--t2);background:var(--surf2);border:1px solid var(--b1);border-radius:var(--rsm);padding:4px 10px;cursor:pointer;font-family:inherit}
+#online-chip:hover{background:var(--surf3);color:var(--t1)}
+.online-dot{width:8px;height:8px;border-radius:50%;background:#50d090;box-shadow:0 0 0 2px rgba(80,208,144,.25);flex-shrink:0}
+#online-panel{position:absolute;top:calc(100% + 6px);right:0;min-width:190px;background:var(--surf);border:1px solid var(--b2);border-radius:var(--rmd);box-shadow:0 8px 24px rgba(0,0,0,.45);padding:8px;z-index:9999}
+.online-panel-hdr{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);padding:4px 8px 8px}
+.online-item{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--t1);padding:5px 8px;border-radius:6px;white-space:nowrap}
+.online-item:hover{background:var(--surf2)}
+.online-empty{font-size:13px;color:var(--t3);padding:6px 8px}
 </style>
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
@@ -389,6 +398,10 @@ if(window._pendingLoad) window._pendingLoad();
 <i class="ti ti-user-circle" style="font-size:18px;color:var(--gold)"></i>
 <span id="user-display-name"></span>
 <button class="signout-btn" onclick="doSignOut()"><i class="ti ti-logout" style="font-size:14px;vertical-align:-1px"></i> Sign out</button>
+</div>
+<div id="online-wrap" style="display:none;position:relative;margin-right:14px">
+<button id="online-chip" onclick="toggleOnline(event)" title="Who's online"><span class="online-dot"></span><span id="online-count">0</span>&nbsp;online</button>
+<div id="online-panel" style="display:none"><div class="online-panel-hdr">Online now</div><div id="online-list"></div></div>
 </div>
 <span id="sync-dot" style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: rgb(80, 208, 144); margin-right: 5px;"></span><span id="sync-lbl" style="font-size:13px;color:var(--t3);margin-right:12px">● Live · 11:58</span><span id="clock">Wed, 27 May 2026 · 11:58</span>
 </nav>
@@ -1970,7 +1983,32 @@ if(info)info.style.display=name?'flex':'none';
 // Activity Log is for Super Administrators only.
 const at=document.getElementById('activity-tab');
 if(at)at.style.display=_isAdminUser()?'':'none';
+if(name)setupPresence(); else teardownPresence();
 }
+// ── Online presence (Supabase Realtime). Everyone joins; only Super Admins see the list. ──
+let _presence=null;
+function setupPresence(){
+if(!window._sb||!_currentUser)return;
+teardownPresence();
+const ch=window._sb.channel('mkt_presence',{config:{presence:{key:_currentUser}}});
+ch.on('presence',{event:'sync'},()=>renderOnline(Object.keys(ch.presenceState())));
+ch.subscribe(async s=>{if(s==='SUBSCRIBED')await ch.track({name:_currentUser,online_at:Date.now()});});
+_presence=ch;
+}
+function teardownPresence(){
+if(_presence){try{window._sb.removeChannel(_presence);}catch(e){}_presence=null;}
+const w=document.getElementById('online-wrap');if(w)w.style.display='none';
+}
+function renderOnline(names){
+const wrap=document.getElementById('online-wrap');if(!wrap)return;
+if(!_isAdminUser()){wrap.style.display='none';return;}
+const uniq=[...new Set(names)].filter(Boolean).sort();
+wrap.style.display='inline-flex';
+document.getElementById('online-count').textContent=uniq.length;
+document.getElementById('online-list').innerHTML=uniq.length?uniq.map(n=>`<div class="online-item"><span class="online-dot"></span>${esc(n)}${n===_currentUser?' <span style="color:var(--t3);font-size:12px">(you)</span>':''}</div>`).join(''):'<div class="online-empty">No one online</div>';
+}
+function toggleOnline(e){if(e)e.stopPropagation();const p=document.getElementById('online-panel');if(p)p.style.display=p.style.display==='none'?'block':'none';}
+document.addEventListener('click',()=>{const p=document.getElementById('online-panel');if(p)p.style.display='none';});
 async function logActivity(taskId,taskTitle,project,action,field,oldVal,newVal){
 try{
 await window._sb.from('mkt_activity_log').insert({
