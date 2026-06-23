@@ -1,2 +1,4 @@
 .DS_Store
 .claude/
+# Local-only data backups — repo is PUBLIC, never publish DB contents
+backups/
