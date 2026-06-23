@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260623q -->
+<!-- v20260623r -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -318,6 +318,8 @@ button{font-family:'DBHeavent','Sarabun',sans-serif}
 .login-btn:hover:not(:disabled){opacity:.88}
 .login-btn:disabled{opacity:.4;cursor:not-allowed}
 .login-error{font-size:13px;color:#f07070;margin-top:10px;min-height:18px}
+.forgot-link{font-size:13px;color:var(--t3);cursor:pointer;text-decoration:underline;transition:color .15s}
+.forgot-link:hover{color:var(--gold)}
 /* CHANGE PASSWORD MODAL */
 #change-pw-modal{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:9999;display:none;align-items:center;justify-content:center}
 .change-pw-card{background:var(--surf);border:1px solid var(--b2);border-radius:var(--rxl);padding:40px 44px;width:400px;max-width:94vw;text-align:center}
@@ -2305,6 +2307,30 @@ btn.disabled=false;btn.textContent='Sign in';
 setupRealtimeNotification();
 loadFromSupabase();
 }
+async function doForgotPassword(){
+const email=document.getElementById('login-email').value.trim().toLowerCase();
+const errEl=document.getElementById('login-error');
+errEl.style.color='';
+if(!email){errEl.textContent='Type your email above first, then click “Forgot password?”.';return;}
+const link=document.getElementById('forgot-link');
+if(link){link.style.pointerEvents='none';link.textContent='Sending…';}
+const{error}=await window._sb.auth.resetPasswordForEmail(email,{redirectTo:window.location.href.split('#')[0]});
+if(link){link.style.pointerEvents='';link.textContent='Forgot password?';}
+if(error){errEl.style.color='';errEl.textContent=error.message;return;}
+errEl.style.color='#50d090';
+errEl.textContent='Reset link sent — check '+email+' (incl. spam). Open it on this device.';
+}
+// Triggered when the user returns via a password-reset email link.
+function _enterRecovery(){
+const ttl=document.getElementById('change-pw-ttl');if(ttl)ttl.textContent='Reset your password';
+const sub=document.getElementById('change-pw-sub');if(sub)sub.textContent='Enter a new password for your account.';
+document.getElementById('login-screen').style.display='none';
+document.getElementById('new-pw').value='';
+document.getElementById('confirm-pw').value='';
+document.getElementById('change-pw-error').textContent='';
+const cpb=document.getElementById('change-pw-btn');if(cpb){cpb.disabled=false;cpb.textContent='Update password';}
+document.getElementById('change-pw-modal').style.display='flex';
+}
 async function doChangePassword(){
 const newPw=document.getElementById('new-pw').value;
 const confirmPw=document.getElementById('confirm-pw').value;
@@ -2317,6 +2343,9 @@ btn.disabled=true;btn.textContent='Updating…';
 const{error}=await window._sb.auth.updateUser({password:newPw,data:{must_change_password:false}});
 if(error){errEl.textContent=error.message;btn.disabled=false;btn.textContent='Update password';return;}
 localStorage.setItem('mkt_login_time',Date.now().toString());
+// After a reset-link recovery there's no _currentUser yet — set it from the session.
+if(!_currentUser){try{const{data:{session}}=await window._sb.auth.getSession();const em=(session?.user?.email||'').toLowerCase();if(em)setCurrentUser(EMAIL_TO_NAME[em]||em);}catch(e){}}
+if(location.hash)history.replaceState(null,'',location.pathname+location.search);
 document.getElementById('change-pw-modal').style.display='none';
 setupRealtimeNotification();
 loadFromSupabase();
@@ -2404,6 +2433,9 @@ if(card){card.scrollIntoView({behavior:'smooth',block:'center'});card.style.bord
 function handleLoginKey(e){if(e.key==='Enter')doLogin();}
 
 window._pendingLoad = async function(){
+  // Password-reset link return: Supabase fires PASSWORD_RECOVERY; also catch the URL hash directly.
+  window._sb.auth.onAuthStateChange((event)=>{ if(event==='PASSWORD_RECOVERY') _enterRecovery(); });
+  if(/type=recovery/.test(location.hash)){ _enterRecovery(); return; }
   loadFromSupabase();
   setInterval(loadFromSupabase,30000);
   // Restore session if within 24 hours
@@ -2435,6 +2467,7 @@ if(window._sbReady) window._pendingLoad();
 <input id="login-email" class="login-field" type="email" placeholder="your.name@cjmart.co.th" autocomplete="username" onkeydown="handleLoginKey(event)">
 <input id="login-password" class="login-field" type="password" placeholder="Password" autocomplete="current-password" onkeydown="handleLoginKey(event)">
 <button id="login-btn" class="login-btn" onclick="doLogin()">Sign in</button>
+<div style="margin-top:12px"><a id="forgot-link" class="forgot-link" onclick="doForgotPassword()">Forgot password?</a></div>
 <div id="login-error" class="login-error"></div>
 </div>
 </div>
@@ -2456,8 +2489,8 @@ if(window._sbReady) window._pendingLoad();
 <div id="change-pw-modal">
 <div class="change-pw-card">
 <div style="font-size:32px;margin-bottom:12px">🔐</div>
-<div style="font-size:20px;font-weight:700;margin-bottom:6px">Set a new password</div>
-<div style="font-size:14px;color:var(--t3);margin-bottom:24px">This is your first login. Please set a new password to continue.</div>
+<div id="change-pw-ttl" style="font-size:20px;font-weight:700;margin-bottom:6px">Set a new password</div>
+<div id="change-pw-sub" style="font-size:14px;color:var(--t3);margin-bottom:24px">This is your first login. Please set a new password to continue.</div>
 <input id="new-pw" class="login-field" type="password" placeholder="New password (min 8 chars)" autocomplete="new-password" onkeydown="if(event.key==='Enter')doChangePassword()">
 <input id="confirm-pw" class="login-field" type="password" placeholder="Confirm new password" autocomplete="new-password" onkeydown="if(event.key==='Enter')doChangePassword()">
 <button id="change-pw-btn" class="login-btn" onclick="doChangePassword()">Update password</button>
