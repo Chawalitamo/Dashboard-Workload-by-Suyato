@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260623h -->
+<!-- v20260623i -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -329,8 +329,6 @@ button{font-family:'DBHeavent','Sarabun',sans-serif}
 .toast-ttl{font-size:16px;font-weight:700;color:var(--t1);line-height:1.3}
 .toast-meta{display:flex;flex-direction:column;gap:5px;font-size:13px;color:var(--t3)}
 .toast-meta span{display:flex;align-items:center;gap:6px}
-.toast-prog{height:3px;background:var(--b1);border-radius:2px;overflow:hidden}
-.toast-prog-bar{height:100%;background:var(--gold);border-radius:2px;width:100%;transition:width linear}
 .toast-acts{display:flex;gap:8px}
 .toast-view{flex:1;padding:9px;background:var(--gold);color:#13131f;border:none;border-radius:var(--rsm);font-family:'DBHeavent','Sarabun',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:opacity .15s}
 .toast-view:hover{opacity:.88}
@@ -2175,40 +2173,35 @@ document.getElementById('login-screen').style.display='flex';
 // ═════════════ NEW-BRIEF NOTIFICATION (poll-based, reliable) ═════════════
 // Detects tasks newly assigned to the current PIC during the 30s data poll.
 // Works even if the PIC wasn't online at the exact moment of creation.
-let _toastTimer=null,_toastTaskId=null,_notifiedIds=new Set();
-function _lastSeenKey(){return 'mkt_lastSeen_'+(_currentUser||'');}
-function setupRealtimeNotification(){
-// Reset per-session dedupe state when a user logs in / session restores.
-_notifiedIds=new Set();
-}
-// Called by task creators so they never get notified about their own new task.
-function broadcastNewTask(task){ if(task&&task.id) _notifiedIds.add(task.id); }
-function teardownRealtimeNotification(){ dismissToast(); }
+let _toastTaskId=null,_pendingNotif=[];
+const NOTIF_LOOKBACK_DAYS=7; // only briefs created within this window can pop
+function _ackKey(){return 'mkt_ack_'+(_currentUser||'');}
+function _getAcked(){try{return new Set(JSON.parse(localStorage.getItem(_ackKey())||'[]'));}catch(e){return new Set();}}
+function _saveAcked(set){try{localStorage.setItem(_ackKey(),JSON.stringify([...set]));}catch(e){}}
+function setupRealtimeNotification(){ _pendingNotif=[]; }
+// Called by task creators so they aren't notified about a brief they just made.
+function broadcastNewTask(task){ if(task&&task.id){const a=_getAcked();a.add(task.id);_saveAcked(a);} }
+function teardownRealtimeNotification(){ document.getElementById('new-task-overlay').classList.remove('show'); }
 function checkForNewAssignedTasks(){
 if(!_currentUser) return;
-const key=_lastSeenKey();
-let lastSeen=localStorage.getItem(key);
-// First time on this browser for this user → baseline silently, no pop-ups
-// for tasks that already existed before they started watching.
-if(lastSeen===null){
-let maxTs='';
-tasks.forEach(t=>{ if(t.created_at&&t.created_at>maxTs) maxTs=t.created_at; });
-localStorage.setItem(key, maxTs||new Date().toISOString());
-return;
-}
-let newMax=lastSeen;
-const fresh=[];
-tasks.forEach(t=>{
-if(t.owner===_currentUser && t.created_at && t.created_at>lastSeen && !_notifiedIds.has(t.id)){
-fresh.push(t); _notifiedIds.add(t.id);
-if(t.created_at>newMax) newMax=t.created_at;
-}
-});
-if(newMax>lastSeen) localStorage.setItem(key,newMax);
-if(fresh.length){
-fresh.sort((a,b)=>a.created_at<b.created_at?1:-1);
+// Don't restack while the user is reading an open pop-up.
+if(document.getElementById('new-task-overlay').classList.contains('show')) return;
+const acked=_getAcked();
+const cutoff=Date.now()-NOTIF_LOOKBACK_DAYS*24*60*60*1000;
+const fresh=tasks.filter(t=>t.owner===_currentUser && t.id && !acked.has(t.id)
+&& t.created_at && new Date(t.created_at).getTime()>=cutoff);
+if(!fresh.length) return;
+fresh.sort((a,b)=>a.created_at<b.created_at?1:-1); // newest first
+_pendingNotif=fresh;
 showNewTaskNotification(fresh.length>1?{...fresh[0],_extra:fresh.length-1}:fresh[0]);
 }
+// Mark every brief currently represented by the pop-up as acknowledged.
+function _ackPending(){
+if(!_pendingNotif.length) return;
+const a=_getAcked();
+_pendingNotif.forEach(t=>{ if(t&&t.id) a.add(t.id); });
+_saveAcked(a);
+_pendingNotif=[];
 }
 function showNewTaskNotification(t){
 _toastTaskId=t.id;
@@ -2227,6 +2220,7 @@ document.getElementById('toast-meta').innerHTML=
 document.getElementById('new-task-overlay').classList.add('show');
 }
 function dismissToast(){
+_ackPending();
 document.getElementById('new-task-overlay').classList.remove('show');
 }
 function toastViewTask(){
