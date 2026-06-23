@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260623f -->
+<!-- v20260623g -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -320,8 +320,10 @@ button{font-family:'DBHeavent','Sarabun',sans-serif}
 .signout-btn{background:var(--surf2);border:1px solid var(--b2);color:var(--t2);border-radius:var(--rsm);padding:5px 12px;font-family:'DBHeavent','Sarabun',sans-serif;font-size:13px;cursor:pointer;transition:all .15s}
 .signout-btn:hover{background:var(--surf3);color:var(--t1)}
 /* NEW-BRIEF TOAST NOTIFICATION */
-#new-task-toast{position:fixed;top:20px;right:20px;width:340px;background:var(--surf);border:1px solid var(--gold);border-radius:var(--rxl);padding:20px;box-shadow:0 12px 40px rgba(0,0,0,.6);z-index:10000;transform:translateX(400px);transition:transform .35s cubic-bezier(.34,1.4,.64,1);display:flex;flex-direction:column;gap:10px}
-#new-task-toast.show{transform:translateX(0)}
+#new-task-overlay{position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(8,8,14,.55);backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:opacity .25s}
+#new-task-overlay.show{opacity:1;pointer-events:auto}
+#new-task-toast{width:400px;max-width:92vw;background:var(--surf);border:1px solid var(--gold);border-radius:var(--rxl);padding:28px;box-shadow:0 24px 70px rgba(0,0,0,.75);display:flex;flex-direction:column;gap:12px;transform:scale(.85);opacity:0;transition:transform .3s cubic-bezier(.34,1.4,.64,1),opacity .25s}
+#new-task-overlay.show #new-task-toast{transform:scale(1);opacity:1}
 .toast-hdr{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.08em}
 .toast-hdr i{font-size:18px}
 .toast-ttl{font-size:16px;font-weight:700;color:var(--t1);line-height:1.3}
@@ -2221,7 +2223,7 @@ document.getElementById('toast-meta').innerHTML=
 `<span>${esc(dueText)}</span>`+
 (leadText?`<span>${esc(leadText)}</span>`:'')+
 (extraText?`<span style="font-weight:600;color:var(--gold)">${esc(extraText)}</span>`:'');
-const toast=document.getElementById('new-task-toast');
+const toast=document.getElementById('new-task-overlay');
 toast.classList.add('show');
 const bar=document.getElementById('toast-bar');
 bar.style.transition='none';bar.style.width='100%';
@@ -2231,7 +2233,7 @@ _toastTimer=setTimeout(()=>dismissToast(),8000);
 }
 function dismissToast(){
 if(_toastTimer){clearTimeout(_toastTimer);_toastTimer=null;}
-document.getElementById('new-task-toast').classList.remove('show');
+document.getElementById('new-task-overlay').classList.remove('show');
 }
 function toastViewTask(){
 dismissToast();
@@ -2281,6 +2283,7 @@ if(window._sbReady) window._pendingLoad();
 </div>
 
 <!-- NEW-BRIEF TOAST NOTIFICATION -->
+<div id="new-task-overlay" onclick="if(event.target===this)dismissToast()">
 <div id="new-task-toast">
 <div class="toast-hdr"><i class="ti ti-bell-ringing"></i> New brief assigned to you</div>
 <div class="toast-ttl" id="toast-ttl"></div>
@@ -2289,6 +2292,7 @@ if(window._sbReady) window._pendingLoad();
 <div class="toast-acts">
 <button class="toast-view" onclick="toastViewTask()"><i class="ti ti-arrow-right" style="vertical-align:-1px"></i> View task</button>
 <button class="toast-dismiss" onclick="dismissToast()">Dismiss</button>
+</div>
 </div>
 </div>
 
