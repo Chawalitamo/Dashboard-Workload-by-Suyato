@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260624e -->
+<!-- v20260624f -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -17,8 +17,8 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
 --bg:#0d0d0c;--surf:#161614;--surf2:#1e1e1b;--surf3:#262623;--surf4:#2e2e2b;
---b0:#ffffff0a;--b1:#ffffff14;--b2:#ffffff22;--b3:#ffffff36;
---t1:#f0ede6;--t2:#9e9b94;--t3:#5c5a55;--t4:#3a3835;
+--b0:#ffffff12;--b1:#ffffff20;--b2:#ffffff33;--b3:#ffffff4d;
+--t1:#fafaf7;--t2:#cfccc4;--t3:#9b988f;--t4:#6a6862;
 --gold:#e8c547;--gold2:#c4a830;--gold3:rgba(232,197,71,.12);
 --r:10px;--rsm:6px;--rxl:16px;
 }
@@ -1341,7 +1341,7 @@ ${prevPersonHTML}
 `;
 try{
 const CHART_TEXT=getComputedStyle(document.documentElement).getPropertyValue('--t2').trim()||'#9e9b94';
-const CHART_GRID='rgba(255,255,255,0.06)';
+const CHART_GRID='rgba(255,255,255,0.12)';
 Chart.defaults.font.family="'DBHeavent','Sarabun',sans-serif";
 Chart.defaults.color=CHART_TEXT;
 // 1. Donut chart – stage distribution
