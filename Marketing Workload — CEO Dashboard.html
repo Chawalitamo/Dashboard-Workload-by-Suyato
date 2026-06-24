@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260623s -->
+<!-- v20260624b -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -1391,7 +1391,7 @@ plugins:{legend:{position:'bottom',labels:{boxWidth:8,font:{size:10}}}},
 scales:{r:{grid:{color:CHART_GRID},angleLines:{color:CHART_GRID},ticks:{display:false},suggestedMin:0,suggestedMax:100}}}
 });
 // 4. Pipeline horizontal bar — filter out empty stages, show counts
-const pipelineFiltered=STAGES.map((s,i)=>({label:s==='AW Release / Event Live'?'AW Release':s,count:stageCounts[i],color:STAGE_COLORS[i]})).filter(x=>x.count>0);
+const pipelineFiltered=STAGES.map((s,i)=>({label:s==='AW Release / Event Live'?'AW Release':s,count:stageCounts[i],color:STAGE_COLORS[i],stage:s})).filter(x=>x.count>0&&x.stage!=='Complete');
 const pipelineEl=document.getElementById('pipeline-chart');
 const pipelineWrap=pipelineEl.parentElement;
 const pipelineHeight=Math.max(140,pipelineFiltered.length*42);
@@ -1433,7 +1433,7 @@ scales:{x:{stacked:true,grid:{color:CHART_GRID},ticks:{stepSize:1,font:{size:10}
 });
 // 6. Bubble chart – capacity map (active tasks vs progress, bubble = total)
 const bubbleData=personData.map((p,i)=>({
-x:p.active,y:p.pct,r:Math.max(4,p.total*2.5),label:p.owner,ok:p.ok
+x:p.active,y:p.pct,r:Math.min(26,Math.max(5,Math.sqrt(p.total)*4)),label:p.owner,ok:p.ok
 }));
 const bubbleColors=personData.map(p=>{
 const map={'por':'#c4a8ff','sun':'#7dd4a0','jew':'#f4a0a0','nod':'#7ab8f5','donut':'#f5c870','ming':'#a4d870','ji':'#f59ab8','kanom':'#70d4d4','ton':'#f5a870','nick':'#b07af5','benz':'#70a8f5','ju':'#f57070','toon':'#60d0a0','witch':'#e0b860','aom':'#d090e0'};
