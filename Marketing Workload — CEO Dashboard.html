@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260624c -->
+<!-- v20260624d -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -1285,12 +1285,16 @@ document.getElementById('dash-inner').innerHTML=`
 <div class="chart-title"><i class="ti ti-folder" aria-hidden="true"></i>Projects overview</div>
 <div class="chart-subtitle">Progress across all projects</div>
 <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px">${projCardsHTML}</div>
-<div class="chart-wrap" style="height:160px"><canvas id="proj-chart"></canvas></div>
 </div>
 <div class="chart-card">
 <div class="chart-title"><i class="ti ti-users" aria-hidden="true"></i>Team capacity heat map</div>
 <div class="chart-subtitle">Active tasks vs completion per person</div>
 <div class="chart-wrap" style="height:300px"><canvas id="bubble-chart"></canvas></div>
+</div>
+<div class="chart-card" style="grid-column:1/-1">
+<div class="chart-title"><i class="ti ti-chart-bar" aria-hidden="true"></i>Project completion</div>
+<div class="chart-subtitle">Complete vs remaining tasks per project</div>
+<div class="chart-wrap" style="height:160px"><canvas id="proj-chart"></canvas></div>
 </div>
 </div>
 <div style="margin-top:14px">
