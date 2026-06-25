@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260624l -->
+<!-- v20260624m -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -18,7 +18,7 @@
 :root{
 --bg:#0d0d0c;--surf:#161614;--surf2:#1e1e1b;--surf3:#262623;--surf4:#2e2e2b;
 --b0:#ffffff1f;--b1:#ffffff30;--b2:#ffffff4d;--b3:#ffffff66;
---t1:#ffffff;--t2:#e4e1da;--t3:#bdbab2;--t4:#8c8a83;
+--t1:#ffffff;--t2:#e4e1da;--t3:#c4c1ba;--t4:#9d9b94;
 --gold:#e8c547;--gold2:#c4a830;--gold3:rgba(232,197,71,.12);
 --r:10px;--rsm:6px;--rxl:16px;
 }
@@ -681,7 +681,7 @@ if(window._pendingLoad) window._pendingLoad();
 <div class="sidebar">
 <div class="sb-title"><i class="ti ti-plus" aria-hidden="true" style="vertical-align:-2px;margin-right:3px"></i>Add task</div>
 <div class="field"><label>Task name *</label><input type="text" id="f-title" placeholder="e.g. Brand refresh…"></div>
-<div class="field"><label>Project</label>
+<div class="field"><label>Project *</label>
 <select id="f-project"><option value="Spot &amp; Production">Spot &amp; Production</option><option value="CJx Commu2026">CJx Commu2026</option><option value="xxxx">xxxx</option><option value="zzz">zzz</option></select>
 </div>
 <div class="field"><label>Owner *</label>
@@ -698,14 +698,14 @@ if(window._pendingLoad) window._pendingLoad();
 <option>Toon</option><option>Witch</option><option>Aom</option>
 </select>
 </div>
-<div class="field"><label>Stage</label>
+<div class="field"><label>Stage *</label>
 <select id="f-stage">
 <option>Job Brief</option><option>Design</option><option>Production</option>
 <option>Review</option><option>Approval Stage</option>
 <option>AW Release / Event Live</option><option>On Hold</option><option>Complete</option>
 </select>
 </div>
-<div class="field"><label>Due date</label><input type="text" class="dp" id="f-due" placeholder="Select date…" readonly></div>
+<div class="field"><label>Due date *</label><input type="text" class="dp" id="f-due" placeholder="Select date…" readonly></div>
 <div class="field"><label>Note</label><textarea id="f-note" placeholder="Brief, link, context…"></textarea></div>
 <button class="btn-add-sb" onclick="addTask()"><i class="ti ti-circle-plus" aria-hidden="true"></i>Add to board</button>
 <div style="border-top:1px solid var(--b1);padding-top:12px;margin-top:4px">
@@ -2021,9 +2021,15 @@ async function addTask(){
 const title=document.getElementById('f-title').value.trim();
 const owner=document.getElementById('f-owner').value;
 const lead=document.getElementById('f-lead').value;
-if(!title||!owner||!lead){document.getElementById('f-title').style.borderColor=!title?'#f07070':'';document.getElementById('f-owner').style.borderColor=!owner?'#f07070':'';document.getElementById('f-lead').style.borderColor=!lead?'#f07070':'';return;}
-document.getElementById('f-title').style.borderColor='';document.getElementById('f-owner').style.borderColor='';document.getElementById('f-lead').style.borderColor='';
-const _ft={title,owner,lead,project:document.getElementById('f-project').value,stage:document.getElementById('f-stage').value,due:_normDue(document.getElementById('f-due').value)||null,note:document.getElementById('f-note').value.trim()};
+const project=document.getElementById('f-project').value;
+const stage=document.getElementById('f-stage').value;
+const due=_normDue(document.getElementById('f-due').value);
+// All fields required except Note.
+const _req={'f-title':!!title,'f-lead':!!lead,'f-owner':!!owner,'f-project':!!project,'f-stage':!!stage,'f-due':!!due};
+let _ok=true;
+Object.keys(_req).forEach(id=>{const el=document.getElementById(id);if(el)el.style.borderColor=_req[id]?'':'#f07070';if(!_req[id])_ok=false;});
+if(!_ok)return;
+const _ft={title,owner,lead,project,stage,due:due||null,note:document.getElementById('f-note').value.trim()};
 const{data:_fd,error:_fe}=await window._sb.from('mkt_tasks').insert(_ft).select().single();
 if(_fe){alert('Save failed');return;}
 tasks.unshift({id:_fd.id,..._ft,due:_ft.due||''});
@@ -2062,6 +2068,11 @@ function renderMyAvatar(){const el=document.getElementById('my-avatar');if(el)el
 async function loadMyAvatar(){
 try{const{data:{session}}=await window._sb.auth.getSession();_myAvatar=session?.user?.user_metadata?.avatar||'';}catch(e){_myAvatar='';}
 renderMyAvatar();
+}
+// Shared avatar map (name -> avatar) so avatars show for everyone, e.g. in the Activity Log.
+let _ownerAvatars={};
+async function loadOwnerAvatars(){
+try{const{data}=await window._sb.from('mkt_owners').select('name,avatar');_ownerAvatars={};(data||[]).forEach(o=>{if(o.avatar)_ownerAvatars[o.name]=o.avatar;});}catch(e){}
 }
 function openProfileModal(){
 _profileChoice=_myAvatar;
@@ -2104,6 +2115,9 @@ const{error}=await window._sb.auth.updateUser({data:{avatar:_profileChoice}});
 if(error)throw error;
 }catch(e){alert('Could not save profile picture: '+(e.message||e));btn.disabled=false;btn.textContent='Save';return;}
 _myAvatar=_profileChoice;renderMyAvatar();
+_ownerAvatars[_currentUser]=_myAvatar;
+// Persist to the shared owners table so the avatar shows for everyone (e.g. Activity Log).
+try{await window._sb.from('mkt_owners').upsert([{name:_currentUser,avatar:_myAvatar}],{onConflict:'name'});}catch(e){}
 if(_presence){try{await _presence.track({name:_currentUser,online_at:Date.now(),avatar:_myAvatar});}catch(e){}}
 btn.disabled=false;btn.textContent='Save';
 closeProfileModal();
@@ -2211,6 +2225,7 @@ host.innerHTML=`<div class="cal-head"><div><div class="cal-title">PIC Calendar</
 }
 async function renderActivity(){
 document.getElementById('act-table-body').innerHTML='<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--t3)">Loading…</td></tr>';
+await loadOwnerAvatars();
 const{data,error}=await window._sb.from('mkt_activity_log').select('*').order('created_at',{ascending:false}).limit(1000);
 if(error){document.getElementById('act-table-body').innerHTML=`<tr><td colspan="6" style="color:#f07070;padding:20px">${error.message}</td></tr>`;return;}
 _actData=data||[];
@@ -2245,7 +2260,7 @@ const badge=`<span class="act-badge ${r.action}"><i class="ti ti-${r.action==='c
 const fieldCell=r.field?`<span style="background:var(--surf3);border-radius:4px;padding:2px 8px;font-size:12px">${esc(r.field)}</span>`:'';
 const changeCell=r.field?`<span style="color:#aaa">${esc(r.old_value||'—')}</span><span style="color:var(--t3);margin:0 6px">→</span><span style="color:#50d090">${esc(r.new_value||'—')}</span>`:'';
 const ok=r.changed_by?OKEY(r.changed_by):'';
-const userCell=r.changed_by?`<div style="display:flex;align-items:center;gap:6px"><div class="person-avatar o-${ok}" style="width:22px;height:22px;font-size:11px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0">${r.changed_by[0]}</div><span style="font-size:13px">${esc(r.changed_by)}</span></div>`:`<span style="color:var(--t4);font-size:12px">—</span>`;
+const userCell=r.changed_by?`<div style="display:flex;align-items:center;gap:6px"><div class="person-avatar o-${ok}" style="width:22px;height:22px;font-size:11px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0;overflow:hidden">${_avatarInner(_ownerAvatars[r.changed_by],r.changed_by)}</div><span style="font-size:13px">${esc(r.changed_by)}</span></div>`:`<span style="color:var(--t4);font-size:12px">—</span>`;
 return`<tr>
 <td style="color:var(--t3);font-size:12px;white-space:nowrap">${dt}</td>
 <td>${badge}</td>
