@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260624g -->
+<!-- v20260624h -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -343,6 +343,13 @@ button{font-family:'DBHeavent','Sarabun',sans-serif}
 .toast-view:hover{opacity:.88}
 .toast-dismiss{padding:9px 14px;background:var(--surf2);border:1px solid var(--b2);color:var(--t2);border-radius:var(--rsm);font-family:'DBHeavent','Sarabun',sans-serif;font-size:14px;cursor:pointer;transition:background .15s}
 .toast-dismiss:hover{background:var(--surf3);color:var(--t1)}
+#overdue-overlay{position:fixed;inset:0;z-index:10001;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(8,8,14,.55);backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:opacity .25s}
+#overdue-overlay.show{opacity:1;pointer-events:auto}
+#overdue-toast{width:420px;max-width:92vw;background:var(--surf);border:1px solid #f07070;border-radius:var(--rxl);padding:28px;box-shadow:0 24px 70px rgba(0,0,0,.75);display:flex;flex-direction:column;gap:12px;transform:scale(.85);opacity:0;transition:transform .3s cubic-bezier(.34,1.4,.64,1),opacity .25s}
+#overdue-overlay.show #overdue-toast{transform:scale(1);opacity:1}
+.overdue-item{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--surf2);border-left:3px solid #f07070;border-radius:6px;padding:8px 10px}
+.overdue-item .oi-ttl{font-size:13px;font-weight:600;color:var(--t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.overdue-item .oi-due{font-size:12px;color:#f07070;white-space:nowrap;flex-shrink:0}
 /* ── PIC Calendar / Timeline ── */
 .cal-inner{flex:1;width:100%;min-width:0;padding:20px 24px;overflow:auto}
 .cal-head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px}
@@ -1175,6 +1182,12 @@ const overdueByOwner=OWNERS.map(o=>({
 owner:o,
 count:tasks.filter(t=>t.owner===o&&t.due&&_dMid(t.due)<_todayMid&&t.stage!=='Complete'&&t.stage!=='On Hold').length
 })).filter(x=>x.count>0).sort((a,b)=>b.count-a.count);
+const overduePICHTML=overdueByOwner.length?overdueByOwner.map(o=>`
+<div style="display:flex;align-items:center;gap:10px;background:var(--surf2);border-left:3px solid #f07070;border-radius:8px;padding:10px 12px">
+<div class="person-avatar o-${OKEY(o.owner)}" style="width:30px;height:30px;font-size:13px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0">${esc(o.owner[0])}</div>
+<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600">${esc(o.owner)}</div><div style="font-size:12px;color:var(--t3)">Person in charge</div></div>
+<div style="text-align:right"><div style="font-family:'DBHeavent',monospace;font-size:18px;font-weight:700;color:#f07070">${o.count}</div><div style="font-size:11px;color:var(--t3)">overdue</div></div>
+</div>`).join(''):`<div style="color:#50d090;font-size:14px;padding:8px 2px">✓ No overdue tasks — everyone is on track.</div>`;
 // ── Previous month performance ──
 const _prevMonthStart=new Date(_todayMid.getFullYear(),_todayMid.getMonth()-1,1);
 const _prevMonthEnd=new Date(_todayMid.getFullYear(),_todayMid.getMonth(),0);
@@ -1261,6 +1274,11 @@ document.getElementById('dash-inner').innerHTML=`
 <div class="kpi-big" style="color:var(--gold)">${avgPct}%</div><div class="kpi-lbl">Avg progress</div>
 <div class="kpi-delta" style="color:var(--t3)">Weighted by stage</div>
 </div>
+</div>
+<div class="chart-card" style="border-top:2px solid #f07070;margin-bottom:14px">
+<div class="chart-title"><i class="ti ti-alarm" aria-hidden="true" style="color:#f07070"></i>Overdue tasks by PIC</div>
+<div class="chart-subtitle">People in charge with past-due tasks (excl. Complete &amp; On Hold)</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-top:12px">${overduePICHTML}</div>
 </div>
 <div class="dash-grid-mid">
 <div class="chart-card">
@@ -2273,6 +2291,7 @@ async function loadFromSupabase(){
     const _all=tks.map(t=>({id:t.id,title:t.title||'(untitled)',owner:t.owner||'',lead:t.lead||'',project:t.project||'',stage:t.stage||'Job Brief',due:t.due||'',note:t.note||'',attachments:t.attachments||[],created_at:t.created_at||''}));
     tasks=applyUserFilter(_all);
     checkForNewAssignedTasks();
+    checkForOverdueTasks();
   }catch(err){
     _sync('err','⚠ Offline');
     console.error('Supabase error:',err);
@@ -2408,7 +2427,7 @@ const NOTIF_LOOKBACK_DAYS=7; // only briefs created within this window can pop
 function _ackKey(){return 'mkt_ack_'+(_currentUser||'');}
 function _getAcked(){try{return new Set(JSON.parse(localStorage.getItem(_ackKey())||'[]'));}catch(e){return new Set();}}
 function _saveAcked(set){try{localStorage.setItem(_ackKey(),JSON.stringify([...set]));}catch(e){}}
-function setupRealtimeNotification(){ _pendingNotif=[]; }
+function setupRealtimeNotification(){ _pendingNotif=[]; _overdueNotifShown=false; }
 // Called by task creators so they aren't notified about a brief they just made.
 function broadcastNewTask(task){ if(task&&task.id){const a=_getAcked();a.add(task.id);_saveAcked(a);} }
 function teardownRealtimeNotification(){ document.getElementById('new-task-overlay').classList.remove('show'); }
@@ -2468,6 +2487,40 @@ if(card){card.scrollIntoView({behavior:'smooth',block:'center'});card.style.bord
 },400);
 }
 }
+// ── Overdue-tasks login reminder (once per page session, for the current PIC) ──
+let _overdueNotifShown=false;
+function checkForOverdueTasks(){
+if(!_currentUser||_overdueNotifShown) return;
+// Don't stack on top of the new-brief pop-up; retry on the next poll.
+if(document.getElementById('new-task-overlay').classList.contains('show')) return;
+const today=new Date();today.setHours(0,0,0,0);
+const dMid=s=>{const d=new Date(s);return new Date(d.getFullYear(),d.getMonth(),d.getDate());};
+const mine=tasks.filter(t=>t.owner===_currentUser&&t.due&&dMid(t.due)<today&&t.stage!=='Complete'&&t.stage!=='On Hold')
+.sort((a,b)=>dMid(a.due)-dMid(b.due));
+if(!mine.length) return;
+_overdueNotifShown=true;
+showOverdueNotification(mine);
+}
+function showOverdueNotification(list){
+document.getElementById('overdue-ttl').textContent=
+`${list.length} task${list.length>1?'s are':' is'} past due — please take action.`;
+document.getElementById('overdue-list').innerHTML=list.map(t=>{
+const proj=projects.find(p=>p.name===t.project);
+const pc=proj?proj.color:'#888';
+return`<div class="overdue-item"><div style="min-width:0"><div class="oi-ttl">${esc(t.title||'(untitled)')}</div>`+
+`<div style="font-size:11px;color:var(--t3)"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${pc};margin-right:4px"></span>${esc(t.project||'No project')} · ${esc(t.stage)}</div></div>`+
+`<div class="oi-due">📅 ${esc(t.due)}</div></div>`;
+}).join('');
+document.getElementById('overdue-overlay').classList.add('show');
+}
+function dismissOverdue(){document.getElementById('overdue-overlay').classList.remove('show');}
+function overdueGoToTasks(){
+dismissOverdue();
+activeProj='All';
+const bfo=document.getElementById('bf-owner'); if(bfo) bfo.value='';
+const boardTab=document.querySelector('.ptab:nth-child(3)');
+showView('board',boardTab);
+}
 function handleLoginKey(e){if(e.key==='Enter')doLogin();}
 
 window._pendingLoad = async function(){
@@ -2519,6 +2572,19 @@ if(window._sbReady) window._pendingLoad();
 <div class="toast-acts">
 <button class="toast-view" onclick="toastViewTask()"><i class="ti ti-layout-kanban" style="vertical-align:-2px"></i> Go to Task</button>
 <button class="toast-dismiss" onclick="dismissToast()"><i class="ti ti-check" style="vertical-align:-2px"></i> Acknowledge</button>
+</div>
+</div>
+</div>
+
+<!-- OVERDUE TASKS LOGIN NOTIFICATION -->
+<div id="overdue-overlay">
+<div id="overdue-toast">
+<div class="toast-hdr" style="color:#f07070"><i class="ti ti-alarm"></i> You have overdue tasks</div>
+<div class="toast-ttl" id="overdue-ttl"></div>
+<div class="toast-meta" id="overdue-list" style="max-height:260px;overflow:auto"></div>
+<div class="toast-acts">
+<button class="toast-view" id="overdue-view-btn" style="background:#f07070;color:#fff" onclick="overdueGoToTasks()"><i class="ti ti-layout-kanban" style="vertical-align:-2px"></i> View tasks</button>
+<button class="toast-dismiss" onclick="dismissOverdue()"><i class="ti ti-check" style="vertical-align:-2px"></i> Got it</button>
 </div>
 </div>
 </div>
