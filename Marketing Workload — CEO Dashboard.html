@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260624i -->
+<!-- v20260624j -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -2024,7 +2024,7 @@ if(name){setupPresence();} else {teardownPresence();_myAvatar='';renderMyAvatar(
 }
 // ── Profile picture (stored in Supabase user_metadata, shared live via presence) ──
 let _myAvatar='',_profileChoice='';
-const PRESET_AVATARS=['😀','😎','🦊','🐱','🐶','🐼','🦁','🐯','🐨','🐸','🦉','🦄','🌟','🚀','🎨','📊','🌈','🔥','⚡','🌙','🍀','🐧','🐢','🦋'];
+const PRESET_AVATARS=['😀','😎','🥰','😺','🤩','🥳','😇','🤗','🦊','🐱','🐶','🐼','🦁','🐯','🐨','🐸','🐰','🐹','🐻','🐻‍❄️','🐮','🐷','🐵','🐥','🐧','🐢','🦋','🐝','🐙','🦉','🦄','🐬','🦭','🦦','🦔','🦝','🐳','🐠','🌟','⭐','🌈','🔥','⚡','🌙','☀️','🍀','🌸','🌺','🌻','🌷','🌼','🍓','🍑','🍉','🍦','🍩','🧁','🍭','🎀','🎈','🎨','🚀','💎','👑','💖','✨'];
 function _avatarInner(av,name){
 if(av&&av.indexOf('data:')===0)return `<img src="${av}" alt="">`;
 if(av&&av.indexOf('emoji:')===0)return `<span style="font-size:1.05em;line-height:1">${esc(av.slice(6))}</span>`;
