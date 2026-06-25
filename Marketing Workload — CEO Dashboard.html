@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260624j -->
+<!-- v20260624k -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -1201,6 +1201,20 @@ const overdueByOwner=OWNERS.map(o=>({
 owner:o,
 count:tasks.filter(t=>t.owner===o&&t.due&&_dMid(t.due)<_todayMid&&t.stage!=='Complete'&&t.stage!=='On Hold').length
 })).filter(x=>x.count>0).sort((a,b)=>b.count-a.count);
+// ── Due today by PIC ──
+const dueTodayByOwner=OWNERS.map(o=>({
+owner:o,
+items:tasks.filter(t=>t.owner===o&&t.due&&_dMid(t.due).getTime()===_todayMid.getTime()&&t.stage!=='Complete'&&t.stage!=='On Hold')
+})).filter(x=>x.items.length>0).sort((a,b)=>b.items.length-a.items.length);
+const dueTodayPICHTML=dueTodayByOwner.length?dueTodayByOwner.map(o=>`
+<div style="background:var(--surf2);border-left:3px solid var(--gold);border-radius:8px;padding:10px 12px">
+<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+<div class="person-avatar o-${OKEY(o.owner)}" style="width:30px;height:30px;font-size:13px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0">${esc(o.owner[0])}</div>
+<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600">${esc(o.owner)}</div><div style="font-size:12px;color:var(--t3)">Person in charge</div></div>
+<div style="text-align:right"><div style="font-family:'DBHeavent',monospace;font-size:18px;font-weight:700;color:var(--gold)">${o.items.length}</div><div style="font-size:11px;color:var(--t3)">due today</div></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:4px">${o.items.map(t=>{const proj=projects.find(p=>p.name===t.project);const pc=proj?proj.color:'#888';return`<div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--t2)"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${pc};flex-shrink:0"></span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(t.title)}</span><span style="color:var(--t3);flex-shrink:0">· ${esc(t.stage)}</span></div>`;}).join('')}</div>
+</div>`).join(''):`<div style="color:#50d090;font-size:14px;padding:8px 2px">✓ No tasks due today.</div>`;
 const overduePICHTML=overdueByOwner.length?overdueByOwner.map(o=>`
 <div style="display:flex;align-items:center;gap:10px;background:var(--surf2);border-left:3px solid #f07070;border-radius:8px;padding:10px 12px">
 <div class="person-avatar o-${OKEY(o.owner)}" style="width:30px;height:30px;font-size:13px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0">${esc(o.owner[0])}</div>
@@ -1293,6 +1307,11 @@ document.getElementById('dash-inner').innerHTML=`
 <div class="kpi-big" style="color:var(--gold)">${avgPct}%</div><div class="kpi-lbl">Avg progress</div>
 <div class="kpi-delta" style="color:var(--t3)">Weighted by stage</div>
 </div>
+</div>
+<div class="chart-card" style="border-top:2px solid var(--gold);margin-bottom:14px">
+<div class="chart-title"><i class="ti ti-calendar-due" aria-hidden="true" style="color:var(--gold)"></i>Due today by PIC</div>
+<div class="chart-subtitle">Tasks with a deadline of today — who needs to take action (excl. Complete &amp; On Hold)</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px;margin-top:12px">${dueTodayPICHTML}</div>
 </div>
 <div class="chart-card" style="border-top:2px solid #f07070;margin-bottom:14px">
 <div class="chart-title"><i class="ti ti-alarm" aria-hidden="true" style="color:#f07070"></i>Overdue tasks by PIC</div>
