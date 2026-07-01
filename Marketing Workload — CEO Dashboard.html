@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260624n -->
+<!-- v20260701a -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -1237,30 +1237,8 @@ const prevInProg=prevTasks.filter(t=>!['Complete','On Hold'].includes(t.stage)).
 const prevOnHold=prevTasks.filter(t=>t.stage==='On Hold').length;
 const prevRate=prevTotal?Math.round(prevDone/prevTotal*100):0;
 const prevAvgPct=prevTotal?Math.round(prevTasks.reduce((s,t)=>s+STAGE_PCT[t.stage],0)/prevTotal):0;
-const prevPersonData=OWNERS.map(owner=>{
-const ot=prevTasks.filter(t=>t.owner===owner);
-if(!ot.length)return null;
-const done=ot.filter(t=>t.stage==='Complete').length;
-const rate=ot.length?Math.round(done/ot.length*100):0;
-return{owner,total:ot.length,done,notDone:ot.length-done,rate,ok:OKEY(owner)};
-}).filter(Boolean).sort((a,b)=>b.done-a.done);
-const prevPersonHTML=prevPersonData.map(p=>{
-const barColor=p.rate>=80?'#50d090':p.rate>=50?'#5aaaf0':p.rate>=30?'#e67700':'#f07070';
-return`<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-<div class="person-avatar o-${p.ok}" style="width:26px;height:26px;font-size:12px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0">${p.owner[0]}</div>
-<div style="flex:1;min-width:0">
-<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px">
-<span>${p.owner}<span style="color:var(--t3);margin-left:4px">${p.done}/${p.total} done</span></span>
-<span style="font-weight:600;color:${barColor}">${p.rate}%</span>
-</div>
-<div style="height:6px;background:var(--surf3);border-radius:3px;overflow:hidden">
-<div style="height:100%;width:${p.rate}%;background:${barColor};border-radius:3px;transition:width .6s"></div>
-</div>
-</div>
-</div>`;
-}).join('');
 // ── Destroy old charts before replacing DOM ──
-['donut-chart','bar-chart','bar-chart2','radar-chart','pipeline-chart','proj-chart','bubble-chart','prev-month-chart'].forEach(id=>{
+['donut-chart','bar-chart','bar-chart2','radar-chart','pipeline-chart','proj-chart','bubble-chart'].forEach(id=>{
 const el=document.getElementById(id);if(el){const inst=Chart.getChart(el);if(inst)inst.destroy();}
 });
 document.getElementById('dash-inner').innerHTML=`
@@ -1390,16 +1368,6 @@ ${prevTotal===0?`<div style="text-align:center;color:var(--t3);padding:20px 0;fo
 <div class="kpi-delta" style="color:var(--t3)">Weighted by stage</div>
 </div>
 </div>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start">
-<div>
-<div style="font-size:13px;font-weight:600;margin-bottom:10px;color:var(--t2)">Completion by team member</div>
-${prevPersonHTML}
-</div>
-<div>
-<div style="font-size:13px;font-weight:600;margin-bottom:10px;color:var(--t2)">Tasks breakdown</div>
-<div class="chart-wrap" style="height:${Math.max(120,prevPersonData.length*30)}px"><canvas id="prev-month-chart"></canvas></div>
-</div>
-</div>
 `}
 </div>
 </div>
@@ -1512,29 +1480,6 @@ plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>{const d=bubbleDa
 scales:{x:{title:{display:true,text:'Active tasks',font:{size:10}},grid:{color:CHART_GRID},ticks:{stepSize:1,font:{size:10}},beginAtZero:true},
 y:{title:{display:true,text:'Progress %',font:{size:10}},grid:{color:CHART_GRID},ticks:{font:{size:10}},min:0,max:105}}}
 });
-// 7. Previous month bar chart – done vs not-done per person
-if(prevPersonData.length>0){
-const prevChartEl=document.getElementById('prev-month-chart');
-if(prevChartEl){
-new Chart(prevChartEl,{
-type:'bar',
-data:{
-labels:prevPersonData.map(p=>p.owner),
-datasets:[
-{label:'Completed',data:prevPersonData.map(p=>p.done),backgroundColor:'#50d090',borderRadius:4,borderSkipped:false},
-{label:'Incomplete',data:prevPersonData.map(p=>p.notDone),backgroundColor:'rgba(240,112,112,0.55)',borderRadius:4,borderSkipped:false}
-]
-},
-options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
-plugins:{legend:{position:'bottom',labels:{boxWidth:8,padding:8,font:{size:10}}},
-tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: ${ctx.parsed.x} task${ctx.parsed.x!==1?'s':''}`}}},
-scales:{
-x:{stacked:true,grid:{color:CHART_GRID},ticks:{stepSize:1,font:{size:10}},beginAtZero:true},
-y:{stacked:true,grid:{display:false},ticks:{font:{size:11},color:'#c0c0d8'}}
-}}
-});
-}
-}
 }catch(chartErr){console.warn('Chart render error:',chartErr);}
 }
 function renderListPills(){
