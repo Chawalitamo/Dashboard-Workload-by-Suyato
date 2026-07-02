@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260702b -->
+<!-- v20260702c -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -1222,16 +1222,24 @@ const overduePICHTML=overdueByOwner.length?overdueByOwner.map(o=>`
 <div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600">${esc(o.owner)}</div><div style="font-size:12px;color:var(--t3)">Person in charge</div></div>
 <div style="text-align:right"><div style="font-family:'DBHeavent',monospace;font-size:18px;font-weight:700;color:#f07070">${o.count}</div><div style="font-size:11px;color:var(--t3)">overdue</div></div>
 </div>`).join(''):`<div style="color:#50d090;font-size:14px;padding:8px 2px">✓ No overdue tasks — everyone is on track.</div>`;
-// ── Inactive members (Super Admins only): no action taken in the last day (or never) ──
+// ── Inactive members (Super Admins only): no action today (working days only) ──
 const _DAYMS=86400000,_nowT=Date.now();
 const _relDays=d=>{if(!d)return null;return Math.floor((_nowT-d.getTime())/_DAYMS);};
 const _relLbl=d=>{if(!d)return 'Never';const n=_relDays(d);if(n<=0)return 'Today';if(n===1)return 'Yesterday';return n+' days ago';};
-const inactiveRows=OWNERS.map(name=>{
+// Working-day model: skip Saturdays, Sundays, and Thai public holidays.
+// Thai government public holidays 2026 (observed dates) — edit here if your office differs.
+const TH_HOLIDAYS=new Set(['2026-01-01','2026-03-03','2026-04-06','2026-04-13','2026-04-14','2026-04-15','2026-05-01','2026-05-04','2026-06-01','2026-06-03','2026-07-28','2026-07-29','2026-07-30','2026-08-12','2026-10-13','2026-10-23','2026-12-07','2026-12-10','2026-12-31','2027-01-01']);
+const _ymd=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const _isWorkday=d=>{const w=d.getDay();return w!==0&&w!==6&&!TH_HOLIDAYS.has(_ymd(d));};
+const _workdaysAfter=(from,to)=>{let c=0;const d=new Date(from);d.setDate(d.getDate()+1);while(d<=to){if(_isWorkday(d))c++;d.setDate(d.getDate()+1);}return c;};
+const _trackToday=_isWorkday(_todayMid);
+const inactiveRows=(!_trackToday)?[]:OWNERS.map(name=>{
 const ll=_lastLogin[name]?new Date(_lastLogin[name]):null;
 const la=_lastAction[name]?new Date(_lastAction[name]):null;
-const actDays=_relDays(la);
-const noAction=la===null||actDays>=1;
-return{name,ll,la,actDays,noAction,ok:OKEY(name)};
+const laDay=la?_dMid(la):null;
+const noAction=la===null||laDay.getTime()<_todayMid.getTime();
+const wdays=laDay?_workdaysAfter(laDay,_todayMid):null;
+return{name,ll,la,wdays,noAction,ok:OKEY(name)};
 }).filter(r=>r.noAction).sort((a,b)=>{
 const av=a.la?a.la.getTime():0,bv=b.la?b.la.getTime():0;return av-bv;
 });
@@ -1240,14 +1248,14 @@ const inactiveCardHTML=_isAdminUser()?`
 <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
 <div>
 <div class="chart-title"><i class="ti ti-user-off" aria-hidden="true" style="color:#f0a840"></i>Inactive members</div>
-<div class="chart-subtitle">No action taken in the dashboard in the last day (or never)</div>
+<div class="chart-subtitle">No action on the dashboard today · working days only (excl. Sat/Sun &amp; Thai holidays)</div>
 </div>
 <div style="text-align:center;background:${inactiveRows.length?'#f0a840':'#50d090'};color:#13131f;border-radius:8px;padding:5px 14px;flex-shrink:0"><div style="font-family:'DBHeavent',monospace;font-size:20px;font-weight:800;line-height:1">${inactiveRows.length}</div><div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.04em">flagged</div></div>
 </div>
 ${inactiveRows.length?`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px;margin-top:14px">${inactiveRows.map(r=>{
 let badges='';
 if(!r.la)badges+=`<span style="font-size:10px;font-weight:600;background:#3a1818;color:#f4a0a0;border-radius:10px;padding:1px 8px">No actions yet</span>`;
-else badges+=`<span style="font-size:10px;font-weight:600;background:#2c2008;color:#e0b860;border-radius:10px;padding:1px 8px">No action ${r.actDays}d</span>`;
+else badges+=`<span style="font-size:10px;font-weight:600;background:#2c2008;color:#e0b860;border-radius:10px;padding:1px 8px">No action ${r.wdays} working day${r.wdays===1?'':'s'}</span>`;
 return`<div style="display:flex;align-items:center;gap:10px;background:var(--surf2);border-left:3px solid #f0a840;border-radius:8px;padding:10px 12px">
 <div class="person-avatar o-${r.ok}" style="width:34px;height:34px;font-size:14px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0;overflow:hidden">${_avatarInner(_ownerAvatars[r.name],r.name)}</div>
 <div style="flex:1;min-width:0">
@@ -1255,7 +1263,7 @@ return`<div style="display:flex;align-items:center;gap:10px;background:var(--sur
 <div style="font-size:11px;color:var(--t3);margin-top:1px">Last action: ${_relLbl(r.la)} · Last login: ${_relLbl(r.ll)}</div>
 <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:5px">${badges}</div>
 </div>
-</div>`;}).join('')}</div>`:`<div style="color:#50d090;font-size:14px;padding:12px 2px">✓ Everyone has taken action in the last day.</div>`}
+</div>`;}).join('')}</div>`:`<div style="font-size:14px;padding:12px 2px;color:${_trackToday?'#50d090':'var(--t3)'}">${_trackToday?'✓ Everyone has taken action today.':'⏸ Tracking paused today — weekend or Thai public holiday.'}</div>`}
 </div>`:'';
 // ── Previous month performance ──
 const _prevMonthStart=new Date(_todayMid.getFullYear(),_todayMid.getMonth()-1,1);
