@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260702d -->
+<!-- v20260702e -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -1708,6 +1708,7 @@ document.getElementById('a-title').value=''; _setDP(document.getElementById('a-d
 closeModal('add-modal'); renderList();
 postToTeams('created',{title:_nt.title,owner:_nt.owner,project:_nt.project,stage:_nt.stage,due:_nt.due||''});
 fetch('https://fxmigukayxvieziseqil.supabase.co/functions/v1/notify-new-task',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:_nt.title,owner:_nt.owner,lead:_nt.lead,project:_nt.project,stage:_nt.stage,due:_nt.due||'',note:_nt.note})}).catch(()=>{});
+if(_nt.due)fetch('https://fxmigukayxvieziseqil.supabase.co/functions/v1/add-to-calendar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:_nt.title,owner:_nt.owner,lead:_nt.lead,project:_nt.project,stage:_nt.stage,due:_nt.due,note:_nt.note,id:_nd.id})}).catch(()=>{});
 }
 // ═════════════ BOARD / KANBAN ═════════════
 function renderProjTabs(){
@@ -2029,6 +2030,7 @@ broadcastNewTask({id:_fd.id,..._ft});
 document.getElementById('f-title').value='';_setDP(document.getElementById('f-due'),'');document.getElementById('f-note').value='';document.getElementById('f-lead').value='';
 postToTeams('created',{title:_ft.title,owner:_ft.owner,project:_ft.project,stage:_ft.stage,due:_ft.due||''});
 fetch('https://fxmigukayxvieziseqil.supabase.co/functions/v1/notify-new-task',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:_ft.title,owner:_ft.owner,lead:_ft.lead,project:_ft.project,stage:_ft.stage,due:_ft.due||'',note:_ft.note})}).catch(()=>{});
+if(_ft.due)fetch('https://fxmigukayxvieziseqil.supabase.co/functions/v1/add-to-calendar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:_ft.title,owner:_ft.owner,lead:_ft.lead,project:_ft.project,stage:_ft.stage,due:_ft.due,note:_ft.note,id:_fd.id})}).catch(()=>{});
 renderKanban();
 }
 // ═════════════ UTILS ═════════════
