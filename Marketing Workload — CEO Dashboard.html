@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260702a -->
+<!-- v20260702b -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -687,13 +687,13 @@ if(window._pendingLoad) window._pendingLoad();
 <div class="field"><label>Owner *</label>
 <select id="f-lead"><option value="">— Select —</option>
 <option>Por</option><option>Jew</option><option>Sun</option><option>Nod</option>
-<option>Ji</option><option>Donut</option><option>Aom</option><option>Ming</option>
+<option>Ji</option><option>Donut</option><option>Aom</option>
 </select>
 </div>
 <div class="field"><label>Person in charge *</label>
 <select id="f-owner"><option value="">— Select —</option>
 <option>Por</option><option>Sun</option><option>Jew</option><option>Nod</option>
-<option>Donut</option><option>Ming</option><option>Ji</option><option>Kanom</option>
+<option>Donut</option><option>Ji</option><option>Kanom</option>
 <option>Ton</option><option>Nick</option><option>Benz</option><option>Ju</option>
 <option>Toon</option><option>Witch</option><option>Aom</option>
 </select>
@@ -1222,42 +1222,40 @@ const overduePICHTML=overdueByOwner.length?overdueByOwner.map(o=>`
 <div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600">${esc(o.owner)}</div><div style="font-size:12px;color:var(--t3)">Person in charge</div></div>
 <div style="text-align:right"><div style="font-family:'DBHeavent',monospace;font-size:18px;font-weight:700;color:#f07070">${o.count}</div><div style="font-size:11px;color:var(--t3)">overdue</div></div>
 </div>`).join(''):`<div style="color:#50d090;font-size:14px;padding:8px 2px">✓ No overdue tasks — everyone is on track.</div>`;
-// ── Inactive members (Super Admins only): no login for 3+ days, or no action ever ──
+// ── Inactive members (Super Admins only): no action taken in the last day (or never) ──
 const _DAYMS=86400000,_nowT=Date.now();
 const _relDays=d=>{if(!d)return null;return Math.floor((_nowT-d.getTime())/_DAYMS);};
 const _relLbl=d=>{if(!d)return 'Never';const n=_relDays(d);if(n<=0)return 'Today';if(n===1)return 'Yesterday';return n+' days ago';};
 const inactiveRows=OWNERS.map(name=>{
 const ll=_lastLogin[name]?new Date(_lastLogin[name]):null;
 const la=_lastAction[name]?new Date(_lastAction[name]):null;
-const loginDays=_relDays(ll);
-const noLogin=ll===null||loginDays>=3;
-const noAction=la===null;
-return{name,ll,la,loginDays,noLogin,noAction,ok:OKEY(name)};
-}).filter(r=>r.noLogin||r.noAction).sort((a,b)=>{
-const av=a.ll?a.ll.getTime():0,bv=b.ll?b.ll.getTime():0;return av-bv;
+const actDays=_relDays(la);
+const noAction=la===null||actDays>=1;
+return{name,ll,la,actDays,noAction,ok:OKEY(name)};
+}).filter(r=>r.noAction).sort((a,b)=>{
+const av=a.la?a.la.getTime():0,bv=b.la?b.la.getTime():0;return av-bv;
 });
 const inactiveCardHTML=_isAdminUser()?`
 <div class="chart-card" style="border-top:2px solid #f0a840;margin-bottom:14px">
 <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
 <div>
 <div class="chart-title"><i class="ti ti-user-off" aria-hidden="true" style="color:#f0a840"></i>Inactive members</div>
-<div class="chart-subtitle">Not logged in for 3+ days (or never), or no action taken in the dashboard yet</div>
+<div class="chart-subtitle">No action taken in the dashboard in the last day (or never)</div>
 </div>
 <div style="text-align:center;background:${inactiveRows.length?'#f0a840':'#50d090'};color:#13131f;border-radius:8px;padding:5px 14px;flex-shrink:0"><div style="font-family:'DBHeavent',monospace;font-size:20px;font-weight:800;line-height:1">${inactiveRows.length}</div><div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.04em">flagged</div></div>
 </div>
 ${inactiveRows.length?`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px;margin-top:14px">${inactiveRows.map(r=>{
 let badges='';
-if(!r.ll)badges+=`<span style="font-size:10px;font-weight:600;background:#3a1818;color:#f4a0a0;border-radius:10px;padding:1px 8px">Never logged in</span>`;
-else if(r.loginDays>=3)badges+=`<span style="font-size:10px;font-weight:600;background:#2c2008;color:#e0b860;border-radius:10px;padding:1px 8px">No login ${r.loginDays}d</span>`;
-if(r.noAction)badges+=`<span style="font-size:10px;font-weight:600;background:#2d1f4a;color:#c4a8ff;border-radius:10px;padding:1px 8px">No actions yet</span>`;
+if(!r.la)badges+=`<span style="font-size:10px;font-weight:600;background:#3a1818;color:#f4a0a0;border-radius:10px;padding:1px 8px">No actions yet</span>`;
+else badges+=`<span style="font-size:10px;font-weight:600;background:#2c2008;color:#e0b860;border-radius:10px;padding:1px 8px">No action ${r.actDays}d</span>`;
 return`<div style="display:flex;align-items:center;gap:10px;background:var(--surf2);border-left:3px solid #f0a840;border-radius:8px;padding:10px 12px">
 <div class="person-avatar o-${r.ok}" style="width:34px;height:34px;font-size:14px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0;overflow:hidden">${_avatarInner(_ownerAvatars[r.name],r.name)}</div>
 <div style="flex:1;min-width:0">
 <div style="font-size:14px;font-weight:600">${esc(r.name)}</div>
-<div style="font-size:11px;color:var(--t3);margin-top:1px">Last login: ${_relLbl(r.ll)} · Last action: ${_relLbl(r.la)}</div>
+<div style="font-size:11px;color:var(--t3);margin-top:1px">Last action: ${_relLbl(r.la)} · Last login: ${_relLbl(r.ll)}</div>
 <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:5px">${badges}</div>
 </div>
-</div>`;}).join('')}</div>`:`<div style="color:#50d090;font-size:14px;padding:12px 2px">✓ Everyone has logged in within the last 3 days and taken action.</div>`}
+</div>`;}).join('')}</div>`:`<div style="color:#50d090;font-size:14px;padding:12px 2px">✓ Everyone has taken action in the last day.</div>`}
 </div>`:'';
 // ── Previous month performance ──
 const _prevMonthStart=new Date(_todayMid.getFullYear(),_todayMid.getMonth()-1,1);
