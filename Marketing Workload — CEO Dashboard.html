@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260702c -->
+<!-- v20260702d -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -1233,7 +1233,9 @@ const _ymd=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${St
 const _isWorkday=d=>{const w=d.getDay();return w!==0&&w!==6&&!TH_HOLIDAYS.has(_ymd(d));};
 const _workdaysAfter=(from,to)=>{let c=0;const d=new Date(from);d.setDate(d.getDate()+1);while(d<=to){if(_isWorkday(d))c++;d.setDate(d.getDate()+1);}return c;};
 const _trackToday=_isWorkday(_todayMid);
-const inactiveRows=(!_trackToday)?[]:OWNERS.map(name=>{
+// Members excluded from inactivity tracking (e.g. left the team).
+const INACTIVE_EXCLUDE=new Set(['Ming']);
+const inactiveRows=(!_trackToday)?[]:OWNERS.filter(name=>!INACTIVE_EXCLUDE.has(name)).map(name=>{
 const ll=_lastLogin[name]?new Date(_lastLogin[name]):null;
 const la=_lastAction[name]?new Date(_lastAction[name]):null;
 const laDay=la?_dMid(la):null;
