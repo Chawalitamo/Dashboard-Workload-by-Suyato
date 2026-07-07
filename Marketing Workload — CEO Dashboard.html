@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260702l -->
+<!-- v20260702m -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -660,7 +660,6 @@ if(window._pendingLoad) window._pendingLoad();
 <span style="color:var(--gold)">⏳ 1 left</span>
 </div>
 </div></div>
-<div class="chart-wrap" style="height:160px"><canvas id="proj-chart" width="287" height="143" style="display: block; box-sizing: border-box; height: 160px; width: 320px;"></canvas></div>
 </div>
 <div class="chart-card">
 <div class="chart-title"><i class="ti ti-users" aria-hidden="true"></i>Team capacity heat map</div>
@@ -1205,16 +1204,30 @@ try{
 }
 // ═════════════ DASHBOARD ═════════════
 function renderDash(){
-const total=tasks.length;
-const complete=tasks.filter(t=>t.stage==='Complete').length;
-const inprog=tasks.filter(t=>!['Complete','On Hold'].includes(t.stage)).length;
-const onhold=tasks.filter(t=>t.stage==='On Hold').length;
 // Compare local calendar days only — avoids UTC-midnight string being "past" by morning in UTC+7
 const _todayMid=new Date();_todayMid.setHours(0,0,0,0);
 const _dMid=s=>{const d=new Date(s);return new Date(d.getFullYear(),d.getMonth(),d.getDate());};
-const overdue=tasks.filter(t=>t.due&&_dMid(t.due)<_todayMid&&t.stage!=='Complete'&&t.stage!=='On Hold').length;
-const avgPct=total?Math.round(tasks.reduce((s,t)=>s+STAGE_PCT[t.stage],0)/total):0;
+// KPI row + capacity heat map are scoped to the CURRENT MONTH (by task due date).
+const _cmStart=new Date(_todayMid.getFullYear(),_todayMid.getMonth(),1);
+const _cmEnd=new Date(_todayMid.getFullYear(),_todayMid.getMonth()+1,0);
+const _cmLabel=_cmStart.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+const monthTasks=tasks.filter(t=>{if(!t.due)return false;const d=_dMid(t.due);return d>=_cmStart&&d<=_cmEnd;});
+const total=monthTasks.length;
+const complete=monthTasks.filter(t=>t.stage==='Complete').length;
+const inprog=monthTasks.filter(t=>!['Complete','On Hold'].includes(t.stage)).length;
+const onhold=monthTasks.filter(t=>t.stage==='On Hold').length;
+const overdue=monthTasks.filter(t=>t.due&&_dMid(t.due)<_todayMid&&t.stage!=='Complete'&&t.stage!=='On Hold').length;
+const avgPct=total?Math.round(monthTasks.reduce((s,t)=>s+STAGE_PCT[t.stage],0)/total):0;
 const projs=[...new Set(tasks.map(t=>t.project))];
+// Per-person data scoped to the current month (for the heat map)
+const monthPersonData=OWNERS.map(owner=>{
+const ot=monthTasks.filter(t=>t.owner===owner);
+if(!ot.length)return null;
+const pct=Math.round(ot.reduce((s,t)=>s+STAGE_PCT[t.stage],0)/ot.length);
+const active=ot.filter(t=>!['Complete','On Hold'].includes(t.stage)).length;
+const done=ot.filter(t=>t.stage==='Complete').length;
+return{owner,pct,total:ot.length,active,done,ok:OKEY(owner)};
+}).filter(Boolean).sort((a,b)=>b.pct-a.pct);
 // ── Person progress data (sorted) ──
 const personData=OWNERS.map(owner=>{
 const ot=tasks.filter(t=>t.owner===owner);
@@ -1373,7 +1386,7 @@ const _periods=[
 ];
 const _pStats=_periods.map(p=>{const l=p.list,tot=l.length,dn=l.filter(t=>t.stage==='Complete').length,oh=l.filter(t=>t.stage==='On Hold').length,ip=tot-dn-oh,rate=tot?Math.round(dn/tot*100):0,avg=tot?Math.round(l.reduce((s,t)=>s+(STAGE_PCT[t.stage]||0),0)/tot):0;return{tot,dn,oh,ip,rate,avg};});
 // ── Destroy old charts before replacing DOM ──
-['donut-chart','bar-chart','bar-chart2','radar-chart','pipeline-chart','proj-chart','bubble-chart','period-chart'].forEach(id=>{
+['donut-chart','bar-chart','bar-chart2','radar-chart','pipeline-chart','bubble-chart','period-chart'].forEach(id=>{
 const el=document.getElementById(id);if(el){const inst=Chart.getChart(el);if(inst)inst.destroy();}
 });
 document.getElementById('dash-inner').innerHTML=`
@@ -1399,6 +1412,7 @@ document.getElementById('dash-inner').innerHTML=`
 <div class="chart-wrap" style="height:180px"><canvas id="radar-chart"></canvas></div>
 </div>
 </div>
+<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><i class="ti ti-calendar-month" style="color:var(--gold);font-size:16px"></i><span style="font-size:13px;font-weight:700;color:var(--t2)">This month · ${_cmLabel}</span><span style="font-size:11px;color:var(--t3)">(tasks due this month)</span></div>
 <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:14px">
 <div class="kpi"><div class="kpi-icon" style="background:#1e2840;color:#7b9cf0"><i class="ti ti-layout-kanban" aria-hidden="true"></i></div>
 <div class="kpi-big">${total}</div><div class="kpi-lbl">Total tasks</div>
@@ -1459,12 +1473,11 @@ ${inactiveCardHTML}
 <div class="chart-card">
 <div class="chart-title"><i class="ti ti-folder" aria-hidden="true"></i>Projects overview</div>
 <div class="chart-subtitle">Progress across all projects</div>
-<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px">${projCardsHTML}</div>
-<div class="chart-wrap" style="height:160px"><canvas id="proj-chart"></canvas></div>
+<div style="display:flex;flex-direction:column;gap:10px">${projCardsHTML}</div>
 </div>
 <div class="chart-card">
 <div class="chart-title"><i class="ti ti-users" aria-hidden="true"></i>Team capacity heat map</div>
-<div class="chart-subtitle">Active tasks vs completion per person</div>
+<div class="chart-subtitle">Active tasks vs completion per person · this month (${_cmLabel})</div>
 <div class="chart-wrap" style="height:300px"><canvas id="bubble-chart"></canvas></div>
 </div>
 </div>
@@ -1473,7 +1486,7 @@ ${inactiveCardHTML}
 <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
 <i class="ti ti-calendar-stats" aria-hidden="true" style="font-size:20px;color:var(--gold)"></i>
 <div><div style="font-size:15px;font-weight:700">Performance comparison</div>
-<div style="font-size:12px;color:var(--t3)">Tasks by due date across periods — bars show volume &amp; status, line shows completion rate. Hover for exact numbers.</div></div>
+<div style="font-size:12px;color:var(--t3)">Tasks by due date across periods — grouped bars compare Completed / Incomplete / On Hold, line shows completion rate. Hover for exact numbers.</div></div>
 </div>
 <div style="display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 12px;font-size:11px;color:var(--t3)">${_periods.map((p,i)=>`<span style="background:var(--surf2);border:1px solid var(--b1);border-radius:10px;padding:2px 9px"><b style="color:var(--t2)">${p.label}</b> · ${_pStats[i].tot} tasks · ${_pStats[i].rate}%</span>`).join('')}</div>
 <div class="chart-wrap" style="height:320px"><canvas id="period-chart"></canvas></div>
@@ -1558,25 +1571,11 @@ scales:{
   y:{grid:{display:false},ticks:{font:{size:11},color:'#c0c0d8'}}
 }}
 });
-// 5. Project comparison horizontal bar
-new Chart(document.getElementById('proj-chart'),{
-type:'bar',
-data:{
-labels:projData.map(p=>p.name.length>20?p.name.substring(0,20)+'…':p.name),
-datasets:[
-{label:'Complete',data:projData.map(p=>p.done),backgroundColor:'#2f9e44',borderRadius:4,borderSkipped:false},
-{label:'Remaining',data:projData.map(p=>p.total-p.done),backgroundColor:'rgba(255,255,255,0.08)',borderRadius:4,borderSkipped:false}
-]
-},
-options:{indexAxis:'y',responsive:true,maintainAspectRatio:true,
-plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}}},
-scales:{x:{stacked:true,grid:{color:CHART_GRID},ticks:{stepSize:1,font:{size:10}},beginAtZero:true},y:{stacked:true,grid:{display:false},ticks:{font:{size:10}}}}}
-});
-// 6. Bubble chart – capacity map (active tasks vs progress, bubble = total)
-const bubbleData=personData.map((p,i)=>({
+// 6. Bubble chart – capacity map (active tasks vs progress, bubble = total) · current month
+const bubbleData=monthPersonData.map((p,i)=>({
 x:p.active,y:p.pct,r:Math.min(26,Math.max(5,Math.sqrt(p.total)*4)),label:p.owner,ok:p.ok
 }));
-const bubbleColors=personData.map(p=>{
+const bubbleColors=monthPersonData.map(p=>{
 const map={'por':'#c4a8ff','sun':'#7dd4a0','jew':'#f4a0a0','nod':'#7ab8f5','donut':'#f5c870','ming':'#a4d870','ji':'#f59ab8','kanom':'#70d4d4','ton':'#f5a870','nick':'#b07af5','benz':'#70a8f5','ju':'#f57070','toon':'#60d0a0','witch':'#e0b860','aom':'#d090e0'};
 return map[p.ok]||'#888';
 });
@@ -1596,9 +1595,9 @@ new Chart(_pcEl,{
 data:{
 labels:_periods.map(p=>p.label),
 datasets:[
-{type:'bar',label:'Completed',data:_pStats.map(s=>s.dn),backgroundColor:'#40c060',stack:'s',borderRadius:4,yAxisID:'y'},
-{type:'bar',label:'Incomplete',data:_pStats.map(s=>s.ip),backgroundColor:'#f07070',stack:'s',borderRadius:4,yAxisID:'y'},
-{type:'bar',label:'On Hold',data:_pStats.map(s=>s.oh),backgroundColor:'#808080',stack:'s',borderRadius:4,yAxisID:'y'},
+{type:'bar',label:'Completed',data:_pStats.map(s=>s.dn),backgroundColor:'#40c060',borderRadius:4,yAxisID:'y'},
+{type:'bar',label:'Incomplete',data:_pStats.map(s=>s.ip),backgroundColor:'#f07070',borderRadius:4,yAxisID:'y'},
+{type:'bar',label:'On Hold',data:_pStats.map(s=>s.oh),backgroundColor:'#808080',borderRadius:4,yAxisID:'y'},
 {type:'line',label:'Completion %',data:_pStats.map(s=>s.rate),borderColor:GOLD,backgroundColor:GOLD,borderWidth:2,tension:.3,pointRadius:4,pointBackgroundColor:GOLD,yAxisID:'y1'}
 ]
 },
@@ -1611,8 +1610,8 @@ label:ctx=>{const s=_pStats[ctx.dataIndex];return ctx.dataset.label==='Completio
 afterBody:items=>{const s=_pStats[items[0].dataIndex];return `Total: ${s.tot} tasks`;}
 }}},
 scales:{
-x:{stacked:true,grid:{color:CHART_GRID},ticks:{font:{size:11}}},
-y:{stacked:true,beginAtZero:true,grid:{color:CHART_GRID},ticks:{precision:0,font:{size:10}},title:{display:true,text:'Tasks',font:{size:10}}},
+x:{grid:{color:CHART_GRID},ticks:{font:{size:11}}},
+y:{beginAtZero:true,grid:{color:CHART_GRID},ticks:{precision:0,font:{size:10}},title:{display:true,text:'Tasks',font:{size:10}}},
 y1:{position:'right',beginAtZero:true,max:100,grid:{display:false},ticks:{callback:v=>v+'%',font:{size:10}},title:{display:true,text:'Completion %',font:{size:10}}}
 }}
 });
