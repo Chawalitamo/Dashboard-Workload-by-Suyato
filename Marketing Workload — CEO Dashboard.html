@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260702f -->
+<!-- v20260702g -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -20,7 +20,40 @@
 --b0:#ffffff1f;--b1:#ffffff30;--b2:#ffffff4d;--b3:#ffffff66;
 --t1:#ffffff;--t2:#e4e1da;--t3:#c4c1ba;--t4:#9d9b94;
 --gold:#e8c547;--gold2:#c4a830;--gold3:rgba(232,197,71,.12);
+--chart-grid:rgba(255,255,255,0.18);
 --r:10px;--rsm:6px;--rxl:16px;
+}
+/* ── Per-user color themes (set via <html data-theme="…">) ── */
+:root[data-theme="dark-yellow"]{
+--bg:#14120a;--surf:#1c1a0f;--surf2:#242113;--surf3:#2d2917;--surf4:#37321c;
+--t1:#ffffff;--t2:#ece6d6;--t3:#cfc7b0;--t4:#a89f83;
+--gold:#f2c94c;--gold2:#d4ab2e;--gold3:rgba(242,201,76,.14);
+--chart-grid:rgba(255,255,255,0.18);
+}
+:root[data-theme="dark-red"]{
+--bg:#120a0a;--surf:#1a0f0f;--surf2:#221313;--surf3:#2b1818;--surf4:#351e1e;
+--t1:#ffffff;--t2:#f0dede;--t3:#d6b8b8;--t4:#b08c8c;
+--gold:#f0655f;--gold2:#d14a44;--gold3:rgba(240,101,95,.14);
+--chart-grid:rgba(255,255,255,0.16);
+}
+:root[data-theme="dark-blue"]{
+--bg:#0a0e16;--surf:#0f1420;--surf2:#131a2a;--surf3:#182134;--surf4:#1e293f;
+--t1:#ffffff;--t2:#dbe3f0;--t3:#b3c0d8;--t4:#8794ab;
+--gold:#5aaaf0;--gold2:#3d8fd8;--gold3:rgba(90,170,240,.14);
+--chart-grid:rgba(255,255,255,0.16);
+}
+:root[data-theme="grey"]{
+--bg:#161618;--surf:#1e1e21;--surf2:#26262a;--surf3:#2f2f34;--surf4:#3a3a40;
+--t1:#f5f5f7;--t2:#dcdce0;--t3:#b0b0b8;--t4:#86868f;
+--gold:#c8ccd4;--gold2:#a9adb6;--gold3:rgba(200,204,212,.12);
+--chart-grid:rgba(255,255,255,0.16);
+}
+:root[data-theme="white"]{
+--bg:#f4f4f2;--surf:#ffffff;--surf2:#f4f4f1;--surf3:#e9e9e5;--surf4:#dededa;
+--b0:#0000000f;--b1:#0000001f;--b2:#00000033;--b3:#00000055;
+--t1:#1a1a18;--t2:#33332f;--t3:#5f5f58;--t4:#8a8a80;
+--gold:#b8860b;--gold2:#9a6f08;--gold3:rgba(184,134,11,.12);
+--chart-grid:rgba(0,0,0,0.12);
 }
 html,body{height:100%;overflow:hidden}
 body{font-family:'DBHeavent','Sarabun',sans-serif;background:var(--bg);color:var(--t1);font-size:17px;display:flex;flex-direction:column}
@@ -337,6 +370,13 @@ button{font-family:'DBHeavent','Sarabun',sans-serif}
 .profile-preview{width:96px;height:96px;border-radius:50%;margin:0 auto 18px;display:flex;align-items:center;justify-content:center;font-size:38px;font-weight:700;background:var(--surf3);color:var(--gold);overflow:hidden;border:2px solid var(--b2)}
 .profile-preview img{width:100%;height:100%;object-fit:cover;display:block}
 .preset-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;margin:8px 0 4px}
+.theme-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:4px}
+.theme-opt{display:flex;flex-direction:column;align-items:center;gap:6px;padding:9px 4px;border:1px solid var(--b1);background:var(--surf2);border-radius:8px;cursor:pointer;transition:all .12s;font-family:inherit}
+.theme-opt:hover{background:var(--surf3)}
+.theme-opt.sel{border-color:var(--gold);background:var(--gold3)}
+.theme-sw{width:32px;height:32px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--b2)}
+.theme-ac{width:11px;height:11px;border-radius:50%}
+.theme-lbl{font-size:11px;color:var(--t2);white-space:nowrap}
 .preset-opt{aspect-ratio:1;border:1px solid var(--b1);background:var(--surf2);border-radius:8px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s}
 .preset-opt:hover{background:var(--surf3)}
 .preset-opt.sel{border-color:var(--gold);background:var(--gold3)}
@@ -1457,7 +1497,7 @@ ${prevTotal===0?`<div style="text-align:center;color:var(--t3);padding:20px 0;fo
 `;
 try{
 const CHART_TEXT=getComputedStyle(document.documentElement).getPropertyValue('--t2').trim()||'#9e9b94';
-const CHART_GRID='rgba(255,255,255,0.18)';
+const CHART_GRID=getComputedStyle(document.documentElement).getPropertyValue('--chart-grid').trim()||'rgba(255,255,255,0.18)';
 Chart.defaults.font.family="'DBHeavent','Sarabun',sans-serif";
 Chart.defaults.color=CHART_TEXT;
 // 1. Donut chart – stage distribution
@@ -2084,7 +2124,7 @@ if(info)info.style.display=name?'flex':'none';
 // Activity Log is for Super Administrators only.
 const at=document.getElementById('activity-tab');
 if(at)at.style.display=_isAdminUser()?'':'none';
-if(name){setupPresence();recordLogin(name);} else {teardownPresence();_myAvatar='';renderMyAvatar();}
+if(name){setupPresence();recordLogin(name);loadUserTheme();} else {teardownPresence();_myAvatar='';renderMyAvatar();}
 }
 // ── Profile picture (stored in Supabase user_metadata, shared live via presence) ──
 let _myAvatar='',_profileChoice='';
@@ -2115,8 +2155,24 @@ async function recordLogin(name){
 if(!name||!OWNERS.includes(name))return;
 try{await window._sb.from('mkt_owners').upsert([{name,last_login:new Date().toISOString()}],{onConflict:'name'});}catch(e){}
 }
+// ── Per-user color theme ──
+const THEMES=[
+{id:'black',label:'Black',sw:'#0d0d0c',ac:'#e8c547'},
+{id:'dark-yellow',label:'Dark Yellow',sw:'#14120a',ac:'#f2c94c'},
+{id:'dark-red',label:'Dark Red',sw:'#120a0a',ac:'#f0655f'},
+{id:'dark-blue',label:'Dark Blue',sw:'#0a0e16',ac:'#5aaaf0'},
+{id:'grey',label:'Grey',sw:'#26262a',ac:'#c8ccd4'},
+{id:'white',label:'White',sw:'#ffffff',ac:'#b8860b'},
+];
+let _currentTheme='black';
+function _themeKey(){return 'mkt_theme_'+(_currentUser||'_');}
+function applyTheme(id){id=id||'black';_currentTheme=id;if(id==='black')document.documentElement.removeAttribute('data-theme');else document.documentElement.setAttribute('data-theme',id);}
+function loadUserTheme(){let id='black';try{id=localStorage.getItem(_themeKey())||'black';}catch(e){}applyTheme(id);}
+function _renderThemeSwatches(active){const el=document.getElementById('theme-grid');if(!el)return;el.innerHTML=THEMES.map(t=>`<button type="button" class="theme-opt${t.id===active?' sel':''}" onclick="setTheme('${t.id}')" title="${t.label}"><span class="theme-sw" style="background:${t.sw}"><span class="theme-ac" style="background:${t.ac}"></span></span><span class="theme-lbl">${t.label}</span></button>`).join('');}
+function setTheme(id){applyTheme(id);try{localStorage.setItem(_themeKey(),id);}catch(e){}_renderThemeSwatches(id);const dv=document.getElementById('view-dashboard');if(dv&&dv.classList.contains('active')&&typeof renderDash==='function'){try{renderDash();}catch(e){}}}
 function openProfileModal(){
 _profileChoice=_myAvatar;
+_renderThemeSwatches(_currentTheme);
 _renderProfilePreview();
 const grid=document.getElementById('preset-grid');
 grid.innerHTML=PRESET_AVATARS.map(e=>`<button type="button" class="preset-opt" data-emoji="${e}" onclick="_pickPreset('${e}')">${e}</button>`).join('');
@@ -2769,6 +2825,9 @@ if(window._sbReady) window._pendingLoad();
 </div>
 <div style="font-size:12px;color:var(--t3);margin-bottom:6px">Or pick an avatar</div>
 <div class="preset-grid" id="preset-grid"></div>
+<div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--gold);margin:22px 0 10px;text-align:left"><i class="ti ti-palette" style="vertical-align:-2px"></i> Color theme</div>
+<div class="theme-grid" id="theme-grid"></div>
+<div style="font-size:11px;color:var(--t3);margin-top:6px;text-align:left">Applies instantly and is saved for your account on this device.</div>
 <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:22px">
 <button class="profile-btn ghost" onclick="closeProfileModal()">Cancel</button>
 <button class="profile-btn primary" id="profile-save-btn" onclick="saveProfile()">Save</button>
