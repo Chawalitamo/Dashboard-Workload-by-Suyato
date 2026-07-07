@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260702m -->
+<!-- v20260702n -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -1219,6 +1219,12 @@ const onhold=monthTasks.filter(t=>t.stage==='On Hold').length;
 const overdue=monthTasks.filter(t=>t.due&&_dMid(t.due)<_todayMid&&t.stage!=='Complete'&&t.stage!=='On Hold').length;
 const avgPct=total?Math.round(monthTasks.reduce((s,t)=>s+STAGE_PCT[t.stage],0)/total):0;
 const projs=[...new Set(tasks.map(t=>t.project))];
+// Top charts window: current month + next month (N and N+1), by task due date.
+const _nmEnd=new Date(_todayMid.getFullYear(),_todayMid.getMonth()+2,0);
+const _winLabel=`${_cmStart.toLocaleDateString('en-US',{month:'short'})}–${_nmEnd.toLocaleDateString('en-US',{month:'short',year:'numeric'})}`;
+const windowTasks=tasks.filter(t=>{if(!t.due)return false;const d=_dMid(t.due);return d>=_cmStart&&d<=_nmEnd;});
+const winStageCounts=STAGES.map(s=>windowTasks.filter(t=>t.stage===s).length);
+const winPersonData=OWNERS.map(owner=>{const ot=windowTasks.filter(t=>t.owner===owner);if(!ot.length)return null;const pct=Math.round(ot.reduce((s,t)=>s+STAGE_PCT[t.stage],0)/ot.length);const active=ot.filter(t=>!['Complete','On Hold'].includes(t.stage)).length;const done=ot.filter(t=>t.stage==='Complete').length;return{owner,pct,total:ot.length,active,done,ok:OKEY(owner)};}).filter(Boolean).sort((a,b)=>b.pct-a.pct);
 // Per-person data scoped to the current month (for the heat map)
 const monthPersonData=OWNERS.map(owner=>{
 const ot=monthTasks.filter(t=>t.owner===owner);
@@ -1393,22 +1399,22 @@ document.getElementById('dash-inner').innerHTML=`
 <div class="dash-grid-top">
 <div class="chart-card">
 <div class="chart-title"><i class="ti ti-chart-donut" aria-hidden="true"></i>Stage distribution</div>
-<div class="chart-subtitle">All tasks by current stage</div>
+<div class="chart-subtitle">By stage · this + next month (${_winLabel})</div>
 <div class="chart-wrap" style="height:180px"><canvas id="donut-chart"></canvas></div>
 </div>
 <div class="chart-card">
 <div class="chart-title"><i class="ti ti-chart-bar" aria-hidden="true"></i>Workload — Owner</div>
-<div class="chart-subtitle">Active tasks per owner (excl. Complete)</div>
+<div class="chart-subtitle">Per owner · this + next month · excl. Complete</div>
 <div class="chart-wrap" style="height:180px"><canvas id="bar-chart"></canvas></div>
 </div>
 <div class="chart-card">
 <div class="chart-title"><i class="ti ti-chart-bar-popular" aria-hidden="true"></i>Workload — PIC</div>
-<div class="chart-subtitle">Active tasks per person in charge (excl. Complete)</div>
+<div class="chart-subtitle">Per PIC · this + next month · excl. Complete</div>
 <div class="chart-wrap" style="height:180px"><canvas id="bar-chart2"></canvas></div>
 </div>
 <div class="chart-card">
 <div class="chart-title"><i class="ti ti-chart-radar" aria-hidden="true"></i>Progress radar</div>
-<div class="chart-subtitle">Top 6 members by % completion</div>
+<div class="chart-subtitle">Top 6 by % · this + next month</div>
 <div class="chart-wrap" style="height:180px"><canvas id="radar-chart"></canvas></div>
 </div>
 </div>
@@ -1503,15 +1509,15 @@ new Chart(document.getElementById('donut-chart'),{
 type:'doughnut',
 data:{
 labels:STAGES.map(s=>s==='AW Release / Event Live'?'AW Release':s),
-datasets:[{data:stageCounts,backgroundColor:STAGE_COLORS,borderWidth:0,hoverOffset:6}]
+datasets:[{data:winStageCounts,backgroundColor:STAGE_COLORS,borderWidth:0,hoverOffset:6}]
 },
 options:{responsive:true,maintainAspectRatio:true,cutout:'65%',
 plugins:{legend:{position:'right',labels:{boxWidth:10,padding:10,font:{size:10}}},
 tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${ctx.parsed} tasks`}}}}
 });
 // 2. Bar chart – active tasks per owner (lead field)
-const activeLeads=LEADS.filter(l=>tasks.some(t=>t.lead===l&&t.stage!=='Complete'));
-const leadCounts=activeLeads.map(l=>tasks.filter(t=>t.lead===l&&t.stage!=='Complete').length);
+const activeLeads=LEADS.filter(l=>windowTasks.some(t=>t.lead===l&&t.stage!=='Complete'));
+const leadCounts=activeLeads.map(l=>windowTasks.filter(t=>t.lead===l&&t.stage!=='Complete').length);
 new Chart(document.getElementById('bar-chart'),{
 type:'bar',
 data:{labels:activeLeads,datasets:[{label:'Tasks',data:leadCounts,backgroundColor:'#e8c547',borderRadius:4,borderSkipped:false}]},
@@ -1520,8 +1526,8 @@ plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${ctx.parsed.y} 
 scales:{x:{grid:{color:CHART_GRID},ticks:{font:{size:10}}},y:{grid:{color:CHART_GRID},ticks:{stepSize:1,font:{size:10}},beginAtZero:true}}}
 });
 // 2b. Bar chart 2 – active tasks per person in charge (owner field)
-const activePIC=OWNERS.filter(o=>tasks.some(t=>t.owner===o&&t.stage!=='Complete'));
-const picCounts=activePIC.map(o=>tasks.filter(t=>t.owner===o&&t.stage!=='Complete').length);
+const activePIC=OWNERS.filter(o=>windowTasks.some(t=>t.owner===o&&t.stage!=='Complete'));
+const picCounts=activePIC.map(o=>windowTasks.filter(t=>t.owner===o&&t.stage!=='Complete').length);
 new Chart(document.getElementById('bar-chart2'),{
 type:'bar',
 data:{labels:activePIC,datasets:[{label:'Tasks',data:picCounts,backgroundColor:'#7b9cf0',borderRadius:4,borderSkipped:false}]},
@@ -1530,7 +1536,7 @@ plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${ctx.parsed.y} 
 scales:{x:{grid:{color:CHART_GRID},ticks:{font:{size:10}}},y:{grid:{color:CHART_GRID},ticks:{stepSize:1,font:{size:10}},beginAtZero:true}}}
 });
 // 3. Radar chart – top 6 members
-const top6=personData.slice(0,6);
+const top6=winPersonData.slice(0,6);
 new Chart(document.getElementById('radar-chart'),{
 type:'radar',
 data:{
