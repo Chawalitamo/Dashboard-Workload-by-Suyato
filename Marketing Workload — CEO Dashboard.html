@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260702g -->
+<!-- v20260702h -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -2124,7 +2124,7 @@ if(info)info.style.display=name?'flex':'none';
 // Activity Log is for Super Administrators only.
 const at=document.getElementById('activity-tab');
 if(at)at.style.display=_isAdminUser()?'':'none';
-if(name){setupPresence();recordLogin(name);loadUserTheme();} else {teardownPresence();_myAvatar='';renderMyAvatar();}
+if(name){setupPresence();recordLogin(name);loadUserTheme();syncUserTheme();} else {teardownPresence();_myAvatar='';renderMyAvatar();}
 }
 // ── Profile picture (stored in Supabase user_metadata, shared live via presence) ──
 let _myAvatar='',_profileChoice='';
@@ -2169,7 +2169,19 @@ function _themeKey(){return 'mkt_theme_'+(_currentUser||'_');}
 function applyTheme(id){id=id||'black';_currentTheme=id;if(id==='black')document.documentElement.removeAttribute('data-theme');else document.documentElement.setAttribute('data-theme',id);}
 function loadUserTheme(){let id='black';try{id=localStorage.getItem(_themeKey())||'black';}catch(e){}applyTheme(id);}
 function _renderThemeSwatches(active){const el=document.getElementById('theme-grid');if(!el)return;el.innerHTML=THEMES.map(t=>`<button type="button" class="theme-opt${t.id===active?' sel':''}" onclick="setTheme('${t.id}')" title="${t.label}"><span class="theme-sw" style="background:${t.sw}"><span class="theme-ac" style="background:${t.ac}"></span></span><span class="theme-lbl">${t.label}</span></button>`).join('');}
-function setTheme(id){applyTheme(id);try{localStorage.setItem(_themeKey(),id);}catch(e){}_renderThemeSwatches(id);const dv=document.getElementById('view-dashboard');if(dv&&dv.classList.contains('active')&&typeof renderDash==='function'){try{renderDash();}catch(e){}}}
+function _refreshDashForTheme(){const dv=document.getElementById('view-dashboard');if(dv&&dv.classList.contains('active')&&typeof renderDash==='function'){try{renderDash();}catch(e){}}}
+function setTheme(id){applyTheme(id);try{localStorage.setItem(_themeKey(),id);}catch(e){}_renderThemeSwatches(id);_refreshDashForTheme();
+// Persist to the account so the theme follows the user across devices.
+if(window._sb&&_currentUser){window._sb.from('mkt_owners').upsert([{name:_currentUser,theme:id}],{onConflict:'name'}).then(()=>{},()=>{});}}
+// Pull the saved theme from the account (cross-device sync) after login.
+async function syncUserTheme(){
+if(!_currentUser||!window._sb)return;
+try{
+const{data}=await window._sb.from('mkt_owners').select('theme').eq('name',_currentUser).maybeSingle();
+const id=data&&data.theme;
+if(id&&id!==_currentTheme){applyTheme(id);try{localStorage.setItem(_themeKey(),id);}catch(e){}_renderThemeSwatches(id);_refreshDashForTheme();}
+}catch(e){}
+}
 function openProfileModal(){
 _profileChoice=_myAvatar;
 _renderThemeSwatches(_currentTheme);
