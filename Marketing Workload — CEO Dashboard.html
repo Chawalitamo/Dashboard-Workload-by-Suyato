@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260702e -->
+<!-- v20260702f -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -920,6 +920,13 @@ if(window._pendingLoad) window._pendingLoad();
 </div>
 </div>
 
+<div class="modal-bg" id="pic-detail-modal">
+<div class="modal" style="width:520px">
+<div class="modal-head"><h3 id="pic-detail-title">Tasks</h3><button class="modal-close" onclick="closeModal('pic-detail-modal')">&#x2715;</button></div>
+<div id="pic-detail-body"></div>
+</div>
+</div>
+
 <script>
 // ═════════════ DATA ═════════════
 const STAGES=['Job Brief','Design','Production','Review','Approval Stage','AW Release / Event Live','On Hold','Complete'];
@@ -933,6 +940,36 @@ const PROJECT_PALETTE=['#5aaaf0','#b87ff0','#f5a870','#7dd4a0','#f07070','#f0c04
 let projects=[];
 let selectedNpColor=PROJECT_PALETTE[2];
 function projColor(name){const p=projects.find(x=>x.name===name);return p?p.color:'#888';}
+// Popup: show a PIC's due-today / overdue task details from the dashboard cards.
+function showPICTasks(owner,mode){
+const dM=s=>{const d=new Date(s);return new Date(d.getFullYear(),d.getMonth(),d.getDate());};
+const today=new Date();today.setHours(0,0,0,0);
+let list=tasks.filter(t=>t.owner===owner&&t.due&&t.stage!=='Complete'&&t.stage!=='On Hold');
+if(mode==='overdue')list=list.filter(t=>dM(t.due)<today);
+else list=list.filter(t=>dM(t.due).getTime()===today.getTime());
+list.sort((a,b)=>new Date(a.due)-new Date(b.due));
+const isOv=mode==='overdue';
+const t1=document.getElementById('pic-detail-title');
+const b1=document.getElementById('pic-detail-body');
+t1.innerHTML=`${esc(owner)} — ${isOv?'Overdue tasks':'Due today'} <span style="color:var(--t3);font-weight:400;font-size:13px">(${list.length})</span>`;
+b1.innerHTML=list.length?list.map(t=>{
+const pc=projColor(t.project);
+const dd=dM(t.due),diff=Math.round((today-dd)/86400000);
+const dueLbl=isOv?(diff===1?'1 day overdue':diff+' days overdue'):'Due today';
+return`<div style="display:flex;align-items:flex-start;gap:10px;padding:11px 0;border-bottom:1px solid var(--b0)">
+<span style="width:8px;height:8px;border-radius:50%;background:${pc};flex-shrink:0;margin-top:5px"></span>
+<div style="flex:1;min-width:0">
+<div style="font-size:14px;font-weight:600;color:var(--t1)">${esc(t.title)}</div>
+<div style="font-size:12px;color:var(--t3);margin-top:2px">${esc(t.project||'—')} · ${esc(t.stage)}${t.lead?' · Owner: '+esc(t.lead):''}</div>
+${t.note?`<div style="font-size:12px;color:var(--t3);margin-top:3px;line-height:1.4">${esc(t.note)}</div>`:''}
+</div>
+<div style="text-align:right;flex-shrink:0">
+<div style="font-family:'DBHeavent',monospace;font-size:12px;color:${isOv?'#f07070':'var(--gold)'}">${esc(t.due)}</div>
+<div style="font-size:10px;color:var(--t3);margin-top:1px">${dueLbl}</div>
+</div>
+</div>`;}).join(''):`<div style="color:var(--t3);padding:18px 0;text-align:center;font-size:13px">No tasks.</div>`;
+document.getElementById('pic-detail-modal').classList.add('open');
+}
 function renderProjectColorSwatches(){
 const el=document.getElementById('np-color-swatches');if(!el)return;
 el.innerHTML=PROJECT_PALETTE.map(c=>`<div onclick="selectNpColor('${c}',this)" style="width:22px;height:22px;border-radius:50%;background:${c};cursor:pointer;border:2px solid ${c===selectedNpColor?'#fff':'transparent'};transition:border .1s" title="${c}"></div>`).join('');
@@ -1208,7 +1245,7 @@ items:tasks.filter(t=>t.owner===o&&t.due&&_dMid(t.due).getTime()===_todayMid.get
 })).filter(x=>x.items.length>0).sort((a,b)=>b.items.length-a.items.length);
 const dueTodayTotal=dueTodayByOwner.reduce((s,o)=>s+o.items.length,0);
 const dueTodayPICHTML=dueTodayByOwner.length?dueTodayByOwner.map(o=>`
-<div style="background:linear-gradient(180deg,var(--gold3),var(--surf2));border:1px solid rgba(232,197,71,.35);border-left:4px solid var(--gold);border-radius:10px;padding:12px 14px">
+<div onclick="showPICTasks('${o.owner}','due-today')" title="Click to see ${esc(o.owner)}'s tasks due today" onmouseover="this.style.filter='brightness(1.08)'" onmouseout="this.style.filter=''" style="background:linear-gradient(180deg,var(--gold3),var(--surf2));border:1px solid rgba(232,197,71,.35);border-left:4px solid var(--gold);border-radius:10px;padding:12px 14px;cursor:pointer;transition:filter .12s">
 <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
 <div class="person-avatar o-${OKEY(o.owner)}" style="width:34px;height:34px;font-size:14px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0">${esc(o.owner[0])}</div>
 <div style="flex:1;min-width:0"><div style="font-size:15px;font-weight:700">${esc(o.owner)}</div><div style="font-size:11px;color:var(--t3)">Person in charge</div></div>
@@ -1217,7 +1254,7 @@ const dueTodayPICHTML=dueTodayByOwner.length?dueTodayByOwner.map(o=>`
 <div style="display:flex;flex-direction:column;gap:4px">${o.items.map(t=>{const proj=projects.find(p=>p.name===t.project);const pc=proj?proj.color:'#888';return`<div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--t2)"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${pc};flex-shrink:0"></span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(t.title)}</span><span style="color:var(--t3);flex-shrink:0">· ${esc(t.stage)}</span></div>`;}).join('')}</div>
 </div>`).join(''):`<div style="color:#50d090;font-size:14px;padding:8px 2px">✓ No tasks due today.</div>`;
 const overduePICHTML=overdueByOwner.length?overdueByOwner.map(o=>`
-<div style="display:flex;align-items:center;gap:10px;background:var(--surf2);border-left:3px solid #f07070;border-radius:8px;padding:10px 12px">
+<div onclick="showPICTasks('${o.owner}','overdue')" title="Click to see ${esc(o.owner)}'s overdue tasks" onmouseover="this.style.filter='brightness(1.12)'" onmouseout="this.style.filter=''" style="display:flex;align-items:center;gap:10px;background:var(--surf2);border-left:3px solid #f07070;border-radius:8px;padding:10px 12px;cursor:pointer;transition:filter .12s">
 <div class="person-avatar o-${OKEY(o.owner)}" style="width:30px;height:30px;font-size:13px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0">${esc(o.owner[0])}</div>
 <div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600">${esc(o.owner)}</div><div style="font-size:12px;color:var(--t3)">Person in charge</div></div>
 <div style="text-align:right"><div style="font-family:'DBHeavent',monospace;font-size:18px;font-weight:700;color:#f07070">${o.count}</div><div style="font-size:11px;color:var(--t3)">overdue</div></div>
