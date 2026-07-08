@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260702n -->
+<!-- v20260702o -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -1899,7 +1899,7 @@ dueHTML=`<span class="due-tag ${cls}">${lbl}</span>`;
 }
 const ac=(t.attachments||[]).length;
 const attachBtn=`<button class="cta k-attach" title="Attachments">&#128206;${ac>0?`<span class="attach-badge">${ac}</span>`:''}</button>`;
-return `<div class="kcard" data-id="${t.id}" data-can-l="${canL?1:0}" data-can-r="${canR?1:0}"><div class="kcard-proj"><span style="width:6px;height:6px;border-radius:50%;background:${pc};flex-shrink:0;display:inline-block"></span>${esc(t.project)}</div><div class="kcard-title">${esc(t.title)}</div>${t.note?noteHTML(t.note):''}<div class="kcard-foot"><span class="owner-pip o-${ok}">${t.owner}</span>${t.lead?`<span style="font-size:11px;color:var(--t3);background:var(--surf3);border-radius:10px;padding:1px 7px;margin-left:4px">&#128100; ${esc(t.lead)}</span>`:''} ${dueHTML}</div>${thumbsHTML(t)}<div class="kcard-actions">${canL?'<button class="cta k-prev">&#8592; Prev</button>':''}<button class="cta k-edit">&#9998; Edit</button>${canR?'<button class="cta k-next">Next &#8594;</button>':''}${attachBtn}<button class="cta del k-del">&#x2715; Del</button></div></div>`;
+return `<div class="kcard" data-id="${t.id}" data-can-l="${canL?1:0}" data-can-r="${canR?1:0}"><div class="kcard-proj"><span style="width:6px;height:6px;border-radius:50%;background:${pc};flex-shrink:0;display:inline-block"></span>${esc(t.project)}</div><div class="kcard-title">${esc(t.title)}</div>${t.note?noteHTML(t.note):''}<div class="kcard-foot"><span class="owner-pip o-${ok}">${t.owner}</span>${t.lead?`<span style="font-size:11px;color:var(--t3);background:var(--surf3);border-radius:10px;padding:1px 7px;margin-left:4px">&#128100; ${esc(t.lead)}</span>`:''} ${dueHTML}</div>${thumbsHTML(t)}<div class="kcard-actions"><button class="cta k-edit">&#9998; Edit</button>${attachBtn}<button class="cta del k-del">&#x2715; Del</button></div></div>`;
 }
 function renderSbStats(){
 const list=activeProj==='All'?tasks:tasks.filter(t=>t.project===activeProj);
