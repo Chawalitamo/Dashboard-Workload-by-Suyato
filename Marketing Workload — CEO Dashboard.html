@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260702v -->
+<!-- v20260702w -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -1792,8 +1792,8 @@ if(_oldStage!==best[0]) logActivity(id,t.title,t.project,'updated','stage',_oldS
 renderList();
 }
 // Proof-of-work gate: a task can only move to Complete if it has an attachment.
-function _hasProof(t){return !!(t&&Array.isArray(t.attachments)&&t.attachments.length>0);}
-function _blockComplete(t){alert('⚠ Attach proof of completed work first.\n\n“'+((t&&t.title)||'This task')+'” can\'t be moved to Complete until a file is attached.\nOpen the task\'s 📎 attachments, add the file, then move it to Complete.');return true;}
+function _hasProof(t){return !!(t&&Array.isArray(t.proof)&&t.proof.length>0);}
+function _blockComplete(t){alert('🏆 Attach proof of completed work first.\n\n“'+((t&&t.title)||'This task')+'” can\'t be moved to Complete until proof is attached.\nClick the 🏆 button on the task, upload the proof file, then move it to Complete.');return true;}
 async function updateStage(id,val){
 const t=tasks.find(t=>t.id===id); if(!t) return;
 if(val==='Complete'&&t.stage!=='Complete'&&!_hasProof(t)){_blockComplete(t);renderList();return;}
@@ -1950,7 +1950,9 @@ dueHTML=`<span class="due-tag ${cls}">${lbl}</span>`;
 }
 const ac=(t.attachments||[]).length;
 const attachBtn=`<button class="cta k-attach" title="Attachments">&#128206;${ac>0?`<span class="attach-badge">${ac}</span>`:''}</button>`;
-return `<div class="kcard" data-id="${t.id}" data-can-l="${canL?1:0}" data-can-r="${canR?1:0}"><div class="kcard-proj"><span style="width:6px;height:6px;border-radius:50%;background:${pc};flex-shrink:0;display:inline-block"></span>${esc(t.project)}</div><div class="kcard-title">${esc(t.title)}</div>${t.note?noteHTML(t.note):''}<div class="kcard-foot"><span class="owner-pip o-${ok}">${t.owner}</span>${t.lead?`<span style="font-size:11px;color:var(--t3);background:var(--surf3);border-radius:10px;padding:1px 7px;margin-left:4px">&#128100; ${esc(t.lead)}</span>`:''} ${dueHTML}</div>${thumbsHTML(t)}<div class="kcard-actions"><button class="cta k-edit">&#9998; Edit</button>${attachBtn}<button class="cta del k-del">&#x2715; Del</button></div></div>`;
+const pcnt=(t.proof||[]).length;
+const proofBtn=`<button class="cta k-proof" title="Proof of completed work (required to Complete)" style="${pcnt>0?'border-color:#2f9e44;color:#50d090':''}">&#127942;${pcnt>0?`<span class="attach-badge" style="background:#2f9e44">${pcnt}</span>`:''}</button>`;
+return `<div class="kcard" data-id="${t.id}" data-can-l="${canL?1:0}" data-can-r="${canR?1:0}"><div class="kcard-proj"><span style="width:6px;height:6px;border-radius:50%;background:${pc};flex-shrink:0;display:inline-block"></span>${esc(t.project)}</div><div class="kcard-title">${esc(t.title)}</div>${t.note?noteHTML(t.note):''}<div class="kcard-foot"><span class="owner-pip o-${ok}">${t.owner}</span>${t.lead?`<span style="font-size:11px;color:var(--t3);background:var(--surf3);border-radius:10px;padding:1px 7px;margin-left:4px">&#128100; ${esc(t.lead)}</span>`:''} ${dueHTML}</div>${thumbsHTML(t)}<div class="kcard-actions"><button class="cta k-edit">&#9998; Edit</button>${attachBtn}${proofBtn}<button class="cta del k-del">&#x2715; Del</button></div></div>`;
 }
 function renderSbStats(){
 const list=activeProj==='All'?tasks:tasks.filter(t=>t.project===activeProj);
@@ -1981,6 +1983,7 @@ function setupDragDrop(){
     if(btnNext)   btnNext.addEventListener('click',e=>{e.stopPropagation();moveTask(rawId,1);});
     if(btnDel)    btnDel.addEventListener('click',e=>{e.stopPropagation();doDelete(rawId);});
     card.querySelectorAll('.k-attach').forEach(el=>el.addEventListener('click',e=>{e.stopPropagation();openAttachModal(rawId);}));
+    card.querySelectorAll('.k-proof').forEach(el=>el.addEventListener('click',e=>{e.stopPropagation();openAttachModal(rawId,'proof');}));
     // Link chips: open the URL without triggering the card's edit/drag.
     card.querySelectorAll('.k-link').forEach(el=>el.addEventListener('click',e=>{e.stopPropagation();}));
     card.setAttribute('draggable','true');
@@ -2052,7 +2055,8 @@ async function doDelete(rawId){
 }
 // ═════════════ ATTACHMENTS ═════════════
 const SB_URL='https://fxmigukayxvieziseqil.supabase.co';
-let attachTaskId=null;
+let attachTaskId=null,attachKind='files';
+const _attField=()=>attachKind==='proof'?'proof':'attachments';
 function fileIcon(type=''){
   if(type.includes('pdf')) return '📕';
   if(type.includes('presentation')||type.includes('powerpoint')) return '📊';
@@ -2065,9 +2069,9 @@ function fileIcon(type=''){
 function fmtSize(b){if(b<1024)return b+'B';if(b<1048576)return(b/1024).toFixed(1)+'KB';return(b/1048576).toFixed(1)+'MB';}
 function pubUrl(path){const{data}=window._sb.storage.from('task-files').getPublicUrl(path);return data.publicUrl;}
 function renderAttachList(t){
-  const list=t.attachments||[];
+  const list=t[_attField()]||[];
   const el=document.getElementById('attach-list');if(!el)return;
-  if(!list.length){el.innerHTML='<div class="attach-empty">No files attached yet</div>';return;}
+  if(!list.length){el.innerHTML=`<div class="attach-empty">${attachKind==='proof'?'No proof of completed work attached yet':'No files attached yet'}</div>`;return;}
   el.innerHTML=list.map((a,i)=>{
     const d=new Date(a.uploaded_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
     return `<div class="attach-item">
@@ -2078,42 +2082,45 @@ function renderAttachList(t){
     </div>`;
   }).join('');
 }
-function openAttachModal(rawId){
+function openAttachModal(rawId,kind){
   attachTaskId=rawId;
+  attachKind=(kind==='proof')?'proof':'files';
   const t=findTask(rawId);if(!t)return;
-  document.getElementById('attach-modal-title').textContent='📎 '+t.title.substring(0,50);
+  document.getElementById('attach-modal-title').textContent=(attachKind==='proof'?'🏆 Proof of completion — ':'📎 ')+t.title.substring(0,50);
   renderAttachList(t);
   document.getElementById('attach-modal').classList.add('open');
 }
 async function uploadFiles(files){
   if(!files||!files.length)return;
   const t=findTask(attachTaskId);if(!t)return;
+  const F=_attField();
   const prog=document.getElementById('upload-progress');
   prog.style.display='block';
-  const attachments=[...(t.attachments||[])];
+  const arr=[...(t[F]||[])];
   for(const file of Array.from(files)){
     prog.textContent=`Uploading "${file.name}"…`;
     const safeName=file.name.replace(/[^a-zA-Z0-9._\-() ]/g,'_');
-    const path=`task-files/${t.id}/${Date.now()}_${safeName}`;
+    const path=`task-files/${t.id}/${F==='proof'?'proof/':''}${Date.now()}_${safeName}`;
     const{error}=await window._sb.storage.from('task-files').upload(path,file,{upsert:true});
     if(error){console.error('upload error',error);prog.textContent=`Failed: ${file.name}`;continue;}
-    attachments.push({name:file.name,path,size:file.size,type:file.type||'application/octet-stream',uploaded_at:new Date().toISOString()});
+    arr.push({name:file.name,path,size:file.size,type:file.type||'application/octet-stream',uploaded_at:new Date().toISOString()});
   }
-  t.attachments=attachments;
-  try{await window._sb.from('mkt_tasks').update({attachments}).eq('id',t.id);}catch(e){console.error(e);}
+  t[F]=arr;
+  try{await window._sb.from('mkt_tasks').update({[F]:arr}).eq('id',t.id);}catch(e){console.error(e);}
   prog.style.display='none';
   renderAttachList(t);
   renderKanban();
 }
 async function deleteAttachment(idx){
   const t=findTask(attachTaskId);if(!t)return;
-  const list=[...(t.attachments||[])];
+  const F=_attField();
+  const list=[...(t[F]||[])];
   const a=list[idx];if(!a)return;
   if(!confirm(`Remove "${a.name}"?`))return;
   await window._sb.storage.from('task-files').remove([a.path]);
   list.splice(idx,1);
-  t.attachments=list;
-  try{await window._sb.from('mkt_tasks').update({attachments:list}).eq('id',t.id);}catch(e){console.error(e);}
+  t[F]=list;
+  try{await window._sb.from('mkt_tasks').update({[F]:list}).eq('id',t.id);}catch(e){console.error(e);}
   renderAttachList(t);
   renderKanban();
 }
@@ -2797,7 +2804,7 @@ async function loadFromSupabase(){
     if(e1) throw e1;
     if(e2) throw e2;
     projects=projs.map(p=>({name:p.name,color:p.color,id:p.id}));
-    const _all=tks.map(t=>({id:t.id,title:t.title||'(untitled)',owner:t.owner||'',lead:t.lead||'',project:t.project||'',stage:t.stage||'Job Brief',due:t.due||'',note:t.note||'',attachments:t.attachments||[],created_at:t.created_at||''}));
+    const _all=tks.map(t=>({id:t.id,title:t.title||'(untitled)',owner:t.owner||'',lead:t.lead||'',project:t.project||'',stage:t.stage||'Job Brief',due:t.due||'',note:t.note||'',attachments:t.attachments||[],proof:t.proof||[],created_at:t.created_at||''}));
     tasks=applyUserFilter(_all);
     checkForNewAssignedTasks();
     checkForOverdueTasks();
