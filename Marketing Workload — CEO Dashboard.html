@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260702r -->
+<!-- v20260702s -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -807,6 +807,7 @@ if(window._pendingLoad) window._pendingLoad();
 <div style="font-size:15px;font-weight:700;color:var(--t1)"><i class="ti ti-clock-hour-4" style="color:var(--gold);vertical-align:-2px;margin-right:4px"></i>Work Log — login time per member</div>
 <div style="flex:1"></div>
 <span id="worklog-count" style="font-size:13px;color:var(--t3)"></span>
+<button class="act-export-btn" onclick="exportWorklogCSV()"><i class="ti ti-file-spreadsheet" aria-hidden="true"></i>Export Excel</button>
 <button class="act-export-btn" onclick="renderWorklog()" style="background:var(--surf3);border-color:var(--b2);color:var(--t2)"><i class="ti ti-refresh" aria-hidden="true"></i>Refresh</button>
 </div>
 <div style="flex:1;overflow-y:auto;padding:0 24px 24px" id="worklog-body"></div>
@@ -1404,8 +1405,28 @@ const _periods=[
 {label:'Prev Month',sub:_prevMonthLabelEn,list:prevTasks},
 ];
 const _pStats=_periods.map(p=>{const l=p.list,tot=l.length,dn=l.filter(t=>t.stage==='Complete').length,oh=l.filter(t=>t.stage==='On Hold').length,ip=tot-dn-oh,rate=tot?Math.round(dn/tot*100):0,avg=tot?Math.round(l.reduce((s,t)=>s+(STAGE_PCT[t.stage]||0),0)/tot):0;return{tot,dn,oh,ip,rate,avg};});
+// ── Previous-week login hours per member (Super Admins only) ──
+const _bkkNow=new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Bangkok'}));
+const _dowW=(_bkkNow.getDay()+6)%7; // 0=Mon
+const _thisWeekStart=new Date(_bkkNow.getFullYear(),_bkkNow.getMonth(),_bkkNow.getDate()-_dowW);
+const _prevWeekStart=new Date(_thisWeekStart);_prevWeekStart.setDate(_thisWeekStart.getDate()-7);
+const _prevWeekEnd=new Date(_thisWeekStart);_prevWeekEnd.setDate(_thisWeekStart.getDate()-1);
+const _pwParseDay=s=>{const p=String(s).split('-').map(Number);return new Date(p[0],p[1]-1,p[2]);};
+const _pwHours=r=>Math.max(0,(new Date(r.last_seen)-new Date(r.first_seen))/3600000);
+const prevWeekLogin=OWNERS.map(name=>{
+const h=(_worklogRows||[]).filter(r=>r.name===name&&_pwParseDay(r.day)>=_prevWeekStart&&_pwParseDay(r.day)<=_prevWeekEnd).reduce((s,r)=>s+_pwHours(r),0);
+return{name,hours:Math.round(h*10)/10};
+}).filter(x=>x.hours>0).sort((a,b)=>b.hours-a.hours);
+const _pwLabel=`${_prevWeekStart.toLocaleDateString('en-GB',{day:'2-digit',month:'short'})} – ${_prevWeekEnd.toLocaleDateString('en-GB',{day:'2-digit',month:'short'})}`;
+const loginWeekCardHTML=_isAdminUser()?`
+<div style="margin-top:14px">
+<div class="chart-card" style="border-top:2px solid var(--gold)">
+<div class="chart-title"><i class="ti ti-clock-hour-4" aria-hidden="true" style="color:var(--gold)"></i>Team login hours — previous week</div>
+<div class="chart-subtitle">Total active time per member · ${_pwLabel} (Mon–Sun)</div>
+${prevWeekLogin.length?`<div class="chart-wrap" style="height:${Math.max(160,prevWeekLogin.length*30)}px"><canvas id="loginweek-chart"></canvas></div>`:`<div style="color:var(--t3);padding:16px 2px;font-size:13px">No login data recorded for last week yet — this fills in as the team uses the dashboard.</div>`}
+</div></div>`:'';
 // ── Destroy old charts before replacing DOM ──
-['donut-chart','bar-chart','bar-chart2','radar-chart','pipeline-chart','bubble-chart','period-chart'].forEach(id=>{
+['donut-chart','bar-chart','bar-chart2','radar-chart','pipeline-chart','bubble-chart','period-chart','loginweek-chart'].forEach(id=>{
 const el=document.getElementById(id);if(el){const inst=Chart.getChart(el);if(inst)inst.destroy();}
 });
 document.getElementById('dash-inner').innerHTML=`
@@ -1500,6 +1521,7 @@ ${inactiveCardHTML}
 <div class="chart-wrap" style="height:300px"><canvas id="bubble-chart"></canvas></div>
 </div>
 </div>
+${loginWeekCardHTML}
 <div style="margin-top:14px">
 <div class="chart-card" style="border-top:2px solid var(--gold)">
 <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
@@ -1633,6 +1655,17 @@ x:{grid:{color:CHART_GRID},ticks:{font:{size:11}}},
 y:{beginAtZero:true,grid:{color:CHART_GRID},ticks:{precision:0,font:{size:10}},title:{display:true,text:'Tasks',font:{size:10}}},
 y1:{position:'right',beginAtZero:true,max:100,grid:{display:false},ticks:{callback:v=>v+'%',font:{size:10}},title:{display:true,text:'Completion %',font:{size:10}}}
 }}
+});
+}
+// 8. Previous-week login hours (admin) – horizontal bar
+const _lwEl=document.getElementById('loginweek-chart');
+if(_lwEl&&prevWeekLogin.length){
+const GOLD2=getComputedStyle(document.documentElement).getPropertyValue('--gold').trim()||'#e8c547';
+new Chart(_lwEl,{type:'bar',
+data:{labels:prevWeekLogin.map(p=>p.name),datasets:[{label:'Hours',data:prevWeekLogin.map(p=>p.hours),backgroundColor:GOLD2,borderRadius:4,borderSkipped:false}]},
+options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${ctx.parsed.x} h`}}},
+scales:{x:{grid:{color:CHART_GRID},ticks:{font:{size:10}},beginAtZero:true,title:{display:true,text:'Hours',font:{size:10}}},y:{grid:{display:false},ticks:{font:{size:11}}}}}
 });
 }
 }catch(chartErr){console.warn('Chart render error:',chartErr);}
@@ -2192,10 +2225,11 @@ async function loadOwnerAvatars(){
 try{const{data}=await window._sb.from('mkt_owners').select('name,avatar');_ownerAvatars={};(data||[]).forEach(o=>{if(o.avatar)_ownerAvatars[o.name]=o.avatar;});}catch(e){}
 }
 // ── Engagement tracking: last login (dashboard open) + last action per member ──
-let _lastLogin={},_lastAction={};
+let _lastLogin={},_lastAction={},_worklogRows=[];
 async function loadEngagementData(){
 try{const{data}=await window._sb.from('mkt_owners').select('name,avatar,last_login');_lastLogin={};(data||[]).forEach(o=>{if(o.avatar)_ownerAvatars[o.name]=o.avatar;if(o.last_login)_lastLogin[o.name]=o.last_login;});}catch(e){}
 try{const{data}=await window._sb.from('mkt_activity_log').select('changed_by,created_at').order('created_at',{ascending:false}).limit(3000);_lastAction={};(data||[]).forEach(r=>{if(r.changed_by&&!_lastAction[r.changed_by])_lastAction[r.changed_by]=r.created_at;});}catch(e){}
+try{const{data}=await window._sb.from('mkt_worklog').select('*');_worklogRows=data||[];}catch(e){_worklogRows=[];}
 }
 // Record that the current user opened the dashboard (works with persisted 30-day sessions).
 async function recordLogin(name){
@@ -2251,6 +2285,28 @@ body.innerHTML=`<table class="act-table"><thead><tr>
 <td style="font-weight:600;color:#5aaaf0">${_fmtDur(d.week)}</td>
 <td style="font-weight:600;color:#40c060">${_fmtDur(d.month)}</td>
 </tr>`).join('')}</tbody></table>`;
+}
+// Export the full login-time history (all days, all members) to CSV for Excel.
+async function exportWorklogCSV(){
+let rows=[];
+try{const{data,error}=await window._sb.from('mkt_worklog').select('*');if(error)throw error;rows=data||[];}
+catch(e){alert('Could not load work-log history.');return;}
+if(!rows.length){alert('No login history to export yet.');return;}
+const bkkDT=s=>new Date(s).toLocaleString('en-GB',{timeZone:'Asia/Bangkok',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+const bkkT=s=>new Date(s).toLocaleTimeString('en-GB',{timeZone:'Asia/Bangkok',hour:'2-digit',minute:'2-digit'});
+rows.sort((a,b)=>a.day===b.day?String(a.name).localeCompare(b.name):String(b.day).localeCompare(a.day));
+const headers=['Member','Date','First login (BKK)','Last seen (BKK)','Duration','Duration (minutes)'];
+const csvRows=rows.map(r=>{
+const mins=Math.max(0,Math.round((new Date(r.last_seen)-new Date(r.first_seen))/60000));
+return[r.name||'',r.day||'',bkkT(r.first_seen),bkkT(r.last_seen),_fmtDur(mins),mins];
+});
+const csv=[headers,...csvRows].map(row=>row.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\r\n');
+const blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'});
+const url=URL.createObjectURL(blob);
+const a=document.createElement('a');
+a.href=url;a.download=`work_log_${new Date().toISOString().split('T')[0]}.csv`;
+document.body.appendChild(a);a.click();document.body.removeChild(a);
+URL.revokeObjectURL(url);
 }
 // ── Per-user color theme ──
 const THEMES=[
