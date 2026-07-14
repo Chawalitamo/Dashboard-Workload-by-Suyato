@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260702x -->
+<!-- v20260702y -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -3110,6 +3110,8 @@ const read=_chatRead();
 }catch(e){}
 _updateChatFab();
 if(_chatChan){try{window._sb.removeChannel(_chatChan);}catch(e){}_chatChan=null;}
+// Run realtime under the user's token so RLS delivers only their town-hall + own DMs (private).
+try{const{data:{session}}=await window._sb.auth.getSession();if(session&&session.access_token&&window._sb.realtime&&window._sb.realtime.setAuth)window._sb.realtime.setAuth(session.access_token);}catch(e){}
 _chatChan=window._sb.channel('mkt_chat_rt').on('postgres_changes',{event:'INSERT',schema:'public',table:'mkt_chat'},p=>_onChatInsert(p.new)).subscribe();
 }
 function teardownChat(){
