@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260702s -->
+<!-- v20260702t -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -747,7 +747,7 @@ if(window._pendingLoad) window._pendingLoad();
 <select id="f-stage">
 <option>Job Brief</option><option>Design</option><option>Production</option>
 <option>Review</option><option>Approval Stage</option>
-<option>AW Release / Event Live</option><option>On Hold</option><option>Complete</option>
+<option>On Hold</option><option>Complete</option>
 </select>
 </div>
 <div class="field"><label>Due date *</label><input type="text" class="dp" id="f-due" placeholder="Select date…" readonly></div>
@@ -838,7 +838,7 @@ if(window._pendingLoad) window._pendingLoad();
 <select id="e-stage">
 <option>Job Brief</option><option>Design</option><option>Production</option>
 <option>Review</option><option>Approval Stage</option>
-<option>AW Release / Event Live</option><option>On Hold</option><option>Complete</option>
+<option>On Hold</option><option>Complete</option>
 </select>
 </div>
 <div class="field"><label>Due date</label><input type="text" class="dp" id="e-due" placeholder="Select date…" readonly></div>
@@ -876,7 +876,7 @@ if(window._pendingLoad) window._pendingLoad();
 <select id="a-stage">
 <option>Job Brief</option><option>Design</option><option>Production</option>
 <option>Review</option><option>Approval Stage</option>
-<option>AW Release / Event Live</option><option>On Hold</option><option>Complete</option>
+<option>On Hold</option><option>Complete</option>
 </select>
 </div>
 <div class="field"><label>Due date</label><input type="text" class="dp" id="a-due" placeholder="Select date…" readonly></div>
@@ -984,12 +984,12 @@ if(window._pendingLoad) window._pendingLoad();
 
 <script>
 // ═════════════ DATA ═════════════
-const STAGES=['Job Brief','Design','Production','Review','Approval Stage','AW Release / Event Live','On Hold','Complete'];
+const STAGES=['Job Brief','Design','Production','Review','Approval Stage','On Hold','Complete'];
 const SKEY=s=>({
 'Job Brief':'jobbrief','Design':'design','Production':'production','Review':'review',
 'Approval Stage':'approval','AW Release / Event Live':'awrelease','On Hold':'onhold','Complete':'complete'
 }[s]||'jobbrief');
-const STAGE_PCT={'Job Brief':5,'Design':20,'Production':45,'Review':65,'Approval Stage':80,'AW Release / Event Live':95,'On Hold':30,'Complete':100};
+const STAGE_PCT={'Job Brief':5,'Design':20,'Production':45,'Review':65,'Approval Stage':80,'On Hold':30,'Complete':100};
 // ═════ PROJECTS (dynamic) ═════
 const PROJECT_PALETTE=['#5aaaf0','#b87ff0','#f5a870','#7dd4a0','#f07070','#f0c040','#70d4d4','#c4a8ff','#f59ab8','#a4d870'];
 let projects=[];
@@ -1298,7 +1298,7 @@ return`<div style="background:var(--surf2);border-radius:8px;padding:12px 14px;b
 </div>`;
 }).join('');
 // ── Stage flow ──
-const STAGE_COLORS=['#3b5bdb','#7048e8','#1971c2','#e67700','#c2255c','#0ca678','#495057','#2f9e44'];
+const STAGE_COLORS=['#3b5bdb','#7048e8','#1971c2','#e67700','#c2255c','#495057','#2f9e44'];
 const maxStage=Math.max(...stageCounts,1);
 const stageFlowHTML=STAGES.map((s,i)=>{
 const cnt=stageCounts[i];
@@ -1430,6 +1430,7 @@ ${prevWeekLogin.length?`<div class="chart-wrap" style="height:${Math.max(160,pre
 const el=document.getElementById(id);if(el){const inst=Chart.getChart(el);if(inst)inst.destroy();}
 });
 document.getElementById('dash-inner').innerHTML=`
+${_isAdminUser()?`<div style="display:flex;justify-content:flex-end;margin-bottom:12px"><button onclick="exportPDFReport()" class="act-export-btn" style="font-size:14px"><i class="ti ti-file-type-pdf" aria-hidden="true"></i>Export PDF report</button></div>`:''}
 <div class="dash-grid-top">
 <div class="chart-card">
 <div class="chart-title"><i class="ti ti-chart-donut" aria-hidden="true"></i>Stage distribution</div>
@@ -1790,8 +1791,12 @@ await window._sb.from('mkt_tasks').update({stage:best[0]}).eq('id',id);
 if(_oldStage!==best[0]) logActivity(id,t.title,t.project,'updated','stage',_oldStage,best[0]);
 renderList();
 }
+// Proof-of-work gate: a task can only move to Complete if it has an attachment.
+function _hasProof(t){return !!(t&&Array.isArray(t.attachments)&&t.attachments.length>0);}
+function _blockComplete(t){alert('⚠ Attach proof of completed work first.\n\n“'+((t&&t.title)||'This task')+'” can\'t be moved to Complete until a file is attached.\nOpen the task\'s 📎 attachments, add the file, then move it to Complete.');return true;}
 async function updateStage(id,val){
 const t=tasks.find(t=>t.id===id); if(!t) return;
+if(val==='Complete'&&t.stage!=='Complete'&&!_hasProof(t)){_blockComplete(t);renderList();return;}
 const _oldStage=t.stage;
 t.stage=val;
 await window._sb.from('mkt_tasks').update({stage:val}).eq('id',id);
@@ -2013,6 +2018,7 @@ function setupDragDrop(){
       if(!t){console.warn('[drag] task not found:',rawId);return;}
       const newStage=STAGES[si];
       if(t.stage===newStage) return;
+      if(newStage==='Complete'&&!_hasProof(t)){_blockComplete(t);renderKanban();return;}
       const _oldDragStage=t.stage;
       t.stage=newStage;
       try{await window._sb.from('mkt_tasks').update({stage:newStage}).eq('id',t.id);}catch(err){console.error(err);}
@@ -2026,6 +2032,7 @@ async function moveTask(rawId,dir){
   const t=findTask(rawId); if(!t){console.warn('[move] task not found:',rawId);return;}
   const si=STAGES.indexOf(t.stage); const ni=si+dir;
   if(ni<0||ni>=STAGES.length) return;
+  if(STAGES[ni]==='Complete'&&!_hasProof(t)){_blockComplete(t);return;}
   const _oldMoveStage=t.stage;
   t.stage=STAGES[ni];
   console.log('[move] id:',rawId,'→',t.stage);
@@ -2135,6 +2142,7 @@ document.getElementById('edit-modal').classList.add('open');
 }
 async function saveEdit(){
 const t=findTask(editId);if(!t)return;
+if(document.getElementById('e-stage').value==='Complete'&&t.stage!=='Complete'&&!_hasProof(t)){_blockComplete(t);return;}
 const _snap={title:t.title,project:t.project,owner:t.owner,lead:t.lead,stage:t.stage,due:t.due||'',note:t.note||''};
 t.title=document.getElementById('e-title').value.trim()||t.title;
 t.project=document.getElementById('e-project').value;
@@ -2583,6 +2591,72 @@ const a=document.createElement('a');
 a.href=url;a.download=`task_list_${new Date().toISOString().split('T')[0]}.csv`;
 document.body.appendChild(a);a.click();document.body.removeChild(a);
 URL.revokeObjectURL(url);
+}
+// CEO team-performance report → opens a print-ready page (Save as PDF).
+function exportPDFReport(){
+if(!tasks.length){alert('No task data to report yet.');return;}
+const esc2=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const today=new Date();today.setHours(0,0,0,0);
+const _dM=s=>{const d=new Date(s);return new Date(d.getFullYear(),d.getMonth(),d.getDate());};
+const all=tasks;
+const tot=all.length;
+const done=all.filter(t=>t.stage==='Complete').length;
+const inprog=all.filter(t=>!['Complete','On Hold'].includes(t.stage)).length;
+const onhold=all.filter(t=>t.stage==='On Hold').length;
+const overdue=all.filter(t=>t.due&&_dM(t.due)<today&&t.stage!=='Complete'&&t.stage!=='On Hold').length;
+const rate=tot?Math.round(done/tot*100):0;
+const avg=tot?Math.round(all.reduce((s,t)=>s+(STAGE_PCT[t.stage]||0),0)/tot):0;
+const cmStart=new Date(today.getFullYear(),today.getMonth(),1),cmEnd=new Date(today.getFullYear(),today.getMonth()+1,0);
+const mTasks=all.filter(t=>t.due&&_dM(t.due)>=cmStart&&_dM(t.due)<=cmEnd);
+const mDone=mTasks.filter(t=>t.stage==='Complete').length;
+const mRate=mTasks.length?Math.round(mDone/mTasks.length*100):0;
+const members=OWNERS.map(o=>{const ot=all.filter(t=>t.owner===o);if(!ot.length)return null;const d=ot.filter(t=>t.stage==='Complete').length;const ov=ot.filter(t=>t.due&&_dM(t.due)<today&&t.stage!=='Complete'&&t.stage!=='On Hold').length;const ap=Math.round(ot.reduce((s,t)=>s+(STAGE_PCT[t.stage]||0),0)/ot.length);return{o,total:ot.length,done:d,active:ot.length-d,rate:Math.round(d/ot.length*100),avg:ap,overdue:ov};}).filter(Boolean).sort((a,b)=>b.rate-a.rate||b.total-a.total);
+const projs=[...new Set(all.map(t=>t.project))].map(p=>{const pt=all.filter(t=>t.project===p);const d=pt.filter(t=>t.stage==='Complete').length;const ap=Math.round(pt.reduce((s,t)=>s+(STAGE_PCT[t.stage]||0),0)/pt.length);return{p,total:pt.length,done:d,pct:ap};}).sort((a,b)=>b.pct-a.pct);
+const genStr=new Date().toLocaleString('en-GB',{timeZone:'Asia/Bangkok',day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+const monLbl=cmStart.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+const bar=(pct,color)=>`<div style="background:#eee;border-radius:4px;height:8px;width:80px;display:inline-block;vertical-align:middle;overflow:hidden"><div style="height:100%;width:${pct}%;background:${color}"></div></div>`;
+const barColor=p=>p>=80?'#2f9e44':p>=50?'#1971c2':p>=30?'#e67700':'#c92a2a';
+const kpi=(label,val,sub,color)=>`<div style="flex:1;border:1px solid #e2e2e2;border-radius:8px;padding:12px 14px"><div style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:.05em">${label}</div><div style="font-size:26px;font-weight:800;color:${color||'#1a1a1a'};line-height:1.1;margin-top:4px">${val}</div><div style="font-size:11px;color:#999;margin-top:2px">${sub||''}</div></div>`;
+const html=`<!doctype html><html><head><meta charset="utf-8"><title>Team Performance Report</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,'Sarabun',sans-serif;color:#1a1a1a;background:#fff;padding:28px 30px}
+h1{font-size:22px}h2{font-size:15px;margin:22px 0 10px;color:#b8860b;border-bottom:2px solid #f0e2b8;padding-bottom:4px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{text-align:left;padding:7px 8px;background:#faf6e8;color:#7a6a2a;font-size:11px;text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid #eadfb8}
+td{padding:7px 8px;border-bottom:1px solid #eee}
+tr:nth-child(even) td{background:#fafafa}
+.hdr{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid #e8c547;padding-bottom:12px}
+.kpis{display:flex;gap:10px;margin-top:16px}
+.muted{color:#999;font-size:11px}
+@media print{body{padding:0}@page{margin:14mm}}
+</style></head><body>
+<div class="hdr">
+<div><div style="font-size:11px;letter-spacing:2px;color:#b8860b;font-weight:700">MARKETING WORKLOAD</div><h1>Team Performance Report</h1></div>
+<div style="text-align:right" class="muted">Generated ${genStr} (BKK)<br>Prepared for CEO</div>
+</div>
+<div class="kpis">
+${kpi('Total tasks',tot,esc2(projs.length+' projects · '+members.length+' members'))}
+${kpi('Completed',done,rate+'% completion','#2f9e44')}
+${kpi('In progress',inprog,onhold+' on hold','#1971c2')}
+${kpi('Overdue',overdue,overdue>0?'Needs attention':'On track',overdue>0?'#c92a2a':'#2f9e44')}
+${kpi('Avg progress',avg+'%','Weighted by stage','#b8860b')}
+</div>
+<div class="muted" style="margin-top:8px">This month (${monLbl}): ${mTasks.length} tasks due · ${mDone} completed · ${mRate}% completion</div>
+<h2>Performance by team member</h2>
+<table><thead><tr><th>#</th><th>Member</th><th>Total</th><th>Completed</th><th>Active</th><th>Overdue</th><th>Completion</th><th>Avg progress</th></tr></thead><tbody>
+${members.map((m,i)=>`<tr><td>${i+1}</td><td style="font-weight:600">${esc2(m.o)}</td><td>${m.total}</td><td>${m.done}</td><td>${m.active}</td><td style="color:${m.overdue>0?'#c92a2a':'#999'}">${m.overdue}</td><td>${bar(m.rate,barColor(m.rate))} <b>${m.rate}%</b></td><td>${m.avg}%</td></tr>`).join('')}
+</tbody></table>
+<h2>Progress by project</h2>
+<table><thead><tr><th>Project</th><th>Total</th><th>Completed</th><th>Progress</th></tr></thead><tbody>
+${projs.map(p=>`<tr><td style="font-weight:600">${esc2(p.p)}</td><td>${p.total}</td><td>${p.done}</td><td>${bar(p.pct,barColor(p.pct))} <b>${p.pct}%</b></td></tr>`).join('')}
+</tbody></table>
+<div class="muted" style="margin-top:26px;border-top:1px solid #eee;padding-top:8px">Marketing Workload — CEO Dashboard · Auto-generated · Figures cover all tasks unless stated.</div>
+</body></html>`;
+const w=window.open('','_blank');
+if(!w){alert('Please allow pop-ups to export the PDF report.');return;}
+w.document.write(html);w.document.close();w.focus();
+setTimeout(()=>{try{w.print();}catch(e){}},500);
 }
 function clock(){const d=new Date();document.getElementById('clock').textContent=d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short',year:'numeric'})+' · '+d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});}
 document.querySelectorAll('.modal-bg').forEach(bg=>bg.addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal(bg.id);}));
