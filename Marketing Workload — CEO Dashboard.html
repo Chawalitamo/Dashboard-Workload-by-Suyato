@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260702p -->
+<!-- v20260702q -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -465,6 +465,7 @@ if(window._pendingLoad) window._pendingLoad();
 <div id="user-info">
 <button id="my-avatar-btn" title="Change profile picture" onclick="openProfileModal()"><span id="my-avatar" class="nav-avatar"></span></button>
 <span id="user-display-name"></span>
+<span id="worktime-chip" title="Your active time today (since first login)" style="display:none;font-size:12px;font-weight:600;color:var(--gold);background:var(--gold3);border:1px solid var(--b1);border-radius:var(--rsm);padding:3px 9px;white-space:nowrap"></span>
 <button class="signout-btn" onclick="doSignOut()"><i class="ti ti-logout" style="font-size:14px;vertical-align:-1px"></i> Sign out</button>
 </div>
 <div id="online-wrap" style="display:none;position:relative;margin-right:14px">
@@ -479,6 +480,7 @@ if(window._pendingLoad) window._pendingLoad();
 <button class="ptab" onclick="showView(&#39;board&#39;,this)"><i class="ti ti-layout-kanban" aria-hidden="true"></i>Kanban Board</button>
 <button class="ptab" onclick="showView(&#39;calendar&#39;,this)"><i class="ti ti-calendar-time" aria-hidden="true"></i>PIC Calendar</button>
 <button id="activity-tab" class="ptab" onclick="showView(&#39;activity&#39;,this)" style="display:none"><i class="ti ti-history" aria-hidden="true"></i>Activity Log</button>
+<button id="worklog-tab" class="ptab" onclick="showView(&#39;worklog&#39;,this)" style="display:none"><i class="ti ti-clock-hour-4" aria-hidden="true"></i>Work Log</button>
 <div style="flex:1"></div>
 <button class="ptab" onclick="openTeamEmailsModal()" title="Notification settings" style="margin-right:6px"><i class="ti ti-bell-ringing" aria-hidden="true"></i>Notify</button>
 <div id="project-nav-tabs" style="display:flex;align-items:center;gap:4px;padding:0 4px"><div style="display:flex;align-items:center;gap:0">
@@ -798,6 +800,15 @@ if(window._pendingLoad) window._pendingLoad();
 <tbody id="act-table-body"><tr><td colspan="7" style="text-align:center;padding:40px;color:var(--t3)">Click "Activity Log" tab to load</td></tr></tbody>
 </table>
 </div>
+</div>
+<div class="view" id="view-worklog">
+<div class="act-toolbar">
+<div style="font-size:15px;font-weight:700;color:var(--t1)"><i class="ti ti-clock-hour-4" style="color:var(--gold);vertical-align:-2px;margin-right:4px"></i>Work Log — login time per member</div>
+<div style="flex:1"></div>
+<span id="worklog-count" style="font-size:13px;color:var(--t3)"></span>
+<button class="act-export-btn" onclick="renderWorklog()" style="background:var(--surf3);border-color:var(--b2);color:var(--t2)"><i class="ti ti-refresh" aria-hidden="true"></i>Refresh</button>
+</div>
+<div style="flex:1;overflow-y:auto;padding:0 24px 24px" id="worklog-body"></div>
 </div>
 <div class="modal-bg" id="edit-modal">
 <div class="modal">
@@ -1184,7 +1195,7 @@ function _showErr(msg){
   d.textContent=msg;
 }
 function showView(v,el){
-if(v==='activity'&&!_isAdminUser()){return;} // Activity Log: Super Admins only
+if((v==='activity'||v==='worklog')&&!_isAdminUser()){return;} // Activity Log & Work Log: Super Admins only
 document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
 document.querySelectorAll('.ptab').forEach(x=>x.classList.remove('active'));
 const _tgt=document.getElementById('view-'+v);
@@ -1197,6 +1208,7 @@ try{
   if(v==='board'){populateAllProjectSelects();renderProjTabs();renderKanban();}
   if(v==='calendar') renderCalendar();
   if(v==='activity') renderActivity();
+  if(v==='worklog') renderWorklog();
 }catch(e){
   console.warn('showView render error:',e);
   _showErr('Render error in view "'+v+'":\n'+e.message+'\n'+e.stack);
@@ -2140,10 +2152,12 @@ const disp=document.getElementById('user-display-name');
 if(disp)disp.textContent=name;
 const info=document.getElementById('user-info');
 if(info)info.style.display=name?'flex':'none';
-// Activity Log is for Super Administrators only.
+// Activity Log & Work Log are for Super Administrators only.
 const at=document.getElementById('activity-tab');
 if(at)at.style.display=_isAdminUser()?'':'none';
-if(name){setupPresence();recordLogin(name);loadUserTheme();syncUserTheme();} else {teardownPresence();_myAvatar='';renderMyAvatar();}
+const wt=document.getElementById('worklog-tab');
+if(wt)wt.style.display=_isAdminUser()?'':'none';
+if(name){setupPresence();recordLogin(name);loadUserTheme();syncUserTheme();initWorktime();} else {teardownPresence();_myAvatar='';renderMyAvatar();_workStart=null;updateWorktimeChip();}
 }
 // ── Profile picture (stored in Supabase user_metadata, shared live via presence) ──
 let _myAvatar='',_profileChoice='';
@@ -2186,6 +2200,56 @@ try{const{data}=await window._sb.from('mkt_activity_log').select('changed_by,cre
 async function recordLogin(name){
 if(!name||!OWNERS.includes(name))return;
 try{await window._sb.from('mkt_owners').upsert([{name,last_login:new Date().toISOString()}],{onConflict:'name'});}catch(e){}
+}
+// ── Work-log: login time duration per day ──
+let _workStart=null;
+const _bkkDay=()=>new Date().toLocaleDateString('en-CA',{timeZone:'Asia/Bangkok'}); // YYYY-MM-DD
+function heartbeat(){if(_currentUser&&window._sb)window._sb.rpc('mkt_touch_worklog',{p_name:_currentUser}).then(()=>{},()=>{});}
+async function initWorktime(){
+if(!_currentUser||!window._sb)return;
+try{await window._sb.rpc('mkt_touch_worklog',{p_name:_currentUser});}catch(e){}
+try{const{data}=await window._sb.from('mkt_worklog').select('first_seen').eq('name',_currentUser).eq('day',_bkkDay()).maybeSingle();_workStart=data&&data.first_seen?new Date(data.first_seen):new Date();}catch(e){_workStart=new Date();}
+updateWorktimeChip();
+}
+function _fmtDur(mins){mins=Math.max(0,Math.round(mins));const h=Math.floor(mins/60);return `${h}h ${String(mins%60).padStart(2,'0')}m`;}
+function updateWorktimeChip(){
+const el=document.getElementById('worktime-chip');if(!el)return;
+if(!_workStart||!_currentUser){el.style.display='none';return;}
+el.style.display='';
+el.textContent=`⏱ ${_fmtDur((Date.now()-_workStart.getTime())/60000)} today`;
+}
+async function renderWorklog(){
+const body=document.getElementById('worklog-body');if(!body)return;
+body.innerHTML='<div style="color:var(--t3);padding:24px">Loading…</div>';
+let rows=[];
+try{const{data,error}=await window._sb.from('mkt_worklog').select('*');if(error)throw error;rows=data||[];}
+catch(e){body.innerHTML='<div style="color:#f07070;padding:24px">Could not load work log.</div>';return;}
+const todayStr=_bkkDay();
+const bkkNow=new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Bangkok'}));
+const dow=(bkkNow.getDay()+6)%7; // 0=Mon
+const weekStart=new Date(bkkNow.getFullYear(),bkkNow.getMonth(),bkkNow.getDate()-dow);
+const monthStr=todayStr.slice(0,7);
+const dur=r=>Math.max(0,(new Date(r.last_seen)-new Date(r.first_seen))/60000);
+const parseDay=s=>{const p=String(s).split('-').map(Number);return new Date(p[0],p[1]-1,p[2]);};
+const tm=s=>new Date(s).toLocaleTimeString('en-GB',{timeZone:'Asia/Bangkok',hour:'2-digit',minute:'2-digit'});
+const data=OWNERS.map(name=>{
+const mine=rows.filter(r=>r.name===name);
+const today=mine.find(r=>r.day===todayStr)||null;
+const week=mine.filter(r=>parseDay(r.day)>=weekStart).reduce((s,r)=>s+dur(r),0);
+const month=mine.filter(r=>String(r.day).slice(0,7)===monthStr).reduce((s,r)=>s+dur(r),0);
+return{name,today,todayMin:today?dur(today):0,week,month,ok:OKEY(name)};
+}).filter(d=>d.today||d.week>0||d.month>0).sort((a,b)=>b.month-a.month);
+const cnt=document.getElementById('worklog-count');if(cnt)cnt.textContent=`${data.length} members · week of ${weekStart.toLocaleDateString('en-GB',{day:'2-digit',month:'short'})} · ${new Date().toLocaleDateString('en-US',{month:'long',year:'numeric'})}`;
+if(!data.length){body.innerHTML='<div style="color:var(--t3);padding:24px;text-align:center">No login activity recorded yet.</div>';return;}
+body.innerHTML=`<table class="act-table"><thead><tr>
+<th>Member</th><th style="width:170px">Today · start → last seen</th><th style="width:90px">Today</th><th style="width:110px">This week</th><th style="width:110px">This month</th>
+</tr></thead><tbody>${data.map(d=>`<tr>
+<td><div style="display:flex;align-items:center;gap:8px"><div class="person-avatar o-${d.ok}" style="width:24px;height:24px;font-size:11px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:600;overflow:hidden">${_avatarInner(_ownerAvatars[d.name],d.name)}</div><span style="font-size:14px">${esc(d.name)}</span></div></td>
+<td style="font-family:'DBHeavent',monospace;font-size:13px;color:var(--t2)">${d.today?`${tm(d.today.first_seen)} → ${tm(d.today.last_seen)}`:'<span style="color:var(--t4)">—</span>'}</td>
+<td style="font-weight:600;color:${d.today?'var(--gold)':'var(--t4)'}">${d.today?_fmtDur(d.todayMin):'—'}</td>
+<td style="font-weight:600;color:#5aaaf0">${_fmtDur(d.week)}</td>
+<td style="font-weight:600;color:#40c060">${_fmtDur(d.month)}</td>
+</tr>`).join('')}</tbody></table>`;
 }
 // ── Per-user color theme ──
 const THEMES=[
@@ -2823,6 +2887,7 @@ window._pendingLoad = async function(){
   if(/type=recovery/.test(location.hash)){ _enterRecovery(); return; }
   loadFromSupabase();
   setInterval(loadFromSupabase,30000);
+  setInterval(()=>{heartbeat();updateWorktimeChip();},60000);
   // Restore session if within 30 days (1 month)
   const{data:{session}}=await window._sb.auth.getSession();
   const loginTime=parseInt(localStorage.getItem('mkt_login_time')||'0');
