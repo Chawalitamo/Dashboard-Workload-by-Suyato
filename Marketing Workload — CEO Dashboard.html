@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260702u -->
+<!-- v20260702v -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -1738,7 +1738,7 @@ const fo=document.getElementById('lf-owner').value;
 const fp=document.getElementById('lf-project').value;
 let list=tasks;
 if(listStageFilter!=='All') list=list.filter(t=>t.stage===listStageFilter);
-if(fo) list=list.filter(t=>t.owner===fo);
+if(fo) list=list.filter(t=>t.owner===fo||t.lead===fo);
 if(fp) list=list.filter(t=>t.project===fp);
 const tbody=document.getElementById('list-tbody');
 if(!list.length){tbody.innerHTML=`<tr><td colspan="8" style="text-align:center;padding:3rem;color:var(--t3)"><i class="ti ti-inbox" style="font-size:24px;display:block;margin-bottom:8px" aria-hidden="true"></i>No tasks found</td></tr>`;return;}
@@ -1873,7 +1873,7 @@ function renderKanban(){
 const fo=document.getElementById('bf-owner').value;
 let list=tasks;
 if(activeProj!=='All') list=list.filter(t=>t.project===activeProj);
-if(fo) list=list.filter(t=>t.owner===fo);
+if(fo) list=list.filter(t=>t.owner===fo||t.lead===fo);
 // sync sidebar project dropdown to active project filter
 const fp=document.getElementById('f-project');
 if(fp&&activeProj!=='All'&&fp.querySelector(`option[value="${activeProj.replace(/"/g,'\\"')}"]`))fp.value=activeProj;
@@ -2573,7 +2573,7 @@ const fo=document.getElementById('lf-owner').value;
 const fp=document.getElementById('lf-project').value;
 let list=tasks.slice();
 if(listStageFilter!=='All')list=list.filter(t=>t.stage===listStageFilter);
-if(fo)list=list.filter(t=>t.owner===fo);
+if(fo)list=list.filter(t=>t.owner===fo||t.lead===fo);
 if(fp)list=list.filter(t=>t.project===fp);
 if(!list.length){alert('No tasks match the current filters.');return;}
 const headers=['Task','Person in charge','Owner','Project','Stage','Progress %','Due date','Note','Created (Bangkok)'];
