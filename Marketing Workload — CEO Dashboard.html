@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260702t -->
+<!-- v20260702u -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -2606,10 +2606,15 @@ const onhold=all.filter(t=>t.stage==='On Hold').length;
 const overdue=all.filter(t=>t.due&&_dM(t.due)<today&&t.stage!=='Complete'&&t.stage!=='On Hold').length;
 const rate=tot?Math.round(done/tot*100):0;
 const avg=tot?Math.round(all.reduce((s,t)=>s+(STAGE_PCT[t.stage]||0),0)/tot):0;
+const logo=(document.querySelector('nav img')||{}).src||'';
 const cmStart=new Date(today.getFullYear(),today.getMonth(),1),cmEnd=new Date(today.getFullYear(),today.getMonth()+1,0);
-const mTasks=all.filter(t=>t.due&&_dM(t.due)>=cmStart&&_dM(t.due)<=cmEnd);
-const mDone=mTasks.filter(t=>t.stage==='Complete').length;
-const mRate=mTasks.length?Math.round(mDone/mTasks.length*100):0;
+const pmStart=new Date(today.getFullYear(),today.getMonth()-1,1),pmEnd=new Date(today.getFullYear(),today.getMonth(),0);
+const inRange=(s,e)=>all.filter(t=>t.due&&_dM(t.due)>=s&&_dM(t.due)<=e);
+const metricsOf=ts=>{const tt=ts.length,dd=ts.filter(t=>t.stage==='Complete').length,oh=ts.filter(t=>t.stage==='On Hold').length,ip=tt-dd-oh,ov=ts.filter(t=>t.due&&_dM(t.due)<today&&t.stage!=='Complete'&&t.stage!=='On Hold').length,rt=tt?Math.round(dd/tt*100):0,ag=tt?Math.round(ts.reduce((s,t)=>s+(STAGE_PCT[t.stage]||0),0)/tt):0;return{tt,dd,ip,oh,ov,rt,ag};};
+const cm=metricsOf(inRange(cmStart,cmEnd)),pm=metricsOf(inRange(pmStart,pmEnd));
+const cmLbl=cmStart.toLocaleDateString('en-US',{month:'short',year:'numeric'}),pmLbl=pmStart.toLocaleDateString('en-US',{month:'short',year:'numeric'});
+const delta=(c,p,suffix,invert)=>{const d=c-p;const good=invert?d<0:d>0;const col=d===0?'#999':good?'#2f9e44':'#c92a2a';const arr=d>0?'▲':d<0?'▼':'—';return `<span style="color:${col};font-weight:700">${arr} ${d>0?'+':''}${d}${suffix||''}</span>`;};
+const svgBars=(groups,maxOverride)=>{const W=520,H=200,padL=30,padR=8,padT=22,padB=38;const plotW=W-padL-padR,plotH=H-padT-padB;const maxV=maxOverride||Math.max(1,...groups.flatMap(g=>[g.cur,g.prev]));const gw=plotW/groups.length;const bw=Math.min(24,gw/3.2);const yv=v=>padT+plotH-(v/maxV)*plotH;let s=`<svg width="100%" viewBox="0 0 ${W} ${H}" font-family="Arial,sans-serif">`;s+=`<line x1="${padL}" y1="${padT+plotH}" x2="${W-padR}" y2="${padT+plotH}" stroke="#ddd"/>`;groups.forEach((g,i)=>{const cx=padL+gw*i+gw/2,xp=cx-bw-2,xc=cx+2;s+=`<rect x="${xp}" y="${yv(g.prev)}" width="${bw}" height="${padT+plotH-yv(g.prev)}" fill="#c9c9c9" rx="2"/>`;s+=`<rect x="${xc}" y="${yv(g.cur)}" width="${bw}" height="${padT+plotH-yv(g.cur)}" fill="#e8c547" rx="2"/>`;s+=`<text x="${xp+bw/2}" y="${yv(g.prev)-3}" font-size="9" fill="#888" text-anchor="middle">${g.prev}${g.suf||''}</text>`;s+=`<text x="${xc+bw/2}" y="${yv(g.cur)-3}" font-size="9" fill="#333" text-anchor="middle">${g.cur}${g.suf||''}</text>`;s+=`<text x="${cx}" y="${padT+plotH+14}" font-size="9.5" fill="#555" text-anchor="middle">${g.label}</text>`;});s+=`</svg>`;return s;};
 const members=OWNERS.map(o=>{const ot=all.filter(t=>t.owner===o);if(!ot.length)return null;const d=ot.filter(t=>t.stage==='Complete').length;const ov=ot.filter(t=>t.due&&_dM(t.due)<today&&t.stage!=='Complete'&&t.stage!=='On Hold').length;const ap=Math.round(ot.reduce((s,t)=>s+(STAGE_PCT[t.stage]||0),0)/ot.length);return{o,total:ot.length,done:d,active:ot.length-d,rate:Math.round(d/ot.length*100),avg:ap,overdue:ov};}).filter(Boolean).sort((a,b)=>b.rate-a.rate||b.total-a.total);
 const projs=[...new Set(all.map(t=>t.project))].map(p=>{const pt=all.filter(t=>t.project===p);const d=pt.filter(t=>t.stage==='Complete').length;const ap=Math.round(pt.reduce((s,t)=>s+(STAGE_PCT[t.stage]||0),0)/pt.length);return{p,total:pt.length,done:d,pct:ap};}).sort((a,b)=>b.pct-a.pct);
 const genStr=new Date().toLocaleString('en-GB',{timeZone:'Asia/Bangkok',day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
@@ -2632,7 +2637,7 @@ tr:nth-child(even) td{background:#fafafa}
 @media print{body{padding:0}@page{margin:14mm}}
 </style></head><body>
 <div class="hdr">
-<div><div style="font-size:11px;letter-spacing:2px;color:#b8860b;font-weight:700">MARKETING WORKLOAD</div><h1>Team Performance Report</h1></div>
+<div style="display:flex;align-items:center;gap:14px">${logo?`<img src="${logo}" alt="CJx" style="height:48px;width:48px;object-fit:cover;border-radius:8px">`:''}<div><div style="font-size:11px;letter-spacing:2px;color:#b8860b;font-weight:700">MARKETING WORKLOAD · CJx</div><h1>Team Performance Report</h1></div></div>
 <div style="text-align:right" class="muted">Generated ${genStr} (BKK)<br>Prepared for CEO</div>
 </div>
 <div class="kpis">
@@ -2642,7 +2647,23 @@ ${kpi('In progress',inprog,onhold+' on hold','#1971c2')}
 ${kpi('Overdue',overdue,overdue>0?'Needs attention':'On track',overdue>0?'#c92a2a':'#2f9e44')}
 ${kpi('Avg progress',avg+'%','Weighted by stage','#b8860b')}
 </div>
-<div class="muted" style="margin-top:8px">This month (${monLbl}): ${mTasks.length} tasks due · ${mDone} completed · ${mRate}% completion</div>
+<h2>This month vs previous month</h2>
+<div class="muted" style="margin-bottom:8px">By task due date · comparing ${esc2(pmLbl)} → ${esc2(cmLbl)}</div>
+<div style="display:flex;gap:18px;align-items:flex-start">
+<div style="flex:1"><div style="font-size:12px;font-weight:600;color:#555;margin-bottom:2px">Task volume</div>${svgBars([{label:'Total',cur:cm.tt,prev:pm.tt},{label:'Completed',cur:cm.dd,prev:pm.dd},{label:'In progress',cur:cm.ip,prev:pm.ip},{label:'Overdue',cur:cm.ov,prev:pm.ov}])}</div>
+<div style="flex:1"><div style="font-size:12px;font-weight:600;color:#555;margin-bottom:2px">Rates (%)</div>${svgBars([{label:'Completion',cur:cm.rt,prev:pm.rt,suf:'%'},{label:'Avg progress',cur:cm.ag,prev:pm.ag,suf:'%'}],100)}</div>
+</div>
+<div style="display:flex;gap:14px;margin-top:6px;font-size:11px">
+<span style="display:inline-flex;align-items:center;gap:5px"><span style="width:11px;height:11px;background:#e8c547;border-radius:2px;display:inline-block"></span>${esc2(cmLbl)} (current)</span>
+<span style="display:inline-flex;align-items:center;gap:5px"><span style="width:11px;height:11px;background:#c9c9c9;border-radius:2px;display:inline-block"></span>${esc2(pmLbl)} (previous)</span>
+</div>
+<table style="margin-top:12px"><thead><tr><th>Metric</th><th>${esc2(pmLbl)}</th><th>${esc2(cmLbl)}</th><th>Change</th></tr></thead><tbody>
+<tr><td>Total tasks</td><td>${pm.tt}</td><td>${cm.tt}</td><td>${delta(cm.tt,pm.tt)}</td></tr>
+<tr><td>Completed</td><td>${pm.dd}</td><td>${cm.dd}</td><td>${delta(cm.dd,pm.dd)}</td></tr>
+<tr><td>Completion rate</td><td>${pm.rt}%</td><td>${cm.rt}%</td><td>${delta(cm.rt,pm.rt,' pts')}</td></tr>
+<tr><td>Avg progress</td><td>${pm.ag}%</td><td>${cm.ag}%</td><td>${delta(cm.ag,pm.ag,' pts')}</td></tr>
+<tr><td>Overdue</td><td>${pm.ov}</td><td>${cm.ov}</td><td>${delta(cm.ov,pm.ov,'',true)}</td></tr>
+</tbody></table>
 <h2>Performance by team member</h2>
 <table><thead><tr><th>#</th><th>Member</th><th>Total</th><th>Completed</th><th>Active</th><th>Overdue</th><th>Completion</th><th>Avg progress</th></tr></thead><tbody>
 ${members.map((m,i)=>`<tr><td>${i+1}</td><td style="font-weight:600">${esc2(m.o)}</td><td>${m.total}</td><td>${m.done}</td><td>${m.active}</td><td style="color:${m.overdue>0?'#c92a2a':'#999'}">${m.overdue}</td><td>${bar(m.rate,barColor(m.rate))} <b>${m.rate}%</b></td><td>${m.avg}%</td></tr>`).join('')}
