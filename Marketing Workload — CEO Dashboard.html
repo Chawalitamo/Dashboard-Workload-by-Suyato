@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260703e -->
+<!-- v20260703f -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -1019,7 +1019,7 @@ if(window._pendingLoad) window._pendingLoad();
 
 <script>
 // ═════════════ DATA ═════════════
-const APP_VERSION='v20260703e'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
+const APP_VERSION='v20260703f'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
 const STAGES=['Job Brief','Design','Production','Review','Approval Stage','On Hold','Complete'];
 const SKEY=s=>({
 'Job Brief':'jobbrief','Design':'design','Production':'production','Review':'review',
@@ -3147,7 +3147,9 @@ function _chatSetRead(room){const r=_chatRead();r[room]=new Date().toISOString()
 function _chatEsc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function _chatRelevant(row){return row.room==='townhall'||row.sender===_currentUser||row.recipient===_currentUser;}
 function _totalUnread(){return Object.values(_chatUnread).reduce((s,n)=>s+n,0);}
-function _updateChatFab(){const el=document.getElementById('chat-fab-unread');if(!el)return;const n=_totalUnread();el.textContent=n>99?'99+':n;el.style.display=n>0?'flex':'none';}
+function _updateChatFab(){const n=_totalUnread();const el=document.getElementById('chat-fab-unread');if(el){el.textContent=n>99?'99+':n;el.style.display=n>0?'flex':'none';}
+// Also reflect the unread count in the browser tab title so it's visible from other tabs.
+try{const base=(document.title||'').replace(/^\(\d+\+?\)\s*/,'');document.title=n>0?'('+(n>99?'99+':n)+') '+base:base;}catch(e){}}
 async function initChat(){
 if(!_currentUser||!window._sb)return;
 const fab=document.getElementById('chat-fab');if(fab)fab.style.display='flex';
@@ -3216,16 +3218,32 @@ const panelOpen=document.getElementById('chat-panel').classList.contains('open')
 if(_chatRoom===row.room&&panelOpen){
 if(!_chatSeen.has(row.id)){_chatSeen.add(row.id);const msgs=document.getElementById('chat-msgs');const nearBottom=msgs.scrollHeight-msgs.scrollTop-msgs.clientHeight<60;_chatAppend(msgs,_chatBubble(row));if(nearBottom)msgs.scrollTop=msgs.scrollHeight;}
 _chatSetRead(row.room);
+// Even while this room is open, OS-notify if the tab is hidden/in the background.
+if(row.sender!==_currentUser&&document.hidden)_notifyChat(row);
 }else if(row.sender!==_currentUser){
 _chatUnread[row.room]=(_chatUnread[row.room]||0)+1;_updateChatFab();
 if(panelOpen&&_chatRoom===null)chatShowList();
-_showChatToast(row);_playTrainHorn();
+_showChatToast(row);_playTrainHorn();_notifyChat(row);
 }
 }
 // ── Incoming-message pop-up + train-horn sound ──
 let _chatToastT=null,_chatAudioCtx=null;
 function _unlockChatAudio(){try{if(!_chatAudioCtx&&(window.AudioContext||window.webkitAudioContext))_chatAudioCtx=new (window.AudioContext||window.webkitAudioContext)();if(_chatAudioCtx&&_chatAudioCtx.state==='suspended')_chatAudioCtx.resume();}catch(e){}}
 document.addEventListener('click',_unlockChatAudio);
+// Ask for OS notification permission on the first click (browsers require a user gesture).
+function _ensureNotifyPerm(){try{if('Notification'in window&&Notification.permission==='default')Notification.requestPermission().catch(()=>{});}catch(e){}}
+document.addEventListener('click',_ensureNotifyPerm,{once:true});
+// Native OS pop-up so messages reach you even when the dashboard tab is in the background.
+function _notifyChat(row){
+try{
+if(!('Notification'in window)||Notification.permission!=='granted')return;
+const isTH=row.room==='townhall';
+const title=isTH?('📣 Town Hall · '+row.sender):('💬 '+row.sender);
+const icon=((document.querySelector('nav img')||{}).src)||undefined;
+const n=new Notification(title,{body:row.body||'',tag:'mkt-chat-'+row.room,renotify:true,icon});
+n.onclick=()=>{try{window.focus();}catch(e){}const p=document.getElementById('chat-panel');if(p&&!p.classList.contains('open'))p.classList.add('open');chatOpen(row.room,isTH?'📣 Town Hall':row.sender);try{n.close();}catch(e){}};
+}catch(e){}
+}
 function _playTrainHorn(){
 try{
 _unlockChatAudio();const ctx=_chatAudioCtx;if(!ctx)return;
