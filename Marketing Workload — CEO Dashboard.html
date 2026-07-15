@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260703f -->
+<!-- v20260703g -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -1019,7 +1019,7 @@ if(window._pendingLoad) window._pendingLoad();
 
 <script>
 // ═════════════ DATA ═════════════
-const APP_VERSION='v20260703f'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
+const APP_VERSION='v20260703g'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
 const STAGES=['Job Brief','Design','Production','Review','Approval Stage','On Hold','Complete'];
 const SKEY=s=>({
 'Job Brief':'jobbrief','Design':'design','Production':'production','Review':'review',
@@ -2959,7 +2959,10 @@ errEl.style.color='';
 if(!email){errEl.textContent='Type your email above first, then click “Forgot password?”.';return;}
 const link=document.getElementById('forgot-link');
 if(link){link.style.pointerEvents='none';link.textContent='Sending…';}
-const{error}=await window._sb.auth.resetPasswordForEmail(email,{redirectTo:window.location.href.split('#')[0]});
+// Return to the site root (index.html forwards the recovery token to the dashboard).
+// A clean, stable URL that's easy to allow-list in Supabase Auth → URL Configuration.
+const _resetTo=window.location.origin+window.location.pathname.replace(/[^/]*$/,'');
+const{error}=await window._sb.auth.resetPasswordForEmail(email,{redirectTo:_resetTo});
 if(link){link.style.pointerEvents='';link.textContent='Forgot password?';}
 if(error){errEl.style.color='';errEl.textContent=error.message;return;}
 errEl.style.color='#50d090';
