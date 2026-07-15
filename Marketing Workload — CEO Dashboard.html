@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260703c -->
+<!-- v20260703d -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -1019,7 +1019,7 @@ if(window._pendingLoad) window._pendingLoad();
 
 <script>
 // ═════════════ DATA ═════════════
-const APP_VERSION='v20260703c'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
+const APP_VERSION='v20260703d'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
 const STAGES=['Job Brief','Design','Production','Review','Approval Stage','On Hold','Complete'];
 const SKEY=s=>({
 'Job Brief':'jobbrief','Design':'design','Production':'production','Review':'review',
@@ -2290,7 +2290,11 @@ try{await window._sb.from('mkt_owners').upsert([{name,last_login:new Date().toIS
 // ── Work-log: login time duration per day ──
 let _workStart=null;
 const _bkkDay=()=>new Date().toLocaleDateString('en-CA',{timeZone:'Asia/Bangkok'}); // YYYY-MM-DD
-function heartbeat(){if(_currentUser&&window._sb)window._sb.rpc('mkt_touch_worklog',{p_name:_currentUser}).then(()=>{},()=>{});}
+// Record work-log for a member. Callable for ANY name (RPC is SECURITY DEFINER),
+// so an up-to-date tab can log people it sees online whose own tab is on a stale
+// build that never sends its own heartbeat. Throttled per-name to ~45s.
+let _wlTouch={};
+function heartbeat(who){const n=who||_currentUser;if(!n||!window._sb)return;const t=Date.now();if(t-(_wlTouch[n]||0)<45000)return;_wlTouch[n]=t;window._sb.rpc('mkt_touch_worklog',{p_name:n}).then(()=>{},()=>{delete _wlTouch[n];});}
 async function initWorktime(){
 if(!_currentUser||!window._sb)return;
 try{await window._sb.rpc('mkt_touch_worklog',{p_name:_currentUser});}catch(e){}
@@ -2446,8 +2450,11 @@ ch.on('presence',{event:'sync'},()=>{
 const st=ch.presenceState();
 const arr=Object.keys(st).map(k=>{const m=(st[k]&&st[k][0])||{};return{name:m.name||k,avatar:m.avatar||''};});
 renderOnline(arr);
+// Robust work-log: record everyone we can see online — covers members whose own
+// tab is on an older build and never sends its own heartbeat (throttled per-name).
+arr.forEach(o=>{if(o&&o.name)heartbeat(o.name);});
 });
-ch.subscribe(async s=>{if(s==='SUBSCRIBED')await ch.track({name:_currentUser,online_at:Date.now(),avatar:_myAvatar});});
+ch.subscribe(async s=>{if(s==='SUBSCRIBED'){await ch.track({name:_currentUser,online_at:Date.now(),avatar:_myAvatar});heartbeat(_currentUser);}});
 _presence=ch;
 }
 function teardownPresence(){
