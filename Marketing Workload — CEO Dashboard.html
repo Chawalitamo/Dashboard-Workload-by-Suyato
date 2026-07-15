@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260702z -->
+<!-- v20260703a -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -3076,11 +3076,13 @@ window._pendingLoad = async function(){
   loadFromSupabase();
   setInterval(loadFromSupabase,30000);
   setInterval(()=>{heartbeat();updateWorktimeChip();},60000);
-  // Restore session if within 30 days (1 month)
+  // Require a fresh login each day: only restore the session if the last
+  // login happened on today's (Bangkok) calendar date.
   const{data:{session}}=await window._sb.auth.getSession();
   const loginTime=parseInt(localStorage.getItem('mkt_login_time')||'0');
-  const within30d=(Date.now()-loginTime)<(30*24*60*60*1000);
-  if(session&&session.user&&within30d){
+  const _bkkDate=t=>new Date(t).toLocaleDateString('en-CA',{timeZone:'Asia/Bangkok'});
+  const sameDay=loginTime>0&&_bkkDate(loginTime)===_bkkDate(Date.now());
+  if(session&&session.user&&sameDay){
     const email=(session.user.email||'').toLowerCase();
     const name=EMAIL_TO_NAME[email]||email;
     setCurrentUser(name);
