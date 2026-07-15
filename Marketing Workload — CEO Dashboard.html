@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260703a -->
+<!-- v20260703b -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -1013,6 +1013,7 @@ if(window._pendingLoad) window._pendingLoad();
 
 <script>
 // ═════════════ DATA ═════════════
+const APP_VERSION='v20260703b'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
 const STAGES=['Job Brief','Design','Production','Review','Approval Stage','On Hold','Complete'];
 const SKEY=s=>({
 'Job Brief':'jobbrief','Design':'design','Production':'production','Review':'review',
@@ -2823,6 +2824,16 @@ function _sync(state,msg){
 
 async function loadFromSupabase(){
   if(!window._sb){_sync('err','Client not ready'); return;}
+  // Auto-refresh stale/long-open tabs when a newer version has shipped.
+  try{
+    const{data:_vv}=await window._sb.from('mkt_settings').select('value').eq('key','app_version').maybeSingle();
+    const _sv=_vv&&_vv.value;
+    if(_sv&&_sv!==APP_VERSION&&sessionStorage.getItem('_verReload')!==_sv){
+      sessionStorage.setItem('_verReload',_sv);
+      location.replace(location.pathname+'?v='+encodeURIComponent(_sv)+location.hash);
+      return;
+    }
+  }catch(e){}
   _sync('busy','Loading…');
   // ── 1. Data fetch — only this can cause ⚠ Offline ──
   try{
