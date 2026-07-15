@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260702y -->
+<!-- v20260702z -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -473,6 +473,11 @@ button{font-family:'DBHeavent','Sarabun',sans-serif}
 .chat-input{display:flex;gap:6px;padding:10px;border-top:1px solid var(--b1);background:var(--surf2);flex-shrink:0}
 .chat-input input{flex:1;background:var(--surf);border:1px solid var(--b1);border-radius:8px;padding:8px 10px;color:var(--t1);font-family:inherit;font-size:13px;outline:none}
 .chat-input button{background:var(--gold);color:#13131f;border:none;border-radius:8px;padding:0 14px;font-weight:700;cursor:pointer;font-family:inherit}
+#chat-toast{position:fixed;left:20px;bottom:20px;width:300px;max-width:80vw;background:var(--surf);border:1px solid var(--gold);border-left:4px solid var(--gold);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.5);z-index:9002;padding:11px 14px;cursor:pointer;transform:translateY(16px);opacity:0;pointer-events:none;transition:transform .25s,opacity .25s}
+#chat-toast.show{transform:translateY(0);opacity:1;pointer-events:auto}
+#chat-toast .ct-hd{display:flex;align-items:center;gap:6px;font-size:10px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+#chat-toast .ct-title{font-size:13px;font-weight:700;color:var(--t1);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#chat-toast .ct-body{font-size:13px;color:var(--t2);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 </style>
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
@@ -3168,7 +3173,42 @@ _chatSetRead(row.room);
 }else if(row.sender!==_currentUser){
 _chatUnread[row.room]=(_chatUnread[row.room]||0)+1;_updateChatFab();
 if(panelOpen&&_chatRoom===null)chatShowList();
+_showChatToast(row);_playTrainHorn();
 }
+}
+// ── Incoming-message pop-up + train-horn sound ──
+let _chatToastT=null,_chatAudioCtx=null;
+function _unlockChatAudio(){try{if(!_chatAudioCtx&&(window.AudioContext||window.webkitAudioContext))_chatAudioCtx=new (window.AudioContext||window.webkitAudioContext)();if(_chatAudioCtx&&_chatAudioCtx.state==='suspended')_chatAudioCtx.resume();}catch(e){}}
+document.addEventListener('click',_unlockChatAudio);
+function _playTrainHorn(){
+try{
+_unlockChatAudio();const ctx=_chatAudioCtx;if(!ctx)return;
+const now=ctx.currentTime;
+const master=ctx.createGain();master.gain.value=0.0001;
+const lp=ctx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=1600;
+master.connect(lp);lp.connect(ctx.destination);
+const freqs=[233.08,277.18,349.23];// dissonant air-horn cluster
+const oscs=freqs.map(f=>{const o=ctx.createOscillator();o.type='sawtooth';o.frequency.value=f;o.connect(master);o.start(now);return o;});
+const v=0.16,g=master.gain;
+g.setValueAtTime(0.0001,now);
+g.exponentialRampToValueAtTime(v,now+0.05);
+g.setValueAtTime(v,now+0.30);
+g.exponentialRampToValueAtTime(0.0001,now+0.42);
+g.setValueAtTime(0.0001,now+0.50);
+g.exponentialRampToValueAtTime(v,now+0.57);
+g.setValueAtTime(v,now+1.00);
+g.exponentialRampToValueAtTime(0.0001,now+1.15);
+oscs.forEach(o=>o.stop(now+1.2));
+}catch(e){}
+}
+function _showChatToast(row){
+const el=document.getElementById('chat-toast');if(!el)return;
+const isTH=row.room==='townhall';
+el.querySelector('.ct-title').textContent=isTH?('📣 Town Hall · '+row.sender):row.sender;
+el.querySelector('.ct-body').textContent=row.body;
+el.onclick=()=>{const p=document.getElementById('chat-panel');if(p&&!p.classList.contains('open'))p.classList.add('open');chatOpen(row.room,isTH?'📣 Town Hall':row.sender);el.classList.remove('show');};
+el.classList.add('show');
+clearTimeout(_chatToastT);_chatToastT=setTimeout(()=>el.classList.remove('show'),6000);
 }
 </script>
 
@@ -3254,5 +3294,6 @@ if(panelOpen&&_chatRoom===null)chatShowList();
 <div class="chat-msgs" id="chat-msgs" style="display:none"></div>
 <div class="chat-input" id="chat-input-row" style="display:none"><input id="chat-input" type="text" maxlength="1000" placeholder="Type a message…" onkeydown="if(event.key==='Enter')chatSend()"><button onclick="chatSend()">Send</button></div>
 </div>
+<div id="chat-toast"><div class="ct-hd">💬 New message<span style="margin-left:auto;font-size:13px">🚂</span></div><div class="ct-title"></div><div class="ct-body"></div></div>
 
 </body></html>
