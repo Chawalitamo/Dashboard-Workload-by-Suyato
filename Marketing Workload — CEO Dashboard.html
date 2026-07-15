@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260703d -->
+<!-- v20260703e -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -1019,7 +1019,7 @@ if(window._pendingLoad) window._pendingLoad();
 
 <script>
 // ═════════════ DATA ═════════════
-const APP_VERSION='v20260703d'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
+const APP_VERSION='v20260703e'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
 const STAGES=['Job Brief','Design','Production','Review','Approval Stage','On Hold','Complete'];
 const SKEY=s=>({
 'Job Brief':'jobbrief','Design':'design','Production':'production','Review':'review',
@@ -3201,18 +3201,20 @@ const t=new Date(m.created_at).toLocaleTimeString('en-GB',{hour:'2-digit',minute
 const who=(!me&&m.room==='townhall')?`<div class="cm-who">${_chatEsc(m.sender)}</div>`:'';
 return `<div class="chat-msg ${me?'me':'them'}">${who}${_chatEsc(m.body)}<div class="cm-time">${t}</div></div>`;
 }
+// Append a bubble, first clearing the "No messages yet" placeholder if it's still showing.
+function _chatAppend(msgs,html){if(msgs&&!msgs.querySelector('.chat-msg'))msgs.innerHTML='';if(msgs)msgs.insertAdjacentHTML('beforeend',html);}
 async function chatSend(){
 const inp=document.getElementById('chat-input');if(!inp||!_chatRoom||!_currentUser)return;
 const body=inp.value.trim();if(!body)return;
 inp.value='';
 const recipient=_chatRoom==='townhall'?null:(_chatRoom.replace('dm:','').split('~').find(n=>n!==_currentUser)||null);
-try{const{data}=await window._sb.from('mkt_chat').insert({room:_chatRoom,sender:_currentUser,recipient,body}).select().single();if(data&&_chatRoom===data.room&&!_chatSeen.has(data.id)){_chatSeen.add(data.id);const msgs=document.getElementById('chat-msgs');msgs.insertAdjacentHTML('beforeend',_chatBubble(data));msgs.scrollTop=msgs.scrollHeight;_chatSetRead(_chatRoom);}}catch(e){inp.value=body;}
+try{const{data}=await window._sb.from('mkt_chat').insert({room:_chatRoom,sender:_currentUser,recipient,body}).select().single();if(data&&_chatRoom===data.room&&!_chatSeen.has(data.id)){_chatSeen.add(data.id);const msgs=document.getElementById('chat-msgs');_chatAppend(msgs,_chatBubble(data));msgs.scrollTop=msgs.scrollHeight;_chatSetRead(_chatRoom);}}catch(e){inp.value=body;}
 }
 function _onChatInsert(row){
 if(!row||!_chatRelevant(row))return;
 const panelOpen=document.getElementById('chat-panel').classList.contains('open');
 if(_chatRoom===row.room&&panelOpen){
-if(!_chatSeen.has(row.id)){_chatSeen.add(row.id);const msgs=document.getElementById('chat-msgs');const nearBottom=msgs.scrollHeight-msgs.scrollTop-msgs.clientHeight<60;msgs.insertAdjacentHTML('beforeend',_chatBubble(row));if(nearBottom)msgs.scrollTop=msgs.scrollHeight;}
+if(!_chatSeen.has(row.id)){_chatSeen.add(row.id);const msgs=document.getElementById('chat-msgs');const nearBottom=msgs.scrollHeight-msgs.scrollTop-msgs.clientHeight<60;_chatAppend(msgs,_chatBubble(row));if(nearBottom)msgs.scrollTop=msgs.scrollHeight;}
 _chatSetRead(row.room);
 }else if(row.sender!==_currentUser){
 _chatUnread[row.room]=(_chatUnread[row.room]||0)+1;_updateChatFab();
