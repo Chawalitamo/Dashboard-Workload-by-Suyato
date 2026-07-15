@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260703b -->
+<!-- v20260703c -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -478,6 +478,12 @@ button{font-family:'DBHeavent','Sarabun',sans-serif}
 #chat-toast .ct-hd{display:flex;align-items:center;gap:6px;font-size:10px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
 #chat-toast .ct-title{font-size:13px;font-weight:700;color:var(--t1);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #chat-toast .ct-body{font-size:13px;color:var(--t2);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+#app-banner{position:fixed;top:0;left:0;right:0;z-index:9500;display:none;align-items:center;justify-content:center;gap:12px;padding:8px 14px;font-size:13px;font-weight:600;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,.3)}
+#app-banner.show{display:flex}
+#app-banner.warn{background:#f0a840;color:#13131f}
+#app-banner.err{background:#f07070;color:#fff}
+#app-banner button{background:rgba(0,0,0,.22);color:inherit;border:none;border-radius:6px;padding:4px 12px;font-weight:700;cursor:pointer;font-family:inherit}
+#app-banner button:hover{background:rgba(0,0,0,.35)}
 </style>
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
@@ -1013,7 +1019,7 @@ if(window._pendingLoad) window._pendingLoad();
 
 <script>
 // ═════════════ DATA ═════════════
-const APP_VERSION='v20260703b'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
+const APP_VERSION='v20260703c'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
 const STAGES=['Job Brief','Design','Production','Review','Approval Stage','On Hold','Complete'];
 const SKEY=s=>({
 'Job Brief':'jobbrief','Design':'design','Production':'production','Review':'review',
@@ -2822,17 +2828,33 @@ function _sync(state,msg){
   if(lbl) lbl.textContent=msg;
 }
 
+// ── Top notice banner (offline / new-version nudge) ──
+let _bannerOffline=false,_bannerNewVer=false;
+function _renderBanner(){
+  const b=document.getElementById('app-banner');if(!b)return;
+  const msg=document.getElementById('app-banner-msg'),btn=document.getElementById('app-banner-btn');
+  if(_bannerOffline){b.className='show err';msg.textContent='⚠ You are offline — reconnecting… your latest changes may not be saved.';btn.style.display='none';}
+  else if(_bannerNewVer){b.className='show warn';msg.textContent='🔄 A new version of the dashboard is available.';btn.style.display='';btn.textContent='Refresh now';}
+  else{b.className='';}
+}
+function _bannerRefresh(){const sv=sessionStorage.getItem('_verReload')||('t'+Date.now());location.replace(location.pathname+'?v='+encodeURIComponent(sv)+location.hash);}
+window.addEventListener('offline',()=>{_bannerOffline=true;_renderBanner();});
+window.addEventListener('online',()=>{_bannerOffline=false;_renderBanner();});
 async function loadFromSupabase(){
   if(!window._sb){_sync('err','Client not ready'); return;}
   // Auto-refresh stale/long-open tabs when a newer version has shipped.
   try{
     const{data:_vv}=await window._sb.from('mkt_settings').select('value').eq('key','app_version').maybeSingle();
     const _sv=_vv&&_vv.value;
-    if(_sv&&_sv!==APP_VERSION&&sessionStorage.getItem('_verReload')!==_sv){
-      sessionStorage.setItem('_verReload',_sv);
-      location.replace(location.pathname+'?v='+encodeURIComponent(_sv)+location.hash);
-      return;
-    }
+    if(_sv&&_sv!==APP_VERSION){
+      if(sessionStorage.getItem('_verReload')!==_sv){
+        sessionStorage.setItem('_verReload',_sv);
+        location.replace(location.pathname+'?v='+encodeURIComponent(_sv)+location.hash);
+        return;
+      }
+      _bannerNewVer=true; // auto-reload already tried this session — nudge manually
+    } else { _bannerNewVer=false; }
+    _renderBanner();
   }catch(e){}
   _sync('busy','Loading…');
   // ── 1. Data fetch — only this can cause ⚠ Offline ──
@@ -2851,10 +2873,12 @@ async function loadFromSupabase(){
   }catch(err){
     _sync('err','⚠ Offline');
     console.error('Supabase error:',err);
+    _bannerOffline=true;_renderBanner();
     return;
   }
   // ── 2. Render — errors here are logged but never override Live status ──
   _sync('ok','● Live · '+new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}));
+  _bannerOffline=false;_renderBanner();
   try{
     populateAllProjectSelects();
     renderProjectNavTabs();
@@ -3308,5 +3332,6 @@ clearTimeout(_chatToastT);_chatToastT=setTimeout(()=>el.classList.remove('show')
 <div class="chat-input" id="chat-input-row" style="display:none"><input id="chat-input" type="text" maxlength="1000" placeholder="Type a message…" onkeydown="if(event.key==='Enter')chatSend()"><button onclick="chatSend()">Send</button></div>
 </div>
 <div id="chat-toast"><div class="ct-hd">💬 New message<span style="margin-left:auto;font-size:13px">🚂</span></div><div class="ct-title"></div><div class="ct-body"></div></div>
+<div id="app-banner"><span id="app-banner-msg"></span><button id="app-banner-btn" style="display:none" onclick="_bannerRefresh()"></button></div>
 
 </body></html>
