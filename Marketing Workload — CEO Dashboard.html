@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260703h -->
+<!-- v20260703i -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -454,6 +454,8 @@ button{font-family:'DBHeavent','Sarabun',sans-serif}
 #chat-fab .chat-unread{position:absolute;top:-2px;right:-2px;background:#f0655f;color:#fff;border-radius:10px;font-size:11px;font-weight:700;min-width:18px;height:18px;align-items:center;justify-content:center;padding:0 4px;display:none}
 #chat-panel{position:fixed;right:20px;bottom:20px;width:340px;height:480px;max-height:82vh;background:var(--surf);border:1px solid var(--b2);border-radius:14px;box-shadow:0 14px 44px rgba(0,0,0,.5);z-index:9001;display:none;flex-direction:column;overflow:hidden}
 #chat-panel.open{display:flex}
+#chat-panel.chat-dragover{outline:2px dashed var(--gold);outline-offset:-6px}
+#chat-panel.chat-dragover::after{content:"⬇ Drop to send";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(19,19,31,.72);color:var(--gold);font-weight:700;font-size:15px;z-index:5;pointer-events:none;border-radius:14px}
 .chat-hd{display:flex;align-items:center;gap:8px;padding:11px 14px;border-bottom:1px solid var(--b1);background:var(--surf2);flex-shrink:0}
 .chat-hd .chat-title{font-weight:700;font-size:14px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .chat-hd button{background:none;border:none;color:var(--t2);cursor:pointer;font-size:16px;padding:2px 4px}
@@ -1026,7 +1028,7 @@ if(window._pendingLoad) window._pendingLoad();
 
 <script>
 // ═════════════ DATA ═════════════
-const APP_VERSION='v20260703h'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
+const APP_VERSION='v20260703i'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
 const STAGES=['Job Brief','Design','Production','Review','Approval Stage','On Hold','Complete'];
 const SKEY=s=>({
 'Job Brief':'jobbrief','Design':'design','Production':'production','Review':'review',
@@ -3163,6 +3165,7 @@ try{const base=(document.title||'').replace(/^\(\d+\+?\)\s*/,'');document.title=
 async function initChat(){
 if(!_currentUser||!window._sb)return;
 const fab=document.getElementById('chat-fab');if(fab)fab.style.display='flex';
+initChatDrop();
 _chatUnread={};
 try{
 const{data}=await window._sb.from('mkt_chat').select('room,sender,recipient,created_at').or('room.eq.townhall,sender.eq.'+_currentUser+',recipient.eq.'+_currentUser).order('created_at',{ascending:false}).limit(500);
@@ -3233,23 +3236,36 @@ const recipient=_chatRoom==='townhall'?null:(_chatRoom.replace('dm:','').split('
 try{const{data}=await window._sb.from('mkt_chat').insert({room:_chatRoom,sender:_currentUser,recipient,body}).select().single();if(data&&_chatRoom===data.room&&!_chatSeen.has(data.id)){_chatSeen.add(data.id);const msgs=document.getElementById('chat-msgs');_chatAppend(msgs,_chatBubble(data));msgs.scrollTop=msgs.scrollHeight;_chatSetRead(_chatRoom);}}catch(e){inp.value=body;}
 }
 // Attach a file / photo to the current chat (reuses the public task-files bucket under a chat/ prefix).
-async function chatSendFile(inpEl){
-const file=inpEl&&inpEl.files&&inpEl.files[0];if(inpEl)inpEl.value='';
+// Core uploader — used by the 📎 picker, drag-and-drop, and paste.
+async function _chatUploadFile(file){
 if(!file||!_chatRoom||!_currentUser)return;
-if(file.size>15*1048576){alert('File too large — max 15 MB.');return;}
+if(file.size>15*1048576){alert('File too large — max 15 MB: '+file.name);return;}
 const btn=document.getElementById('chat-attach-btn');const prev=btn?btn.textContent:'';if(btn){btn.textContent='⏳';btn.disabled=true;}
 try{
 const recipient=_chatRoom==='townhall'?null:(_chatRoom.replace('dm:','').split('~').find(n=>n!==_currentUser)||null);
-const safe=file.name.replace(/[^a-zA-Z0-9._\-() ]/g,'_');
+const safe=(file.name||'file').replace(/[^a-zA-Z0-9._\-() ]/g,'_');
 const rk=_chatRoom.replace(/[^a-zA-Z0-9]/g,'_');
 const path=`chat/${rk}/${Date.now()}_${safe}`;
 const{error}=await window._sb.storage.from('task-files').upload(path,file,{upsert:true});
 if(error)throw error;
-const attachment={name:file.name,path,size:file.size,type:file.type||'application/octet-stream'};
+const attachment={name:file.name||safe,path,size:file.size,type:file.type||'application/octet-stream'};
 const{data}=await window._sb.from('mkt_chat').insert({room:_chatRoom,sender:_currentUser,recipient,body:'',attachment}).select().single();
 if(data&&_chatRoom===data.room&&!_chatSeen.has(data.id)){_chatSeen.add(data.id);const msgs=document.getElementById('chat-msgs');_chatAppend(msgs,_chatBubble(data));msgs.scrollTop=msgs.scrollHeight;_chatSetRead(_chatRoom);}
 }catch(e){alert('Could not send file: '+(e.message||e));}
 finally{if(btn){btn.textContent=prev||'📎';btn.disabled=false;}}
+}
+async function chatSendFile(inpEl){
+const files=inpEl&&inpEl.files?Array.from(inpEl.files):[];if(inpEl)inpEl.value='';
+for(const f of files)await _chatUploadFile(f);
+}
+// Drag-and-drop + paste files onto the chat panel (only while a conversation is open).
+function initChatDrop(){
+const panel=document.getElementById('chat-panel');if(!panel||panel._dropWired)return;panel._dropWired=true;
+const stop=e=>{e.preventDefault();e.stopPropagation();};
+panel.addEventListener('dragover',e=>{if(!_chatRoom)return;stop(e);panel.classList.add('chat-dragover');});
+panel.addEventListener('dragleave',e=>{if(e.target===panel||!panel.contains(e.relatedTarget))panel.classList.remove('chat-dragover');});
+panel.addEventListener('drop',async e=>{panel.classList.remove('chat-dragover');if(!_chatRoom)return;stop(e);const files=e.dataTransfer&&e.dataTransfer.files?Array.from(e.dataTransfer.files):[];for(const f of files)await _chatUploadFile(f);});
+panel.addEventListener('paste',async e=>{if(!_chatRoom)return;const items=(e.clipboardData&&e.clipboardData.files)?Array.from(e.clipboardData.files):[];if(items.length){stop(e);for(const f of items)await _chatUploadFile(f);}});
 }
 function _onChatInsert(row){
 if(!row||!_chatRelevant(row))return;
