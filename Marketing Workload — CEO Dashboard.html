@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260703g -->
+<!-- v20260703h -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -473,6 +473,13 @@ button{font-family:'DBHeavent','Sarabun',sans-serif}
 .chat-input{display:flex;gap:6px;padding:10px;border-top:1px solid var(--b1);background:var(--surf2);flex-shrink:0}
 .chat-input input{flex:1;background:var(--surf);border:1px solid var(--b1);border-radius:8px;padding:8px 10px;color:var(--t1);font-family:inherit;font-size:13px;outline:none}
 .chat-input button{background:var(--gold);color:#13131f;border:none;border-radius:8px;padding:0 14px;font-weight:700;cursor:pointer;font-family:inherit}
+.chat-input .chat-attach{background:var(--surf);color:var(--t2);border:1px solid var(--b1);padding:0 10px;font-size:16px}
+.chat-input .chat-attach:hover{color:var(--t1);border-color:var(--gold2)}
+.chat-msg img.cm-img{max-width:210px;max-height:230px;border-radius:9px;display:block;margin:2px 0;cursor:pointer;object-fit:cover}
+.chat-msg .cm-file{display:flex;align-items:center;gap:6px;margin:2px 0;padding:6px 8px;border-radius:8px;background:rgba(0,0,0,.14);text-decoration:none;color:inherit;font-size:12px}
+.chat-msg.them .cm-file{background:rgba(255,255,255,.07)}
+.chat-msg .cm-fname{font-weight:600;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chat-msg .cm-fsize{opacity:.65;font-size:10px;flex-shrink:0}
 #chat-toast{position:fixed;left:20px;bottom:20px;width:300px;max-width:80vw;background:var(--surf);border:1px solid var(--gold);border-left:4px solid var(--gold);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.5);z-index:9002;padding:11px 14px;cursor:pointer;transform:translateY(16px);opacity:0;pointer-events:none;transition:transform .25s,opacity .25s}
 #chat-toast.show{transform:translateY(0);opacity:1;pointer-events:auto}
 #chat-toast .ct-hd{display:flex;align-items:center;gap:6px;font-size:10px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
@@ -1019,7 +1026,7 @@ if(window._pendingLoad) window._pendingLoad();
 
 <script>
 // ═════════════ DATA ═════════════
-const APP_VERSION='v20260703g'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
+const APP_VERSION='v20260703h'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
 const STAGES=['Job Brief','Design','Production','Review','Approval Stage','On Hold','Complete'];
 const SKEY=s=>({
 'Job Brief':'jobbrief','Design':'design','Production':'production','Review':'review',
@@ -3200,11 +3207,21 @@ msgs.innerHTML=data.map(m=>{_chatSeen.add(m.id);return _chatBubble(m);}).join(''
 msgs.scrollTop=msgs.scrollHeight;
 _chatUnread[room]=0;_chatSetRead(room);_updateChatFab();
 }
+function _chatAtt(m){
+const a=m.attachment;if(!a||!a.path)return '';
+const url=pubUrl(a.path);
+if((a.type||'').indexOf('image')===0)return `<a href="${url}" target="_blank" rel="noopener"><img class="cm-img" src="${url}" alt="${_chatEsc(a.name||'image')}"></a>`;
+return `<a class="cm-file" href="${url}" target="_blank" rel="noopener" title="${_chatEsc(a.name||'file')}">${fileIcon(a.type)} <span class="cm-fname">${_chatEsc(a.name||'file')}</span><span class="cm-fsize">${fmtSize(a.size||0)}</span></a>`;
+}
+// Short preview for toast / OS notification when a message is a file/photo.
+function _msgPreview(m){if(m.body)return m.body;if(m.attachment)return ((m.attachment.type||'').indexOf('image')===0?'📷 Photo':'📎 '+(m.attachment.name||'File'));return '';}
 function _chatBubble(m){
 const me=m.sender===_currentUser;
 const t=new Date(m.created_at).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
 const who=(!me&&m.room==='townhall')?`<div class="cm-who">${_chatEsc(m.sender)}</div>`:'';
-return `<div class="chat-msg ${me?'me':'them'}">${who}${_chatEsc(m.body)}<div class="cm-time">${t}</div></div>`;
+const att=_chatAtt(m);
+const body=m.body?_chatEsc(m.body):'';
+return `<div class="chat-msg ${me?'me':'them'}">${who}${att}${body}<div class="cm-time">${t}</div></div>`;
 }
 // Append a bubble, first clearing the "No messages yet" placeholder if it's still showing.
 function _chatAppend(msgs,html){if(msgs&&!msgs.querySelector('.chat-msg'))msgs.innerHTML='';if(msgs)msgs.insertAdjacentHTML('beforeend',html);}
@@ -3214,6 +3231,25 @@ const body=inp.value.trim();if(!body)return;
 inp.value='';
 const recipient=_chatRoom==='townhall'?null:(_chatRoom.replace('dm:','').split('~').find(n=>n!==_currentUser)||null);
 try{const{data}=await window._sb.from('mkt_chat').insert({room:_chatRoom,sender:_currentUser,recipient,body}).select().single();if(data&&_chatRoom===data.room&&!_chatSeen.has(data.id)){_chatSeen.add(data.id);const msgs=document.getElementById('chat-msgs');_chatAppend(msgs,_chatBubble(data));msgs.scrollTop=msgs.scrollHeight;_chatSetRead(_chatRoom);}}catch(e){inp.value=body;}
+}
+// Attach a file / photo to the current chat (reuses the public task-files bucket under a chat/ prefix).
+async function chatSendFile(inpEl){
+const file=inpEl&&inpEl.files&&inpEl.files[0];if(inpEl)inpEl.value='';
+if(!file||!_chatRoom||!_currentUser)return;
+if(file.size>15*1048576){alert('File too large — max 15 MB.');return;}
+const btn=document.getElementById('chat-attach-btn');const prev=btn?btn.textContent:'';if(btn){btn.textContent='⏳';btn.disabled=true;}
+try{
+const recipient=_chatRoom==='townhall'?null:(_chatRoom.replace('dm:','').split('~').find(n=>n!==_currentUser)||null);
+const safe=file.name.replace(/[^a-zA-Z0-9._\-() ]/g,'_');
+const rk=_chatRoom.replace(/[^a-zA-Z0-9]/g,'_');
+const path=`chat/${rk}/${Date.now()}_${safe}`;
+const{error}=await window._sb.storage.from('task-files').upload(path,file,{upsert:true});
+if(error)throw error;
+const attachment={name:file.name,path,size:file.size,type:file.type||'application/octet-stream'};
+const{data}=await window._sb.from('mkt_chat').insert({room:_chatRoom,sender:_currentUser,recipient,body:'',attachment}).select().single();
+if(data&&_chatRoom===data.room&&!_chatSeen.has(data.id)){_chatSeen.add(data.id);const msgs=document.getElementById('chat-msgs');_chatAppend(msgs,_chatBubble(data));msgs.scrollTop=msgs.scrollHeight;_chatSetRead(_chatRoom);}
+}catch(e){alert('Could not send file: '+(e.message||e));}
+finally{if(btn){btn.textContent=prev||'📎';btn.disabled=false;}}
 }
 function _onChatInsert(row){
 if(!row||!_chatRelevant(row))return;
@@ -3243,7 +3279,7 @@ if(!('Notification'in window)||Notification.permission!=='granted')return;
 const isTH=row.room==='townhall';
 const title=isTH?('📣 Town Hall · '+row.sender):('💬 '+row.sender);
 const icon=((document.querySelector('nav img')||{}).src)||undefined;
-const n=new Notification(title,{body:row.body||'',tag:'mkt-chat-'+row.room,renotify:true,icon});
+const n=new Notification(title,{body:_msgPreview(row),tag:'mkt-chat-'+row.room,renotify:true,icon});
 n.onclick=()=>{try{window.focus();}catch(e){}const p=document.getElementById('chat-panel');if(p&&!p.classList.contains('open'))p.classList.add('open');chatOpen(row.room,isTH?'📣 Town Hall':row.sender);try{n.close();}catch(e){}};
 }catch(e){}
 }
@@ -3272,7 +3308,7 @@ function _showChatToast(row){
 const el=document.getElementById('chat-toast');if(!el)return;
 const isTH=row.room==='townhall';
 el.querySelector('.ct-title').textContent=isTH?('📣 Town Hall · '+row.sender):row.sender;
-el.querySelector('.ct-body').textContent=row.body;
+el.querySelector('.ct-body').textContent=_msgPreview(row);
 el.onclick=()=>{const p=document.getElementById('chat-panel');if(p&&!p.classList.contains('open'))p.classList.add('open');chatOpen(row.room,isTH?'📣 Town Hall':row.sender);el.classList.remove('show');};
 el.classList.add('show');
 clearTimeout(_chatToastT);_chatToastT=setTimeout(()=>el.classList.remove('show'),6000);
@@ -3359,7 +3395,7 @@ clearTimeout(_chatToastT);_chatToastT=setTimeout(()=>el.classList.remove('show')
 <div class="chat-hd"><button id="chat-back" onclick="chatShowList()" style="display:none" title="Back">←</button><span class="chat-title" id="chat-title">Team Chat</span><button onclick="toggleChat()" title="Close">✕</button></div>
 <div class="chat-list" id="chat-list"></div>
 <div class="chat-msgs" id="chat-msgs" style="display:none"></div>
-<div class="chat-input" id="chat-input-row" style="display:none"><input id="chat-input" type="text" maxlength="1000" placeholder="Type a message…" onkeydown="if(event.key==='Enter')chatSend()"><button onclick="chatSend()">Send</button></div>
+<div class="chat-input" id="chat-input-row" style="display:none"><input type="file" id="chat-file" style="display:none" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.rar" onchange="chatSendFile(this)"><button type="button" id="chat-attach-btn" class="chat-attach" title="Attach file or photo" onclick="document.getElementById('chat-file').click()">📎</button><input id="chat-input" type="text" maxlength="1000" placeholder="Type a message…" onkeydown="if(event.key==='Enter')chatSend()"><button onclick="chatSend()">Send</button></div>
 </div>
 <div id="chat-toast"><div class="ct-hd">💬 New message<span style="margin-left:auto;font-size:13px">🚂</span></div><div class="ct-title"></div><div class="ct-body"></div></div>
 <div id="app-banner"><span id="app-banner-msg"></span><button id="app-banner-btn" style="display:none" onclick="_bannerRefresh()"></button></div>
