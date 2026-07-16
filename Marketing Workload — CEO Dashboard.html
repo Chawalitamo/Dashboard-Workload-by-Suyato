@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260703i -->
+<!-- v20260703j -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -482,6 +482,18 @@ button{font-family:'DBHeavent','Sarabun',sans-serif}
 .chat-msg.them .cm-file{background:rgba(255,255,255,.07)}
 .chat-msg .cm-fname{font-weight:600;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .chat-msg .cm-fsize{opacity:.65;font-size:10px;flex-shrink:0}
+.chat-msg.sticker{background:none!important;padding:0!important;box-shadow:none;max-width:100%}
+.chat-msg.sticker .cm-sticker{font-size:46px;line-height:1;display:block}
+#chat-emoji-panel{position:absolute;left:8px;right:8px;bottom:58px;background:var(--surf);border:1px solid var(--b2);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.45);z-index:6;display:none;flex-direction:column;overflow:hidden}
+#chat-emoji-panel.open{display:flex}
+#chat-emoji-panel .ep-tabs{display:flex;border-bottom:1px solid var(--b1);flex-shrink:0}
+#chat-emoji-panel .ep-tab{flex:1;background:none;border:none;color:var(--t3);padding:8px;font-weight:700;font-size:12px;cursor:pointer;font-family:inherit}
+#chat-emoji-panel .ep-tab.active{color:var(--gold);box-shadow:inset 0 -2px 0 var(--gold)}
+#chat-emoji-panel .ep-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:2px;padding:8px;max-height:184px;overflow-y:auto}
+#chat-emoji-panel #ep-sticker{grid-template-columns:repeat(5,1fr)}
+#chat-emoji-panel .ep-item{background:none;border:none;cursor:pointer;font-size:20px;padding:4px 0;border-radius:6px;line-height:1}
+#chat-emoji-panel .ep-item:hover{background:var(--surf3)}
+#chat-emoji-panel .ep-sticker{font-size:30px}
 #chat-toast{position:fixed;left:20px;bottom:20px;width:300px;max-width:80vw;background:var(--surf);border:1px solid var(--gold);border-left:4px solid var(--gold);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.5);z-index:9002;padding:11px 14px;cursor:pointer;transform:translateY(16px);opacity:0;pointer-events:none;transition:transform .25s,opacity .25s}
 #chat-toast.show{transform:translateY(0);opacity:1;pointer-events:auto}
 #chat-toast .ct-hd{display:flex;align-items:center;gap:6px;font-size:10px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
@@ -1028,7 +1040,7 @@ if(window._pendingLoad) window._pendingLoad();
 
 <script>
 // ═════════════ DATA ═════════════
-const APP_VERSION='v20260703i'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
+const APP_VERSION='v20260703j'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
 const STAGES=['Job Brief','Design','Production','Review','Approval Stage','On Hold','Complete'];
 const SKEY=s=>({
 'Job Brief':'jobbrief','Design':'design','Production':'production','Review':'review',
@@ -3186,7 +3198,7 @@ const f=document.getElementById('chat-fab');if(f)f.style.display='none';
 }
 function toggleChat(){const p=document.getElementById('chat-panel');if(!p)return;if(p.classList.contains('open'))p.classList.remove('open');else{p.classList.add('open');chatShowList();}}
 function chatShowList(){
-_chatRoom=null;
+_chatRoom=null;_closeEmojiPanel();
 document.getElementById('chat-back').style.display='none';
 document.getElementById('chat-title').textContent='Team Chat';
 document.getElementById('chat-msgs').style.display='none';
@@ -3216,12 +3228,13 @@ const url=pubUrl(a.path);
 if((a.type||'').indexOf('image')===0)return `<a href="${url}" target="_blank" rel="noopener"><img class="cm-img" src="${url}" alt="${_chatEsc(a.name||'image')}"></a>`;
 return `<a class="cm-file" href="${url}" target="_blank" rel="noopener" title="${_chatEsc(a.name||'file')}">${fileIcon(a.type)} <span class="cm-fname">${_chatEsc(a.name||'file')}</span><span class="cm-fsize">${fmtSize(a.size||0)}</span></a>`;
 }
-// Short preview for toast / OS notification when a message is a file/photo.
-function _msgPreview(m){if(m.body)return m.body;if(m.attachment)return ((m.attachment.type||'').indexOf('image')===0?'📷 Photo':'📎 '+(m.attachment.name||'File'));return '';}
+// Short preview for toast / OS notification when a message is a sticker/file/photo.
+function _msgPreview(m){if(m.body)return m.body;const a=m.attachment;if(a){if(a.kind==='sticker')return a.emoji||'Sticker';return (a.type||'').indexOf('image')===0?'📷 Photo':'📎 '+(a.name||'File');}return '';}
 function _chatBubble(m){
 const me=m.sender===_currentUser;
 const t=new Date(m.created_at).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
 const who=(!me&&m.room==='townhall')?`<div class="cm-who">${_chatEsc(m.sender)}</div>`:'';
+if(m.attachment&&m.attachment.kind==='sticker')return `<div class="chat-msg sticker ${me?'me':'them'}">${who}<span class="cm-sticker">${_chatEsc(m.attachment.emoji||'')}</span><div class="cm-time">${t}</div></div>`;
 const att=_chatAtt(m);
 const body=m.body?_chatEsc(m.body):'';
 return `<div class="chat-msg ${me?'me':'them'}">${who}${att}${body}<div class="cm-time">${t}</div></div>`;
@@ -3257,6 +3270,26 @@ finally{if(btn){btn.textContent=prev||'📎';btn.disabled=false;}}
 async function chatSendFile(inpEl){
 const files=inpEl&&inpEl.files?Array.from(inpEl.files):[];if(inpEl)inpEl.value='';
 for(const f of files)await _chatUploadFile(f);
+}
+// ── Emoji picker + one-tap cute stickers ──
+const CHAT_EMOJIS='😀 😁 😂 🤣 😊 🥰 😍 😘 😜 🤪 😎 🥳 🤩 🤔 🙄 😅 😢 😭 😱 😴 😇 🤗 😋 😏 🥺 🙏 👍 👎 👏 🙌 💪 🤝 👌 ✌️ 🤞 🫶 👀 🔥 ✨ 🎉 🎊 💯 ✅ ❌ ⭐ ⚡ 💤 ❤️ 🧡 💛 💚 💙 💜 🖤 💔 💕 💖 ☕ 🍰 🍕 🍺 🎂 🌸 🌟 🌈 🐱 🐶 🎈 💩 🤖 👻'.split(' ');
+const CHAT_STICKERS='🐱 🐶 🐰 🐻 🐼 🦊 🐸 🐧 🦄 🐥 🐹 🐨 🌈 🎉 🥳 😻 🙌 💖 👍 🔥'.split(' ');
+function _buildEmojiPanel(){
+const p=document.getElementById('chat-emoji-panel');if(!p||p._built)return;p._built=true;
+const em=CHAT_EMOJIS.map(e=>`<button type="button" class="ep-item" onclick="chatInsertEmoji('${e}')">${e}</button>`).join('');
+const st=CHAT_STICKERS.map(e=>`<button type="button" class="ep-item ep-sticker" onclick="chatSendSticker('${e}')">${e}</button>`).join('');
+p.innerHTML=`<div class="ep-tabs"><button type="button" class="ep-tab active" data-tab="emoji" onclick="_epTab('emoji')">Emoji</button><button type="button" class="ep-tab" data-tab="sticker" onclick="_epTab('sticker')">Stickers</button></div><div class="ep-grid" id="ep-emoji">${em}</div><div class="ep-grid" id="ep-sticker" style="display:none">${st}</div>`;
+}
+function _epTab(t){const e=document.getElementById('ep-emoji'),s=document.getElementById('ep-sticker');if(e)e.style.display=t==='emoji'?'grid':'none';if(s)s.style.display=t==='sticker'?'grid':'none';document.querySelectorAll('#chat-emoji-panel .ep-tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===t));}
+function toggleEmojiPanel(){const p=document.getElementById('chat-emoji-panel');if(!p)return;_buildEmojiPanel();p.classList.toggle('open');}
+function _closeEmojiPanel(){const p=document.getElementById('chat-emoji-panel');if(p)p.classList.remove('open');}
+function chatInsertEmoji(e){const inp=document.getElementById('chat-input');if(!inp)return;inp.value+=e;inp.focus();} // keep panel open to add more
+async function chatSendSticker(emoji){
+_closeEmojiPanel();
+if(!emoji||!_chatRoom||!_currentUser)return;
+const recipient=_chatRoom==='townhall'?null:(_chatRoom.replace('dm:','').split('~').find(n=>n!==_currentUser)||null);
+try{const{data}=await window._sb.from('mkt_chat').insert({room:_chatRoom,sender:_currentUser,recipient,body:'',attachment:{kind:'sticker',emoji}}).select().single();
+if(data&&_chatRoom===data.room&&!_chatSeen.has(data.id)){_chatSeen.add(data.id);const msgs=document.getElementById('chat-msgs');_chatAppend(msgs,_chatBubble(data));msgs.scrollTop=msgs.scrollHeight;_chatSetRead(_chatRoom);}}catch(e){}
 }
 // Drag-and-drop + paste files onto the chat panel (only while a conversation is open).
 function initChatDrop(){
@@ -3411,7 +3444,8 @@ clearTimeout(_chatToastT);_chatToastT=setTimeout(()=>el.classList.remove('show')
 <div class="chat-hd"><button id="chat-back" onclick="chatShowList()" style="display:none" title="Back">←</button><span class="chat-title" id="chat-title">Team Chat</span><button onclick="toggleChat()" title="Close">✕</button></div>
 <div class="chat-list" id="chat-list"></div>
 <div class="chat-msgs" id="chat-msgs" style="display:none"></div>
-<div class="chat-input" id="chat-input-row" style="display:none"><input type="file" id="chat-file" style="display:none" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.rar" onchange="chatSendFile(this)"><button type="button" id="chat-attach-btn" class="chat-attach" title="Attach file or photo" onclick="document.getElementById('chat-file').click()">📎</button><input id="chat-input" type="text" maxlength="1000" placeholder="Type a message…" onkeydown="if(event.key==='Enter')chatSend()"><button onclick="chatSend()">Send</button></div>
+<div id="chat-emoji-panel"></div>
+<div class="chat-input" id="chat-input-row" style="display:none"><input type="file" id="chat-file" style="display:none" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.rar" onchange="chatSendFile(this)"><button type="button" id="chat-emoji-btn" class="chat-attach" title="Emoji &amp; stickers" onclick="toggleEmojiPanel()">😊</button><button type="button" id="chat-attach-btn" class="chat-attach" title="Attach file or photo" onclick="document.getElementById('chat-file').click()">📎</button><input id="chat-input" type="text" maxlength="1000" placeholder="Type a message…" onkeydown="if(event.key==='Enter')chatSend()"><button onclick="chatSend()">Send</button></div>
 </div>
 <div id="chat-toast"><div class="ct-hd">💬 New message<span style="margin-left:auto;font-size:13px">🚂</span></div><div class="ct-title"></div><div class="ct-body"></div></div>
 <div id="app-banner"><span id="app-banner-msg"></span><button id="app-banner-btn" style="display:none" onclick="_bannerRefresh()"></button></div>
