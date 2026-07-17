@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260703n -->
+<!-- v20260703o -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -494,7 +494,7 @@ button{font-family:'DBHeavent','Sarabun',sans-serif}
 #chat-emoji-panel .ep-item{background:none;border:none;cursor:pointer;font-size:20px;padding:4px 0;border-radius:6px;line-height:1}
 #chat-emoji-panel .ep-item:hover{background:var(--surf3)}
 #chat-emoji-panel .ep-sticker{font-size:30px}
-#stage-toasts{position:fixed;top:70px;right:16px;z-index:9600;display:flex;flex-direction:column;gap:8px;width:300px;max-width:82vw;pointer-events:none}
+#stage-toasts{position:fixed;top:162px;right:16px;z-index:9600;display:flex;flex-direction:column;gap:8px;width:300px;max-width:82vw;pointer-events:none}
 #stage-toasts .stg-toast{background:var(--surf);border:1px solid var(--gold);border-left:4px solid var(--gold);border-radius:11px;box-shadow:0 10px 30px rgba(0,0,0,.5);padding:10px 13px;cursor:pointer;pointer-events:auto;animation:stgin .25s ease}
 #stage-toasts .st-hd{font-size:10px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px}
 #stage-toasts .st-ttl{font-size:13px;font-weight:700;color:var(--t1);margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -502,7 +502,7 @@ button{font-family:'DBHeavent','Sarabun',sans-serif}
 #stage-toasts .st-sub{font-size:11px;color:var(--t3)}
 @keyframes stgin{from{transform:translateX(24px);opacity:0}to{transform:none;opacity:1}}
 @keyframes spin{to{transform:rotate(360deg)}}
-#chat-toast{position:fixed;left:20px;bottom:20px;width:300px;max-width:80vw;background:var(--surf);border:1px solid var(--gold);border-left:4px solid var(--gold);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.5);z-index:9002;padding:11px 14px;cursor:pointer;transform:translateY(16px);opacity:0;pointer-events:none;transition:transform .25s,opacity .25s}
+#chat-toast{position:fixed;right:16px;top:70px;width:300px;max-width:80vw;background:var(--surf);border:1px solid var(--gold);border-left:4px solid var(--gold);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.5);z-index:9602;padding:11px 14px;cursor:pointer;transform:translateY(-16px);opacity:0;pointer-events:none;transition:transform .25s,opacity .25s}
 #chat-toast.show{transform:translateY(0);opacity:1;pointer-events:auto}
 #chat-toast .ct-hd{display:flex;align-items:center;gap:6px;font-size:10px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
 #chat-toast .ct-title{font-size:13px;font-weight:700;color:var(--t1);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -884,7 +884,7 @@ if(window._pendingLoad) window._pendingLoad();
 
 <script>
 // ═════════════ DATA ═════════════
-const APP_VERSION='v20260703n'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
+const APP_VERSION='v20260703o'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
 const STAGES=['Job Brief','Design','Production','Review','Approval Stage','On Hold','Complete'];
 const SKEY=s=>({
 'Job Brief':'jobbrief','Design':'design','Production':'production','Review':'review',
@@ -3022,7 +3022,7 @@ window._pendingLoad = async function(){
 _initDP();
 if(window._sbReady) window._pendingLoad();
 // ═════════════ TEAM CHAT ═════════════
-let _chatChan=null,_chatRoom=null,_chatUnread={},_chatSeen=new Set();
+let _chatChan=null,_chatRoom=null,_chatUnread={},_chatSeen=new Set(),_chatLastMsg={};
 const _dmRoom=(a,b)=>'dm:'+[a,b].sort().join('~');
 const _chatReadKey=()=>'mkt_chat_read_'+(_currentUser||'_');
 function _chatRead(){try{return JSON.parse(localStorage.getItem(_chatReadKey())||'{}');}catch(e){return{};}}
@@ -3041,7 +3041,10 @@ _chatUnread={};
 try{
 const{data}=await window._sb.from('mkt_chat').select('room,sender,recipient,created_at').or('room.eq.townhall,sender.eq.'+_currentUser+',recipient.eq.'+_currentUser).order('created_at',{ascending:false}).limit(500);
 const read=_chatRead();
-(data||[]).forEach(r=>{if(!_chatRelevant(r)||r.sender===_currentUser)return;const last=read[r.room]?new Date(read[r.room]):new Date(0);if(new Date(r.created_at)>last)_chatUnread[r.room]=(_chatUnread[r.room]||0)+1;});
+(data||[]).forEach(r=>{if(!_chatRelevant(r))return;
+if(!_chatLastMsg[r.room])_chatLastMsg[r.room]=r.created_at; // data is newest-first
+if(r.sender===_currentUser)return;
+const last=read[r.room]?new Date(read[r.room]):new Date(0);if(new Date(r.created_at)>last)_chatUnread[r.room]=(_chatUnread[r.room]||0)+1;});
 }catch(e){}
 _updateChatFab();
 if(_chatChan){try{window._sb.removeChannel(_chatChan);}catch(e){}_chatChan=null;}
@@ -3051,7 +3054,7 @@ _chatChan=window._sb.channel('mkt_chat_rt').on('postgres_changes',{event:'INSERT
 }
 function teardownChat(){
 if(_chatChan){try{window._sb.removeChannel(_chatChan);}catch(e){}_chatChan=null;}
-_chatRoom=null;_chatUnread={};
+_chatRoom=null;_chatUnread={};_chatLastMsg={};
 const p=document.getElementById('chat-panel');if(p)p.classList.remove('open');
 const f=document.getElementById('chat-fab');if(f)f.style.display='none';
 }
@@ -3064,7 +3067,11 @@ document.getElementById('chat-msgs').style.display='none';
 document.getElementById('chat-input-row').style.display='none';
 const list=document.getElementById('chat-list');list.style.display='block';
 const rows=[{room:'townhall',name:'📣 Town Hall',ok:''}].concat(OWNERS.filter(o=>o!==_currentUser).map(o=>({room:_dmRoom(_currentUser,o),name:o,ok:OKEY(o)})));
-list.innerHTML=rows.map(r=>{const u=_chatUnread[r.room]||0;const av=r.room==='townhall'?'<div class="cc-av" style="background:var(--gold3);color:var(--gold)">📣</div>':`<div class="cc-av o-${r.ok}">${_avatarInner(_ownerAvatars[r.name],r.name)}</div>`;return `<div class="chat-conv" onclick="chatOpen('${r.room}','${_chatEsc(r.name).replace(/'/g,"&#39;")}')">${av}<span class="cc-name">${_chatEsc(r.name)}</span>${u>0?`<span class="chat-badge">${u>99?'99+':u}</span>`:''}</div>`;}).join('');
+// Conversations with the newest message float to the top (base order preserved for the rest).
+rows.forEach((r,i)=>r._i=i);
+rows.sort((a,b)=>{const ta=_chatLastMsg[a.room]?Date.parse(_chatLastMsg[a.room]):0,tb=_chatLastMsg[b.room]?Date.parse(_chatLastMsg[b.room]):0;return tb-ta||a._i-b._i;});
+const _ccTime=r=>{const ts=_chatLastMsg[r.room];if(!ts)return '';const d=new Date(ts),now=new Date();const sameDay=d.toDateString()===now.toDateString();return `<span style="font-size:11px;color:var(--t3);flex-shrink:0;margin-left:6px">${sameDay?d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}):d.toLocaleDateString('en-GB',{day:'numeric',month:'short'})}</span>`;};
+list.innerHTML=rows.map(r=>{const u=_chatUnread[r.room]||0;const av=r.room==='townhall'?'<div class="cc-av" style="background:var(--gold3);color:var(--gold)">📣</div>':`<div class="cc-av o-${r.ok}">${_avatarInner(_ownerAvatars[r.name],r.name)}</div>`;return `<div class="chat-conv" onclick="chatOpen('${r.room}','${_chatEsc(r.name).replace(/'/g,"&#39;")}')">${av}<span class="cc-name">${_chatEsc(r.name)}</span>${_ccTime(r)}${u>0?`<span class="chat-badge">${u>99?'99+':u}</span>`:''}</div>`;}).join('');
 }
 async function chatOpen(room,name){
 _chatRoom=room;
@@ -3105,7 +3112,8 @@ const inp=document.getElementById('chat-input');if(!inp||!_chatRoom||!_currentUs
 const body=inp.value.trim();if(!body)return;
 inp.value='';
 const recipient=_chatRoom==='townhall'?null:(_chatRoom.replace('dm:','').split('~').find(n=>n!==_currentUser)||null);
-try{const{data}=await window._sb.from('mkt_chat').insert({room:_chatRoom,sender:_currentUser,recipient,body}).select().single();if(data&&_chatRoom===data.room&&!_chatSeen.has(data.id)){_chatSeen.add(data.id);const msgs=document.getElementById('chat-msgs');_chatAppend(msgs,_chatBubble(data));msgs.scrollTop=msgs.scrollHeight;_chatSetRead(_chatRoom);}}catch(e){inp.value=body;}
+try{const{data}=await window._sb.from('mkt_chat').insert({room:_chatRoom,sender:_currentUser,recipient,body}).select().single();if(data)_chatLastMsg[data.room]=data.created_at;
+if(data&&_chatRoom===data.room&&!_chatSeen.has(data.id)){_chatSeen.add(data.id);const msgs=document.getElementById('chat-msgs');_chatAppend(msgs,_chatBubble(data));msgs.scrollTop=msgs.scrollHeight;_chatSetRead(_chatRoom);}}catch(e){inp.value=body;}
 }
 // Attach a file / photo to the current chat (reuses the public task-files bucket under a chat/ prefix).
 // Core uploader — used by the 📎 picker, drag-and-drop, and paste.
@@ -3122,6 +3130,7 @@ const{error}=await window._sb.storage.from('task-files').upload(path,file,{upser
 if(error)throw error;
 const attachment={name:file.name||safe,path,size:file.size,type:file.type||'application/octet-stream'};
 const{data}=await window._sb.from('mkt_chat').insert({room:_chatRoom,sender:_currentUser,recipient,body:'',attachment}).select().single();
+if(data)_chatLastMsg[data.room]=data.created_at;
 if(data&&_chatRoom===data.room&&!_chatSeen.has(data.id)){_chatSeen.add(data.id);const msgs=document.getElementById('chat-msgs');_chatAppend(msgs,_chatBubble(data));msgs.scrollTop=msgs.scrollHeight;_chatSetRead(_chatRoom);}
 }catch(e){alert('Could not send file: '+(e.message||e));}
 finally{if(btn){btn.textContent=prev||'📎';btn.disabled=false;}}
@@ -3148,6 +3157,7 @@ _closeEmojiPanel();
 if(!emoji||!_chatRoom||!_currentUser)return;
 const recipient=_chatRoom==='townhall'?null:(_chatRoom.replace('dm:','').split('~').find(n=>n!==_currentUser)||null);
 try{const{data}=await window._sb.from('mkt_chat').insert({room:_chatRoom,sender:_currentUser,recipient,body:'',attachment:{kind:'sticker',emoji}}).select().single();
+if(data)_chatLastMsg[data.room]=data.created_at;
 if(data&&_chatRoom===data.room&&!_chatSeen.has(data.id)){_chatSeen.add(data.id);const msgs=document.getElementById('chat-msgs');_chatAppend(msgs,_chatBubble(data));msgs.scrollTop=msgs.scrollHeight;_chatSetRead(_chatRoom);}}catch(e){}
 }
 // Drag-and-drop + paste files onto the chat panel (only while a conversation is open).
@@ -3161,6 +3171,7 @@ panel.addEventListener('paste',async e=>{if(!_chatRoom)return;const items=(e.cli
 }
 function _onChatInsert(row){
 if(!row||!_chatRelevant(row))return;
+_chatLastMsg[row.room]=row.created_at;
 const panelOpen=document.getElementById('chat-panel').classList.contains('open');
 if(_chatRoom===row.room&&panelOpen){
 if(!_chatSeen.has(row.id)){_chatSeen.add(row.id);const msgs=document.getElementById('chat-msgs');const nearBottom=msgs.scrollHeight-msgs.scrollTop-msgs.clientHeight<60;_chatAppend(msgs,_chatBubble(row));if(nearBottom)msgs.scrollTop=msgs.scrollHeight;}
