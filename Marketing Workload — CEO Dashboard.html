@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260703m -->
+<!-- v20260703n -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -501,6 +501,7 @@ button{font-family:'DBHeavent','Sarabun',sans-serif}
 #stage-toasts .st-chg{font-size:13px;color:var(--t1);margin-bottom:2px}
 #stage-toasts .st-sub{font-size:11px;color:var(--t3)}
 @keyframes stgin{from{transform:translateX(24px);opacity:0}to{transform:none;opacity:1}}
+@keyframes spin{to{transform:rotate(360deg)}}
 #chat-toast{position:fixed;left:20px;bottom:20px;width:300px;max-width:80vw;background:var(--surf);border:1px solid var(--gold);border-left:4px solid var(--gold);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.5);z-index:9002;padding:11px 14px;cursor:pointer;transform:translateY(16px);opacity:0;pointer-events:none;transition:transform .25s,opacity .25s}
 #chat-toast.show{transform:translateY(0);opacity:1;pointer-events:auto}
 #chat-toast .ct-hd{display:flex;align-items:center;gap:6px;font-size:10px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
@@ -536,7 +537,7 @@ if(window._pendingLoad) window._pendingLoad();
 <button id="online-chip" onclick="toggleOnline(event)" title="Who's online"><span class="online-dot"></span><span id="online-count">0</span>&nbsp;online</button>
 <div id="online-panel" style="display:none"><div class="online-panel-hdr">Online now</div><div id="online-list"></div></div>
 </div>
-<span id="sync-dot" style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: rgb(80, 208, 144); margin-right: 5px;"></span><span id="sync-lbl" style="font-size:13px;color:var(--t3);margin-right:12px">● Live · 11:58</span><span id="clock">Wed, 27 May 2026 · 11:58</span>
+<span id="sync-dot" style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: rgb(80, 208, 144); margin-right: 5px;"></span><span id="sync-lbl" style="font-size:13px;color:var(--t3);margin-right:12px"></span><span id="clock"></span>
 </nav>
 <div class="page-tabs">
 <button class="ptab active" onclick="showView(&#39;dashboard&#39;,this)"><i class="ti ti-layout-dashboard" aria-hidden="true"></i>CEO Dashboard</button>
@@ -564,174 +565,10 @@ if(window._pendingLoad) window._pendingLoad();
 </div>
 <div class="view active" id="view-dashboard">
 <div class="dash-inner" id="dash-inner">
-<div class="dash-grid-top">
-<div class="chart-card">
-<div class="chart-title"><i class="ti ti-chart-donut" aria-hidden="true"></i>Stage distribution</div>
-<div class="chart-subtitle">All tasks by current stage</div>
-<div class="chart-wrap" style="height:180px"><canvas id="donut-chart" width="161" height="161" style="display: block; box-sizing: border-box; height: 180px; width: 180px;"></canvas></div>
-</div>
-<div class="chart-card">
-<div class="chart-title"><i class="ti ti-chart-bar" aria-hidden="true"></i>Workload per person</div>
-<div class="chart-subtitle">Task count by team member</div>
-<div class="chart-wrap" style="height:180px"><canvas id="bar-chart" width="323" height="161" style="display: block; box-sizing: border-box; height: 180px; width: 360px;"></canvas></div>
-</div>
-<div class="chart-card">
-<div class="chart-title"><i class="ti ti-chart-radar" aria-hidden="true"></i>Progress radar</div>
-<div class="chart-subtitle">Top 6 members by % completion</div>
-<div class="chart-wrap" style="height:180px"><canvas id="radar-chart" width="161" height="161" style="display: block; box-sizing: border-box; height: 180px; width: 180px;"></canvas></div>
-</div>
-</div>
-<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:14px">
-<div class="kpi"><div class="kpi-icon" style="background:#1e2840;color:#7b9cf0"><i class="ti ti-layout-kanban" aria-hidden="true"></i></div>
-<div class="kpi-big">29</div><div class="kpi-lbl">Total tasks</div>
-<div class="kpi-delta" style="color:var(--t3)">3 projects · 7 members</div>
-</div>
-<div class="kpi"><div class="kpi-icon" style="background:#0d2010;color:#40c060"><i class="ti ti-circle-check" aria-hidden="true"></i></div>
-<div class="kpi-big" style="color:#40c060">0</div><div class="kpi-lbl">Complete</div>
-<div class="kpi-delta" style="color:#40c060">0% completion rate</div>
-</div>
-<div class="kpi"><div class="kpi-icon" style="background:#0e2235;color:#5aaaf0"><i class="ti ti-player-play" aria-hidden="true"></i></div>
-<div class="kpi-big" style="color:#5aaaf0">29</div><div class="kpi-lbl">In progress</div>
-<div class="kpi-delta" style="color:var(--t3)">0 on hold</div>
-</div>
-<div class="kpi"><div class="kpi-icon" style="background:#2a1a08;color:#f0b040"><i class="ti ti-clock" aria-hidden="true"></i></div>
-<div class="kpi-big" style="color:#f07070">25</div><div class="kpi-lbl">Overdue</div>
-<div class="kpi-delta" style="color:#f07070">⚠ Needs attention</div>
-</div>
-<div class="kpi"><div class="kpi-icon" style="background:#1a140a;color:var(--gold)"><i class="ti ti-chart-line" aria-hidden="true"></i></div>
-<div class="kpi-big" style="color:var(--gold)">54%</div><div class="kpi-lbl">Avg progress</div>
-<div class="kpi-delta" style="color:var(--t3)">Weighted by stage</div>
-</div>
-</div>
-<div class="dash-grid-mid">
-<div class="chart-card">
-<div class="chart-title"><i class="ti ti-arrow-right" aria-hidden="true"></i>Stage pipeline flow</div>
-<div class="chart-subtitle">Tasks currently sitting in each stage</div>
-<div class="flow-row"><div class="flow-seg">
-<div class="flow-seg-bar" style="background:#3b5bdb;opacity:0.9249999999999999">6</div>
-<div class="flow-seg-lbl">Job Brief</div>
-</div><div class="flow-arrow" style="margin-top:-12px;padding-bottom:18px;color:var(--t4);font-size:14px">›</div><div class="flow-seg">
-<div class="flow-seg-bar" style="background:#7048e8;opacity:0.2">0</div>
-<div class="flow-seg-lbl">Design</div>
-</div><div class="flow-arrow" style="margin-top:-12px;padding-bottom:18px;color:var(--t4);font-size:14px">›</div><div class="flow-seg">
-<div class="flow-seg-bar" style="background:#1971c2;opacity:0.964">7</div>
-<div class="flow-seg-lbl">Production</div>
-</div><div class="flow-arrow" style="margin-top:-12px;padding-bottom:18px;color:var(--t4);font-size:14px">›</div><div class="flow-seg">
-<div class="flow-seg-bar" style="background:#e67700;opacity:1">8</div>
-<div class="flow-seg-lbl">Review</div>
-</div><div class="flow-arrow" style="margin-top:-12px;padding-bottom:18px;color:var(--t4);font-size:14px">›</div><div class="flow-seg">
-<div class="flow-seg-bar" style="background:#c2255c;opacity:0.85">4</div>
-<div class="flow-seg-lbl">Approval Stage</div>
-</div><div class="flow-arrow" style="margin-top:-12px;padding-bottom:18px;color:var(--t4);font-size:14px">›</div><div class="flow-seg">
-<div class="flow-seg-bar" style="background:#0ca678;opacity:0.85">4</div>
-<div class="flow-seg-lbl">AW Release</div>
-</div><div class="flow-arrow" style="margin-top:-12px;padding-bottom:18px;color:var(--t4);font-size:14px">›</div><div class="flow-seg">
-<div class="flow-seg-bar" style="background:#495057;opacity:0.2">0</div>
-<div class="flow-seg-lbl">On Hold</div>
-</div><div class="flow-arrow" style="margin-top:-12px;padding-bottom:18px;color:var(--t4);font-size:14px">›</div><div class="flow-seg">
-<div class="flow-seg-bar" style="background:#2f9e44;opacity:0.2">0</div>
-<div class="flow-seg-lbl">Complete</div>
-</div></div>
-<div style="margin-top:14px"><div class="chart-wrap" style="height:120px"><canvas id="pipeline-chart" width="215" height="107" style="display: block; box-sizing: border-box; height: 120px; width: 240px;"></canvas></div></div>
-</div>
-<div class="chart-card">
-<div class="chart-title"><i class="ti ti-trophy" aria-hidden="true"></i>Progress leaderboard</div>
-<div class="chart-subtitle">Ranked by tasks completed this month</div>
-<div><div class="lb-row">
-<div class="lb-rank gold">🥇</div>
-<div class="person-avatar o-benz" style="width:26px;height:26px;font-size:12px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0">B</div>
-<div class="lb-name">Benz</div>
-<div class="lb-bar-wrap"><div class="lb-bar-fill" style="width:80%;background:#50d090"></div></div>
-<div class="lb-pct">80%</div>
-</div><div class="lb-row">
-<div class="lb-rank silver">🥈</div>
-<div class="person-avatar o-witch" style="width:26px;height:26px;font-size:12px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0">W</div>
-<div class="lb-name">Witch</div>
-<div class="lb-bar-wrap"><div class="lb-bar-fill" style="width:67%;background:#5aaaf0"></div></div>
-<div class="lb-pct">67%</div>
-</div><div class="lb-row">
-<div class="lb-rank bronze">🥉</div>
-<div class="person-avatar o-nod" style="width:26px;height:26px;font-size:12px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0">N</div>
-<div class="lb-name">Nod</div>
-<div class="lb-bar-wrap"><div class="lb-bar-fill" style="width:65%;background:#5aaaf0"></div></div>
-<div class="lb-pct">65%</div>
-</div><div class="lb-row">
-<div class="lb-rank ">4</div>
-<div class="person-avatar o-ton" style="width:26px;height:26px;font-size:12px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0">T</div>
-<div class="lb-name">Ton</div>
-<div class="lb-bar-wrap"><div class="lb-bar-fill" style="width:65%;background:#5aaaf0"></div></div>
-<div class="lb-pct">65%</div>
-</div><div class="lb-row">
-<div class="lb-rank ">5</div>
-<div class="person-avatar o-ju" style="width:26px;height:26px;font-size:12px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0">J</div>
-<div class="lb-name">Ju</div>
-<div class="lb-bar-wrap"><div class="lb-bar-fill" style="width:65%;background:#5aaaf0"></div></div>
-<div class="lb-pct">65%</div>
-</div><div class="lb-row">
-<div class="lb-rank ">6</div>
-<div class="person-avatar o-por" style="width:26px;height:26px;font-size:12px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0">P</div>
-<div class="lb-name">Por</div>
-<div class="lb-bar-wrap"><div class="lb-bar-fill" style="width:5%;background:#f07070"></div></div>
-<div class="lb-pct">5%</div>
-</div><div class="lb-row">
-<div class="lb-rank ">7</div>
-<div class="person-avatar o-sun" style="width:26px;height:26px;font-size:12px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0">S</div>
-<div class="lb-name">Sun</div>
-<div class="lb-bar-wrap"><div class="lb-bar-fill" style="width:5%;background:#f07070"></div></div>
-<div class="lb-pct">5%</div>
-</div></div>
-</div>
-</div>
-<div class="dash-grid-bot">
-<div class="chart-card">
-<div class="chart-title"><i class="ti ti-folder" aria-hidden="true"></i>Projects overview</div>
-<div class="chart-subtitle">Progress across all projects</div>
-<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px"><div style="background:var(--surf2);border-radius:8px;padding:12px 14px;border-left:3px solid #5aaaf0">
-<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-<span style="font-size:13px;font-weight:600">Spot &amp; Production</span>
-<span style="font-family:&#39;DBHeavent&#39;,monospace;font-size:14px;font-weight:700;color:#5aaaf0">64%</span>
-</div>
-<div style="height:5px;background:var(--surf3);border-radius:3px;overflow:hidden;margin-bottom:8px">
-<div style="height:100%;width:64%;background:#5aaaf0;border-radius:3px;transition:width .6s"></div>
-</div>
-<div style="display:flex;gap:14px;font-size:13px;color:var(--t3)">
-<span>📋 18 tasks</span>
-<span style="color:#50d090">✓ 0 done</span>
-<span style="color:var(--gold)">⏳ 18 left</span>
-</div>
-</div><div style="background:var(--surf2);border-radius:8px;padding:12px 14px;border-left:3px solid #b87ff0">
-<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-<span style="font-size:13px;font-weight:600">CJx Commu2026</span>
-<span style="font-family:&#39;DBHeavent&#39;,monospace;font-size:14px;font-weight:700;color:#b87ff0">40%</span>
-</div>
-<div style="height:5px;background:var(--surf3);border-radius:3px;overflow:hidden;margin-bottom:8px">
-<div style="height:100%;width:40%;background:#b87ff0;border-radius:3px;transition:width .6s"></div>
-</div>
-<div style="display:flex;gap:14px;font-size:13px;color:var(--t3)">
-<span>📋 10 tasks</span>
-<span style="color:#50d090">✓ 0 done</span>
-<span style="color:var(--gold)">⏳ 10 left</span>
-</div>
-</div><div style="background:var(--surf2);border-radius:8px;padding:12px 14px;border-left:3px solid #c4a8ff">
-<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-<span style="font-size:13px;font-weight:600">xxxx</span>
-<span style="font-family:&#39;DBHeavent&#39;,monospace;font-size:14px;font-weight:700;color:#c4a8ff">5%</span>
-</div>
-<div style="height:5px;background:var(--surf3);border-radius:3px;overflow:hidden;margin-bottom:8px">
-<div style="height:100%;width:5%;background:#c4a8ff;border-radius:3px;transition:width .6s"></div>
-</div>
-<div style="display:flex;gap:14px;font-size:13px;color:var(--t3)">
-<span>📋 1 tasks</span>
-<span style="color:#50d090">✓ 0 done</span>
-<span style="color:var(--gold)">⏳ 1 left</span>
-</div>
-</div></div>
-</div>
-<div class="chart-card">
-<div class="chart-title"><i class="ti ti-users" aria-hidden="true"></i>Team capacity heat map</div>
-<div class="chart-subtitle">Active tasks vs completion per person</div>
-<div class="chart-wrap" style="height:300px"><canvas id="bubble-chart" width="539" height="269" style="display: block; box-sizing: border-box; height: 300px; width: 600px;"></canvas></div>
-</div>
+<!-- Placeholder while live data loads; renderDash() replaces this. -->
+<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:90px 20px;color:var(--t3)">
+<div style="width:34px;height:34px;border:3px solid var(--surf3);border-top-color:var(--gold);border-radius:50%;animation:spin .9s linear infinite"></div>
+<div style="font-size:14px">Loading dashboard…</div>
 </div>
 </div>
 </div>
@@ -886,13 +723,13 @@ if(window._pendingLoad) window._pendingLoad();
 <div class="field"><label>Owner</label>
 <select id="e-lead"><option value="">— Select —</option>
 <option>Por</option><option>Jew</option><option>Sun</option><option>Nod</option>
-<option>Ji</option><option>Donut</option><option>Aom</option><option>Ming</option>
+<option>Ji</option><option>Donut</option><option>Aom</option><option hidden disabled>Ming</option>
 </select>
 </div>
 <div class="field"><label>Person in charge</label>
 <select id="e-owner">
 <option>Por</option><option>Sun</option><option>Jew</option><option>Nod</option>
-<option>Donut</option><option>Ming</option><option>Ji</option><option>Kanom</option>
+<option>Donut</option><option hidden disabled>Ming</option><option>Ji</option><option>Kanom</option>
 <option>Ton</option><option>Nick</option><option>Benz</option><option>Ju</option>
 <option>Toon</option><option>Witch</option><option>Aom</option>
 </select>
@@ -924,13 +761,13 @@ if(window._pendingLoad) window._pendingLoad();
 <div class="field"><label>Owner *</label>
 <select id="a-lead"><option value="">— Select —</option>
 <option>Por</option><option>Jew</option><option>Sun</option><option>Nod</option>
-<option>Ji</option><option>Donut</option><option>Aom</option><option>Ming</option>
+<option>Ji</option><option>Donut</option><option>Aom</option>
 </select>
 </div>
 <div class="field"><label>Person in charge *</label>
 <select id="a-owner"><option value="">— Select —</option>
 <option>Por</option><option>Sun</option><option>Jew</option><option>Nod</option>
-<option>Donut</option><option>Ming</option><option>Ji</option><option>Kanom</option>
+<option>Donut</option><option>Ji</option><option>Kanom</option>
 <option>Ton</option><option>Nick</option><option>Benz</option><option>Ju</option>
 <option>Toon</option><option>Witch</option><option>Aom</option>
 </select>
@@ -1010,7 +847,7 @@ if(window._pendingLoad) window._pendingLoad();
 <p style="margin:6px 0 0;font-size:12px;color:var(--t3)">Use <strong>Power Automate</strong> to post to a group chat: make.powerautomate.com → New flow → HTTP trigger → Post message in Teams group chat → copy the HTTP POST URL here.</p>
 </div>
 
-<p style="font-size:14px;color:var(--t3);margin:0 0 10px">📧 <strong style="color:var(--t2)">Email reminders</strong> — sent every morning at <strong style="color:var(--gold)">10:00 AM</strong>. Leave blank to skip.</p>
+<p style="font-size:14px;color:var(--t3);margin:0 0 10px">📧 <strong style="color:var(--t2)">Email reminders</strong> — sent when an admin clicks <strong style="color:var(--gold)">“Send Reminders Now”</strong> below. Leave blank to skip a member.</p>
 <div id="team-emails-list" style="display:flex;flex-direction:column;gap:7px;max-height:280px;overflow-y:auto;padding-right:4px"></div>
 <div id="notify-status" style="display:none;margin-top:10px;font-size:14px;padding:7px 10px;border-radius:6px;background:var(--surf2)"></div>
 <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--b1);display:flex;gap:8px;justify-content:space-between;align-items:center;flex-wrap:wrap">
@@ -1047,7 +884,7 @@ if(window._pendingLoad) window._pendingLoad();
 
 <script>
 // ═════════════ DATA ═════════════
-const APP_VERSION='v20260703m'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
+const APP_VERSION='v20260703n'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
 const STAGES=['Job Brief','Design','Production','Review','Approval Stage','On Hold','Complete'];
 const SKEY=s=>({
 'Job Brief':'jobbrief','Design':'design','Production':'production','Review':'review',
@@ -1683,7 +1520,7 @@ plugins:{
 },
 scales:{
   x:{grid:{color:CHART_GRID},ticks:{stepSize:1,font:{size:10}},beginAtZero:true,max:(pipelineFiltered.length?Math.max(...pipelineFiltered.map(x=>x.count)):5)+1},
-  y:{grid:{display:false},ticks:{font:{size:11},color:'#c0c0d8'}}
+  y:{grid:{display:false},ticks:{font:{size:11},color:CHART_TEXT}}
 }}
 });
 // 6. Bubble chart – capacity map (active tasks vs progress, bubble = total) · current month
@@ -2924,12 +2761,18 @@ async function loadFromSupabase(){
   _sync('ok','● Live · '+new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}));
   _bannerOffline=false;_renderBanner();
   try{
+    // Skip re-render when nothing changed — avoids charts re-animating and
+    // tooltips vanishing on every 30s poll. Views still render on tab switch.
+    const _sig=JSON.stringify([projects,tasks]);
+    if(_sig===window._lastDataSig)return;
+    window._lastDataSig=_sig;
     populateAllProjectSelects();
     renderProjectNavTabs();
     await loadEngagementData();
-    renderDash();
-    if(document.getElementById('view-list').classList.contains('active')){populateAllProjectSelects();renderListPills();renderList();}
-    else if(document.getElementById('view-board').classList.contains('active')){populateAllProjectSelects();renderProjTabs();renderKanban();}
+    if(document.getElementById('view-dashboard').classList.contains('active'))renderDash();
+    if(document.getElementById('view-list').classList.contains('active')){renderListPills();renderList();}
+    else if(document.getElementById('view-board').classList.contains('active')){renderProjTabs();renderKanban();}
+    else if(document.getElementById('view-calendar').classList.contains('active'))renderCalendar();
   }catch(renderErr){
     console.warn('Render error (data is live):',renderErr);
   }
@@ -3463,7 +3306,7 @@ setTimeout(()=>{el.style.transition='opacity .3s,transform .3s';el.style.opacity
 <div class="preset-grid" id="preset-grid"></div>
 <div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--gold);margin:22px 0 10px;text-align:left"><i class="ti ti-palette" style="vertical-align:-2px"></i> Color theme</div>
 <div class="theme-grid" id="theme-grid"></div>
-<div style="font-size:11px;color:var(--t3);margin-top:6px;text-align:left">Applies instantly and is saved for your account on this device.</div>
+<div style="font-size:11px;color:var(--t3);margin-top:6px;text-align:left">Applies instantly and syncs to your account across all your devices.</div>
 <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:22px">
 <button class="profile-btn ghost" onclick="closeProfileModal()">Cancel</button>
 <button class="profile-btn primary" id="profile-save-btn" onclick="saveProfile()">Save</button>
