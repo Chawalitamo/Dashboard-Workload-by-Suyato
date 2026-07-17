@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260703j -->
+<!-- v20260703k -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -494,6 +494,13 @@ button{font-family:'DBHeavent','Sarabun',sans-serif}
 #chat-emoji-panel .ep-item{background:none;border:none;cursor:pointer;font-size:20px;padding:4px 0;border-radius:6px;line-height:1}
 #chat-emoji-panel .ep-item:hover{background:var(--surf3)}
 #chat-emoji-panel .ep-sticker{font-size:30px}
+#stage-toasts{position:fixed;top:70px;right:16px;z-index:9600;display:flex;flex-direction:column;gap:8px;width:300px;max-width:82vw;pointer-events:none}
+#stage-toasts .stg-toast{background:var(--surf);border:1px solid var(--gold);border-left:4px solid var(--gold);border-radius:11px;box-shadow:0 10px 30px rgba(0,0,0,.5);padding:10px 13px;cursor:pointer;pointer-events:auto;animation:stgin .25s ease}
+#stage-toasts .st-hd{font-size:10px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px}
+#stage-toasts .st-ttl{font-size:13px;font-weight:700;color:var(--t1);margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#stage-toasts .st-chg{font-size:13px;color:var(--t1);margin-bottom:2px}
+#stage-toasts .st-sub{font-size:11px;color:var(--t3)}
+@keyframes stgin{from{transform:translateX(24px);opacity:0}to{transform:none;opacity:1}}
 #chat-toast{position:fixed;left:20px;bottom:20px;width:300px;max-width:80vw;background:var(--surf);border:1px solid var(--gold);border-left:4px solid var(--gold);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.5);z-index:9002;padding:11px 14px;cursor:pointer;transform:translateY(16px);opacity:0;pointer-events:none;transition:transform .25s,opacity .25s}
 #chat-toast.show{transform:translateY(0);opacity:1;pointer-events:auto}
 #chat-toast .ct-hd{display:flex;align-items:center;gap:6px;font-size:10px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
@@ -1040,7 +1047,7 @@ if(window._pendingLoad) window._pendingLoad();
 
 <script>
 // ═════════════ DATA ═════════════
-const APP_VERSION='v20260703j'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
+const APP_VERSION='v20260703k'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
 const STAGES=['Job Brief','Design','Production','Review','Approval Stage','On Hold','Complete'];
 const SKEY=s=>({
 'Job Brief':'jobbrief','Design':'design','Production':'production','Review':'review',
@@ -2263,7 +2270,7 @@ const at=document.getElementById('activity-tab');
 if(at)at.style.display=_isAdminUser()?'':'none';
 const wt=document.getElementById('worklog-tab');
 if(wt)wt.style.display=_isAdminUser()?'':'none';
-if(name){setupPresence();recordLogin(name);loadUserTheme();syncUserTheme();initWorktime();initChat();} else {teardownPresence();teardownChat();_myAvatar='';renderMyAvatar();_workStart=null;updateWorktimeChip();}
+if(name){setupPresence();recordLogin(name);loadUserTheme();syncUserTheme();initWorktime();initChat();setupStageNotify();} else {teardownPresence();teardownChat();teardownStageNotify();_myAvatar='';renderMyAvatar();_workStart=null;updateWorktimeChip();}
 }
 // ── Profile picture (stored in Supabase user_metadata, shared live via presence) ──
 let _myAvatar='',_profileChoice='';
@@ -3362,6 +3369,35 @@ el.onclick=()=>{const p=document.getElementById('chat-panel');if(p&&!p.classList
 el.classList.add('show');
 clearTimeout(_chatToastT);_chatToastT=setTimeout(()=>el.classList.remove('show'),6000);
 }
+// ── Stage-change pop-up (top-right) for a task's Owner and PIC ──
+let _actChan=null;
+function setupStageNotify(){
+if(!window._sb||!_currentUser)return;
+teardownStageNotify();
+_actChan=window._sb.channel('mkt_act_rt').on('postgres_changes',{event:'INSERT',schema:'public',table:'mkt_activity_log'},p=>_onActivityInsert(p.new)).subscribe();
+}
+function teardownStageNotify(){if(_actChan){try{window._sb.removeChannel(_actChan);}catch(e){}_actChan=null;}}
+function _onActivityInsert(row){
+if(!row||row.action!=='updated'||row.field!=='stage')return;
+if(row.changed_by===_currentUser)return; // don't notify whoever made the change
+const t=(tasks||[]).find(x=>String(x.id)===String(row.task_id));
+if(!t)return;
+// owner field = PIC, lead field = Owner. Notify either.
+if(_currentUser!==t.owner&&_currentUser!==t.lead)return;
+const role=_currentUser===t.owner?'you are PIC':'you are Owner';
+_showStageToast(row.task_title||t.title||'Task',`${row.old_value||'?'} → ${row.new_value||'?'}`,`Moved by ${row.changed_by||'someone'} · ${role}`);
+}
+function _showStageToast(title,change,sub){
+let wrap=document.getElementById('stage-toasts');if(!wrap)return;
+const el=document.createElement('div');el.className='stg-toast';
+el.innerHTML=`<div class="st-hd">📋 Stage updated</div><div class="st-ttl"></div><div class="st-chg"></div><div class="st-sub"></div>`;
+el.querySelector('.st-ttl').textContent=title;
+el.querySelector('.st-chg').textContent=change;
+el.querySelector('.st-sub').textContent=sub;
+el.onclick=()=>{const b=document.querySelector('.ptab[onclick*="board"]');if(b)b.click();el.remove();};
+wrap.appendChild(el);
+setTimeout(()=>{el.style.transition='opacity .3s,transform .3s';el.style.opacity='0';el.style.transform='translateX(20px)';setTimeout(()=>el.remove(),300);},8000);
+}
 </script>
 
 <!-- LOGIN SCREEN -->
@@ -3449,5 +3485,6 @@ clearTimeout(_chatToastT);_chatToastT=setTimeout(()=>el.classList.remove('show')
 </div>
 <div id="chat-toast"><div class="ct-hd">💬 New message<span style="margin-left:auto;font-size:13px">🚂</span></div><div class="ct-title"></div><div class="ct-body"></div></div>
 <div id="app-banner"><span id="app-banner-msg"></span><button id="app-banner-btn" style="display:none" onclick="_bannerRefresh()"></button></div>
+<div id="stage-toasts"></div>
 
 </body></html>
