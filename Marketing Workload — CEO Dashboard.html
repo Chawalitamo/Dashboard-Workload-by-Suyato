@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260703k -->
+<!-- v20260703l -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -636,7 +636,7 @@ if(window._pendingLoad) window._pendingLoad();
 </div>
 <div class="chart-card">
 <div class="chart-title"><i class="ti ti-trophy" aria-hidden="true"></i>Progress leaderboard</div>
-<div class="chart-subtitle">Ranked by weighted completion %</div>
+<div class="chart-subtitle">Ranked by % completed this month (completed ÷ total)</div>
 <div><div class="lb-row">
 <div class="lb-rank gold">🥇</div>
 <div class="person-avatar o-benz" style="width:26px;height:26px;font-size:12px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0">B</div>
@@ -1047,7 +1047,7 @@ if(window._pendingLoad) window._pendingLoad();
 
 <script>
 // ═════════════ DATA ═════════════
-const APP_VERSION='v20260703k'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
+const APP_VERSION='v20260703l'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
 const STAGES=['Job Brief','Design','Production','Review','Approval Stage','On Hold','Complete'];
 const SKEY=s=>({
 'Job Brief':'jobbrief','Design':'design','Production':'production','Review':'review',
@@ -1330,19 +1330,26 @@ const pct=pt.length?Math.round(pt.reduce((s,t)=>s+STAGE_PCT[t.stage],0)/pt.lengt
 const done=pt.filter(t=>t.stage==='Complete').length;
 return{name:p,total:pt.length,done,pct,color:projColor(p)};
 });
-// ── Leaderboard HTML ──
-const lbHTML=personData.slice(0,8).map((p,i)=>{
+// ── Leaderboard: ranked by % completed THIS MONTH (completed ÷ total tasks due this month) ──
+const lbData=OWNERS.map(owner=>{
+const ot=monthTasks.filter(t=>t.owner===owner);
+if(!ot.length)return null;
+const done=ot.filter(t=>t.stage==='Complete').length;
+const pct=Math.round(done/ot.length*100);
+return{owner,pct,total:ot.length,done,ok:OKEY(owner)};
+}).filter(Boolean).sort((a,b)=>b.pct-a.pct||b.done-a.done||b.total-a.total);
+const lbHTML=lbData.length?lbData.slice(0,8).map((p,i)=>{
 const rankCls=i===0?'gold':i===1?'silver':i===2?'bronze':'';
 const rankIcon=i===0?'🥇':i===1?'🥈':i===2?'🥉':`${i+1}`;
 const barColor=p.pct>=80?'#50d090':p.pct>=50?'#5aaaf0':p.pct>=30?'#e67700':'#f07070';
 return`<div class="lb-row">
 <div class="lb-rank ${rankCls}">${rankIcon}</div>
 <div class="person-avatar o-${p.ok}" style="width:26px;height:26px;font-size:12px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0">${p.owner[0]}</div>
-<div class="lb-name">${p.owner}<span style="font-size:12px;color:var(--t3);margin-left:6px">${p.total} tasks</span></div>
+<div class="lb-name">${p.owner}<span style="font-size:12px;color:var(--t3);margin-left:6px">${p.done}/${p.total} done</span></div>
 <div class="lb-bar-wrap"><div class="lb-bar-fill" style="width:${p.pct}%;background:${barColor}"></div></div>
 <div class="lb-pct">${p.pct}%</div>
 </div>`;
-}).join('');
+}).join(''):'<div style="color:var(--t3);font-size:13px;padding:10px 2px">No tasks due this month yet.</div>';
 // ── Project cards ──
 const projCardsHTML=projData.map(p=>{
 const remaining=p.total-p.done;
@@ -1569,7 +1576,7 @@ ${inactiveCardHTML}
 </div>
 <div class="chart-card">
 <div class="chart-title"><i class="ti ti-trophy" aria-hidden="true"></i>Progress leaderboard</div>
-<div class="chart-subtitle">Ranked by weighted completion %</div>
+<div class="chart-subtitle">Ranked by % completed this month (completed ÷ total)</div>
 <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px">${LEADS.map(l=>`<span style="font-size:11px;background:var(--surf3);color:var(--t3);border-radius:10px;padding:2px 8px">&#128100; ${l}</span>`).join('')}</div>
 <div>${lbHTML}</div>
 </div>
