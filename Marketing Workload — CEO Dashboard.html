@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260703q -->
+<!-- v20260703r -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -884,7 +884,7 @@ if(window._pendingLoad) window._pendingLoad();
 
 <script>
 // ═════════════ DATA ═════════════
-const APP_VERSION='v20260703q'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
+const APP_VERSION='v20260703r'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
 const STAGES=['Job Brief','Design','Production','Review','Approval Stage','On Hold','Complete'];
 const SKEY=s=>({
 'Job Brief':'jobbrief','Design':'design','Production':'production','Review':'review',
@@ -2833,21 +2833,23 @@ btn.disabled=false;btn.textContent='Sign in';
 setupRealtimeNotification();
 loadFromSupabase();
 }
-async function doForgotPassword(){
+// "Reset Password" → notify the Super Admin, who resets it and shares a temp password.
+async function doResetRequest(){
 const email=document.getElementById('login-email').value.trim().toLowerCase();
 const errEl=document.getElementById('login-error');
 errEl.style.color='';
-if(!email){errEl.textContent='Type your email above first, then click “Forgot password?”.';return;}
+if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){errEl.textContent='Type your email above first, then click “Reset Password”.';return;}
 const link=document.getElementById('forgot-link');
 if(link){link.style.pointerEvents='none';link.textContent='Sending…';}
-// Return to the site root (index.html forwards the recovery token to the dashboard).
-// A clean, stable URL that's easy to allow-list in Supabase Auth → URL Configuration.
-const _resetTo=window.location.origin+window.location.pathname.replace(/[^/]*$/,'');
-const{error}=await window._sb.auth.resetPasswordForEmail(email,{redirectTo:_resetTo});
-if(link){link.style.pointerEvents='';link.textContent='Forgot password?';}
-if(error){errEl.style.color='';errEl.textContent=error.message;return;}
+try{
+const res=await fetch('https://fxmigukayxvieziseqil.supabase.co/functions/v1/notify-password-reset',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,name:(EMAIL_TO_NAME&&EMAIL_TO_NAME[email])||''})});
+if(!res.ok)throw new Error('request failed');
 errEl.style.color='#50d090';
-errEl.textContent='Reset link sent — check '+email+' (incl. spam). Open it on this device.';
+errEl.textContent='✓ Request sent to the admin. They’ll reset your password and share a new one with you shortly.';
+}catch(e){
+errEl.style.color='';errEl.textContent='Could not send the request. Please message the admin (Sun) directly.';
+}
+if(link){link.style.pointerEvents='';link.textContent='Reset Password';}
 }
 // Triggered when the user returns via a password-reset email link.
 function _enterRecovery(){
@@ -3273,7 +3275,7 @@ setTimeout(()=>{el.style.transition='opacity .3s,transform .3s';el.style.opacity
 <input id="login-email" class="login-field" type="email" placeholder="your.name@cjmart.co.th" autocomplete="username" onkeydown="handleLoginKey(event)">
 <input id="login-password" class="login-field" type="password" placeholder="Password" autocomplete="current-password" onkeydown="handleLoginKey(event)">
 <button id="login-btn" class="login-btn" onclick="doLogin()">Sign in</button>
-<div style="margin-top:12px"><a id="forgot-link" class="forgot-link" onclick="doForgotPassword()">Forgot password?</a></div>
+<div style="margin-top:12px"><a id="forgot-link" class="forgot-link" onclick="doResetRequest()">Reset Password</a></div>
 <div id="login-error" class="login-error"></div>
 </div>
 </div>
