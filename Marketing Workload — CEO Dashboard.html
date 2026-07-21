@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260703p -->
+<!-- v20260703q -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -884,7 +884,7 @@ if(window._pendingLoad) window._pendingLoad();
 
 <script>
 // ═════════════ DATA ═════════════
-const APP_VERSION='v20260703p'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
+const APP_VERSION='v20260703q'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
 const STAGES=['Job Brief','Design','Production','Review','Approval Stage','On Hold','Complete'];
 const SKEY=s=>({
 'Job Brief':'jobbrief','Design':'design','Production':'production','Review':'review',
@@ -1701,12 +1701,11 @@ await window._sb.from('mkt_tasks').update({stage:best[0]}).eq('id',id);
 if(_oldStage!==best[0]) logActivity(id,t.title,t.project,'updated','stage',_oldStage,best[0]);
 renderList();
 }
-// Proof-of-work gate: a task can only move to Complete if it has an attachment.
+// Proof of completed work is OPTIONAL — the 🏆 button stays available, but it no
+// longer blocks moving a task to Complete. (_hasProof kept for any display use.)
 function _hasProof(t){return !!(t&&Array.isArray(t.proof)&&t.proof.length>0);}
-function _blockComplete(t){alert('🏆 Attach proof of completed work first.\n\n“'+((t&&t.title)||'This task')+'” can\'t be moved to Complete until proof is attached.\nClick the 🏆 button on the task, upload the proof file, then move it to Complete.');return true;}
 async function updateStage(id,val){
 const t=tasks.find(t=>t.id===id); if(!t) return;
-if(val==='Complete'&&t.stage!=='Complete'&&!_hasProof(t)){_blockComplete(t);renderList();return;}
 const _oldStage=t.stage;
 t.stage=val;
 await window._sb.from('mkt_tasks').update({stage:val}).eq('id',id);
@@ -1931,7 +1930,6 @@ function setupDragDrop(){
       if(!t){console.warn('[drag] task not found:',rawId);return;}
       const newStage=STAGES[si];
       if(t.stage===newStage) return;
-      if(newStage==='Complete'&&!_hasProof(t)){_blockComplete(t);renderKanban();return;}
       const _oldDragStage=t.stage;
       t.stage=newStage;
       try{await window._sb.from('mkt_tasks').update({stage:newStage}).eq('id',t.id);}catch(err){console.error(err);}
@@ -1945,7 +1943,6 @@ async function moveTask(rawId,dir){
   const t=findTask(rawId); if(!t){console.warn('[move] task not found:',rawId);return;}
   const si=STAGES.indexOf(t.stage); const ni=si+dir;
   if(ni<0||ni>=STAGES.length) return;
-  if(STAGES[ni]==='Complete'&&!_hasProof(t)){_blockComplete(t);return;}
   const _oldMoveStage=t.stage;
   t.stage=STAGES[ni];
   console.log('[move] id:',rawId,'→',t.stage);
@@ -2059,7 +2056,6 @@ document.getElementById('edit-modal').classList.add('open');
 }
 async function saveEdit(){
 const t=findTask(editId);if(!t)return;
-if(document.getElementById('e-stage').value==='Complete'&&t.stage!=='Complete'&&!_hasProof(t)){_blockComplete(t);return;}
 const _snap={title:t.title,project:t.project,owner:t.owner,lead:t.lead,stage:t.stage,due:t.due||'',note:t.note||''};
 t.title=document.getElementById('e-title').value.trim()||t.title;
 t.project=document.getElementById('e-project').value;
