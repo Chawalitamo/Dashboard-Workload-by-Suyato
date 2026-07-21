@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260703o -->
+<!-- v20260703p -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -530,7 +530,7 @@ if(window._pendingLoad) window._pendingLoad();
 <div id="user-info">
 <button id="my-avatar-btn" title="Change profile picture" onclick="openProfileModal()"><span id="my-avatar" class="nav-avatar"></span></button>
 <span id="user-display-name"></span>
-<span id="worktime-chip" title="Your active time today (since first login)" style="display:none;font-size:12px;font-weight:600;color:var(--gold);background:var(--gold3);border:1px solid var(--b1);border-radius:var(--rsm);padding:3px 9px;white-space:nowrap"></span>
+<span id="worktime-chip" title="Your active time today — counts from first login, idle gaps of 15 min+ excluded" style="display:none;font-size:12px;font-weight:600;color:var(--gold);background:var(--gold3);border:1px solid var(--b1);border-radius:var(--rsm);padding:3px 9px;white-space:nowrap"></span>
 <button class="signout-btn" onclick="doSignOut()"><i class="ti ti-logout" style="font-size:14px;vertical-align:-1px"></i> Sign out</button>
 </div>
 <div id="online-wrap" style="display:none;position:relative;margin-right:14px">
@@ -704,7 +704,7 @@ if(window._pendingLoad) window._pendingLoad();
 </div>
 <div class="view" id="view-worklog">
 <div class="act-toolbar">
-<div style="font-size:15px;font-weight:700;color:var(--t1)"><i class="ti ti-clock-hour-4" style="color:var(--gold);vertical-align:-2px;margin-right:4px"></i>Work Log — login time per member</div>
+<div style="font-size:15px;font-weight:700;color:var(--t1)"><i class="ti ti-clock-hour-4" style="color:var(--gold);vertical-align:-2px;margin-right:4px"></i>Work Log — active time per member <span style="font-size:11px;font-weight:400;color:var(--t3)">(from first login each day · idle gaps 15 min+ excluded)</span></div>
 <div style="flex:1"></div>
 <span id="worklog-count" style="font-size:13px;color:var(--t3)"></span>
 <button class="act-export-btn" onclick="exportWorklogCSV()"><i class="ti ti-file-spreadsheet" aria-hidden="true"></i>Export Excel</button>
@@ -884,7 +884,7 @@ if(window._pendingLoad) window._pendingLoad();
 
 <script>
 // ═════════════ DATA ═════════════
-const APP_VERSION='v20260703o'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
+const APP_VERSION='v20260703p'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
 const STAGES=['Job Brief','Design','Production','Review','Approval Stage','On Hold','Complete'];
 const SKEY=s=>({
 'Job Brief':'jobbrief','Design':'design','Production':'production','Review':'review',
@@ -1322,7 +1322,7 @@ const _thisWeekStart=new Date(_bkkNow.getFullYear(),_bkkNow.getMonth(),_bkkNow.g
 const _prevWeekStart=new Date(_thisWeekStart);_prevWeekStart.setDate(_thisWeekStart.getDate()-7);
 const _prevWeekEnd=new Date(_thisWeekStart);_prevWeekEnd.setDate(_thisWeekStart.getDate()-1);
 const _pwParseDay=s=>{const p=String(s).split('-').map(Number);return new Date(p[0],p[1]-1,p[2]);};
-const _pwHours=r=>Math.max(0,(new Date(r.last_seen)-new Date(r.first_seen))/3600000);
+const _pwHours=r=>Math.max(0,(r.active_secs!=null?r.active_secs/3600:(new Date(r.last_seen)-new Date(r.first_seen))/3600000));
 const prevWeekLogin=OWNERS.map(name=>{
 const h=(_worklogRows||[]).filter(r=>r.name===name&&_pwParseDay(r.day)>=_prevWeekStart&&_pwParseDay(r.day)<=_prevWeekEnd).reduce((s,r)=>s+_pwHours(r),0);
 return{name,hours:Math.round(h*10)/10};
@@ -2162,8 +2162,11 @@ if(!name||!OWNERS.includes(name))return;
 try{await window._sb.from('mkt_owners').upsert([{name,last_login:new Date().toISOString()}],{onConflict:'name'});}catch(e){}
 }
 // ── Work-log: login time duration per day ──
-let _workStart=null;
+let _workStart=null,_workActiveSecs=0,_lastBeatAt=null;
 const _bkkDay=()=>new Date().toLocaleDateString('en-CA',{timeZone:'Asia/Bangkok'}); // YYYY-MM-DD
+// Mirror the server's active-time model locally for the nav chip: add elapsed since
+// the last tick, but skip gaps > 15 min or while the tab is hidden (idle/asleep).
+function _tickActive(){if(_lastBeatAt!=null){const g=(Date.now()-_lastBeatAt)/1000;if(!document.hidden&&g>0&&g<=900)_workActiveSecs+=g;}_lastBeatAt=Date.now();}
 // Record work-log for a member. Callable for ANY name (RPC is SECURITY DEFINER),
 // so an up-to-date tab can log people it sees online whose own tab is on a stale
 // build that never sends its own heartbeat. Throttled per-name to ~45s.
@@ -2172,7 +2175,8 @@ function heartbeat(who){const n=who||_currentUser;if(!n||!window._sb)return;cons
 async function initWorktime(){
 if(!_currentUser||!window._sb)return;
 try{await window._sb.rpc('mkt_touch_worklog',{p_name:_currentUser});}catch(e){}
-try{const{data}=await window._sb.from('mkt_worklog').select('first_seen').eq('name',_currentUser).eq('day',_bkkDay()).maybeSingle();_workStart=data&&data.first_seen?new Date(data.first_seen):new Date();}catch(e){_workStart=new Date();}
+try{const{data}=await window._sb.from('mkt_worklog').select('first_seen,active_secs').eq('name',_currentUser).eq('day',_bkkDay()).maybeSingle();_workStart=data&&data.first_seen?new Date(data.first_seen):new Date();_workActiveSecs=data&&data.active_secs!=null?data.active_secs:0;}catch(e){_workStart=new Date();_workActiveSecs=0;}
+_lastBeatAt=Date.now();
 updateWorktimeChip();
 }
 function _fmtDur(mins){mins=Math.max(0,Math.round(mins));const h=Math.floor(mins/60);return `${h}h ${String(mins%60).padStart(2,'0')}m`;}
@@ -2180,7 +2184,7 @@ function updateWorktimeChip(){
 const el=document.getElementById('worktime-chip');if(!el)return;
 if(!_workStart||!_currentUser){el.style.display='none';return;}
 el.style.display='';
-el.textContent=`⏱ ${_fmtDur((Date.now()-_workStart.getTime())/60000)} today`;
+el.textContent=`⏱ ${_fmtDur(_workActiveSecs/60)} today`;
 }
 async function renderWorklog(){
 const body=document.getElementById('worklog-body');if(!body)return;
@@ -2193,7 +2197,8 @@ const bkkNow=new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Bangkok'
 const dow=(bkkNow.getDay()+6)%7; // 0=Mon
 const weekStart=new Date(bkkNow.getFullYear(),bkkNow.getMonth(),bkkNow.getDate()-dow);
 const monthStr=todayStr.slice(0,7);
-const dur=r=>Math.max(0,(new Date(r.last_seen)-new Date(r.first_seen))/60000);
+// Active minutes: sum of heartbeat intervals with idle gaps (15 min+) excluded. Falls back to span for legacy rows.
+const dur=r=>Math.max(0,(r.active_secs!=null?r.active_secs/60:(new Date(r.last_seen)-new Date(r.first_seen))/60000));
 const parseDay=s=>{const p=String(s).split('-').map(Number);return new Date(p[0],p[1]-1,p[2]);};
 const tm=s=>new Date(s).toLocaleTimeString('en-GB',{timeZone:'Asia/Bangkok',hour:'2-digit',minute:'2-digit'});
 const data=OWNERS.map(name=>{
@@ -2206,7 +2211,7 @@ return{name,today,todayMin:today?dur(today):0,week,month,ok:OKEY(name)};
 const cnt=document.getElementById('worklog-count');if(cnt)cnt.textContent=`${data.length} members · week of ${weekStart.toLocaleDateString('en-GB',{day:'2-digit',month:'short'})} · ${new Date().toLocaleDateString('en-US',{month:'long',year:'numeric'})}`;
 if(!data.length){body.innerHTML='<div style="color:var(--t3);padding:24px;text-align:center">No login activity recorded yet.</div>';return;}
 body.innerHTML=`<table class="act-table"><thead><tr>
-<th>Member</th><th style="width:170px">Today · start → last seen</th><th style="width:90px">Today</th><th style="width:110px">This week</th><th style="width:110px">This month</th>
+<th>Member</th><th style="width:170px">Today · first login → last seen</th><th style="width:110px">Active today</th><th style="width:110px">This week</th><th style="width:110px">This month</th>
 </tr></thead><tbody>${data.map(d=>`<tr>
 <td><div style="display:flex;align-items:center;gap:8px"><div class="person-avatar o-${d.ok}" style="width:24px;height:24px;font-size:11px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:600;overflow:hidden">${_avatarInner(_ownerAvatars[d.name],d.name)}</div><span style="font-size:14px">${esc(d.name)}</span></div></td>
 <td style="font-family:'DBHeavent',monospace;font-size:13px;color:var(--t2)">${d.today?`${tm(d.today.first_seen)} → ${tm(d.today.last_seen)}`:'<span style="color:var(--t4)">—</span>'}</td>
@@ -2226,7 +2231,7 @@ const bkkT=s=>new Date(s).toLocaleTimeString('en-GB',{timeZone:'Asia/Bangkok',ho
 rows.sort((a,b)=>a.day===b.day?String(a.name).localeCompare(b.name):String(b.day).localeCompare(a.day));
 const headers=['Member','Date','First login (BKK)','Last seen (BKK)','Duration','Duration (minutes)'];
 const csvRows=rows.map(r=>{
-const mins=Math.max(0,Math.round((new Date(r.last_seen)-new Date(r.first_seen))/60000));
+const mins=Math.max(0,Math.round((r.active_secs!=null?r.active_secs/60:(new Date(r.last_seen)-new Date(r.first_seen))/60000)));
 return[r.name||'',r.day||'',bkkT(r.first_seen),bkkT(r.last_seen),_fmtDur(mins),mins];
 });
 const csv=[headers,...csvRows].map(row=>row.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\r\n');
@@ -3000,7 +3005,7 @@ window._pendingLoad = async function(){
   if(/type=recovery/.test(location.hash)){ _enterRecovery(); return; }
   loadFromSupabase();
   setInterval(loadFromSupabase,30000);
-  setInterval(()=>{heartbeat();updateWorktimeChip();},60000);
+  setInterval(()=>{heartbeat();_tickActive();updateWorktimeChip();},60000);
   // Require a fresh login each day: only restore the session if the last
   // login happened on today's (Bangkok) calendar date.
   const{data:{session}}=await window._sb.auth.getSession();
