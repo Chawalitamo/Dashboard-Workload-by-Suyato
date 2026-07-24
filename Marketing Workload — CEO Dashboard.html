@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260703s -->
+<!-- v20260703t -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -213,6 +213,15 @@ nav h1{font-size:17px;font-weight:600;letter-spacing:-.01em}
 .field select option{background:var(--surf2)}
 .btn-add-sb{display:flex;align-items:center;justify-content:center;gap:7px;background:var(--gold);color:#0d0d0c;border:none;border-radius:var(--rsm);padding:9px;font-family:'DBHeavent','Sarabun',sans-serif;font-size:14px;font-weight:600;cursor:pointer;width:100%}
 .btn-add-sb:hover{background:var(--gold2)}
+.btn-add-sb:disabled{opacity:.6;cursor:default}
+.sb-attach-btn{display:flex;align-items:center;justify-content:center;gap:6px;background:var(--surf2);color:var(--t2);border:1px dashed var(--b2);border-radius:var(--rsm);padding:8px;font-family:'DBHeavent','Sarabun',sans-serif;font-size:13px;cursor:pointer;width:100%;transition:all .12s}
+.sb-attach-btn:hover{border-color:var(--gold);color:var(--t1);background:var(--surf3)}
+.sb-file-list{display:flex;flex-direction:column;gap:5px;margin-top:6px}
+.sb-file-item{display:flex;align-items:center;gap:7px;background:var(--surf2);border:1px solid var(--b1);border-radius:var(--rsm);padding:5px 8px;font-size:12px}
+.sb-file-item .sfi-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--t1)}
+.sb-file-item .sfi-size{color:var(--t3);flex-shrink:0}
+.sb-file-item .sfi-del{background:none;border:none;color:var(--t3);cursor:pointer;padding:0 2px;flex-shrink:0;font-size:13px}
+.sb-file-item .sfi-del:hover{color:#f07070}
 .kanban{flex:1;overflow-x:auto;overflow-y:hidden;padding:16px;display:flex;gap:11px;align-items:flex-start}
 .kanban::-webkit-scrollbar{height:4px}
 .kanban::-webkit-scrollbar-thumb{background:var(--surf3);border-radius:2px}
@@ -658,7 +667,12 @@ if(window._pendingLoad) window._pendingLoad();
 </select>
 </div>
 <div class="field"><label>Due date *</label><input type="text" class="dp" id="f-due" placeholder="Select date…" readonly></div>
-<div class="field"><label>Note</label><textarea id="f-note" placeholder="Brief, link, context…"></textarea></div>
+<div class="field"><label>Note</label><textarea id="f-note" placeholder="Brief, link, context…" oninput="_updateNoteLinks('f-note-links',this.value)"></textarea><div id="f-note-links" class="modal-links"></div></div>
+<div class="field"><label>Attachments</label>
+<input type="file" id="f-file" multiple style="display:none" accept=".ppt,.pptx,.xls,.xlsx,.doc,.docx,.pdf,.jpg,.jpeg,.png,.gif,.zip,.rar" onchange="_addNewTaskFiles(this)">
+<button type="button" class="sb-attach-btn" onclick="document.getElementById('f-file').click()"><i class="ti ti-paperclip" aria-hidden="true"></i>Attach files</button>
+<div id="f-file-list" class="sb-file-list"></div>
+</div>
 <button class="btn-add-sb" onclick="addTask()"><i class="ti ti-circle-plus" aria-hidden="true"></i>Add to board</button>
 <div style="border-top:1px solid var(--b1);padding-top:12px;margin-top:4px">
 <div class="sb-title" style="margin-bottom:10px">Stage counts</div>
@@ -891,7 +905,7 @@ if(window._pendingLoad) window._pendingLoad();
 
 <script>
 // ═════════════ DATA ═════════════
-const APP_VERSION='v20260703s'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
+const APP_VERSION='v20260703t'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
 const STAGES=['Job Brief','Design','Production','Review','Approval Stage','On Hold','Complete'];
 const SKEY=s=>({
 'Job Brief':'jobbrief','Design':'design','Production':'production','Review':'review',
@@ -2088,6 +2102,31 @@ renderKanban();
 renderList();
 }
 // ═════════════ BOARD ADD ═════════════
+// ── New-task attachments: staged in memory, uploaded after the task is created ──
+let _newTaskFiles=[];
+function _addNewTaskFiles(input){
+const files=input&&input.files?Array.from(input.files):[];
+for(const f of files){if(f.size>50*1048576){alert('File too large — max 50 MB: '+f.name);continue;}_newTaskFiles.push(f);}
+if(input)input.value='';
+_renderNewTaskFiles();
+}
+function _removeNewTaskFile(i){_newTaskFiles.splice(i,1);_renderNewTaskFiles();}
+function _renderNewTaskFiles(){
+const box=document.getElementById('f-file-list');if(!box)return;
+box.innerHTML=_newTaskFiles.map((f,i)=>`<div class="sb-file-item"><span>${fileIcon(f.type)}</span><span class="sfi-name" title="${esc(f.name)}">${esc(f.name)}</span><span class="sfi-size">${fmtSize(f.size)}</span><button type="button" class="sfi-del" title="Remove" onclick="_removeNewTaskFile(${i})">✕</button></div>`).join('');
+}
+// Upload the staged files to a freshly-created task and return the attachments array.
+async function _uploadNewTaskFiles(taskId){
+const arr=[];
+for(const file of _newTaskFiles){
+const safeName=file.name.replace(/[^a-zA-Z0-9._\-() ]/g,'_');
+const path=`task-files/${taskId}/${Date.now()}_${safeName}`;
+const{error}=await window._sb.storage.from('task-files').upload(path,file,{upsert:true});
+if(error){console.error('upload error',error);continue;}
+arr.push({name:file.name,path,size:file.size,type:file.type||'application/octet-stream',uploaded_at:new Date().toISOString()});
+}
+return arr;
+}
 async function addTask(){
 const title=document.getElementById('f-title').value.trim();
 const owner=document.getElementById('f-owner').value;
@@ -2101,12 +2140,19 @@ let _ok=true;
 Object.keys(_req).forEach(id=>{const el=document.getElementById(id);if(el)el.style.borderColor=_req[id]?'':'#f07070';if(!_req[id])_ok=false;});
 if(!_ok)return;
 const _ft={title,owner,lead,project,stage,due:due||null,note:document.getElementById('f-note').value.trim()};
+const _btn=document.querySelector('.btn-add-sb');
+if(_newTaskFiles.length&&_btn){_btn.disabled=true;_btn.textContent='Uploading…';}
 const{data:_fd,error:_fe}=await window._sb.from('mkt_tasks').insert(_ft).select().single();
-if(_fe){alert('Save failed');return;}
-tasks.unshift({id:_fd.id,..._ft,due:_ft.due||''});
+if(_fe){alert('Save failed');if(_btn){_btn.disabled=false;_btn.innerHTML='<i class="ti ti-circle-plus" aria-hidden="true"></i>Add to board';}return;}
+// Upload any files staged in the sidebar, then attach them to the new task.
+let _atts=[];
+if(_newTaskFiles.length){_atts=await _uploadNewTaskFiles(_fd.id);if(_atts.length){try{await window._sb.from('mkt_tasks').update({attachments:_atts}).eq('id',_fd.id);}catch(e){console.error(e);}}}
+if(_btn){_btn.disabled=false;_btn.innerHTML='<i class="ti ti-circle-plus" aria-hidden="true"></i>Add to board';}
+tasks.unshift({id:_fd.id,..._ft,due:_ft.due||'',attachments:_atts,proof:[]});
+_newTaskFiles=[];_renderNewTaskFiles();
 logActivity(_fd.id,_ft.title,_ft.project,'created',null,null,null);
 broadcastNewTask({id:_fd.id,..._ft});
-document.getElementById('f-title').value='';_setDP(document.getElementById('f-due'),'');document.getElementById('f-note').value='';document.getElementById('f-lead').value='';
+document.getElementById('f-title').value='';_setDP(document.getElementById('f-due'),'');document.getElementById('f-note').value='';document.getElementById('f-lead').value='';_updateNoteLinks('f-note-links','');
 postToTeams('created',{title:_ft.title,owner:_ft.owner,project:_ft.project,stage:_ft.stage,due:_ft.due||''});
 fetch('https://fxmigukayxvieziseqil.supabase.co/functions/v1/notify-new-task',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:_ft.title,owner:_ft.owner,lead:_ft.lead,project:_ft.project,stage:_ft.stage,due:_ft.due||'',note:_ft.note})}).catch(()=>{});
 if(_ft.due)fetch('https://fxmigukayxvieziseqil.supabase.co/functions/v1/add-to-calendar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:_ft.title,owner:_ft.owner,lead:_ft.lead,project:_ft.project,stage:_ft.stage,due:_ft.due,note:_ft.note,id:_fd.id})}).catch(()=>{});
