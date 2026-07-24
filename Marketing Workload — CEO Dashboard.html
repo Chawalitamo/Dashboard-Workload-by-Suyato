@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260703r -->
+<!-- v20260703s -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -285,6 +285,13 @@ nav h1{font-size:17px;font-weight:600;letter-spacing:-.01em}
 .btn-pri:hover{background:var(--gold2)}
 /* NOTE MODAL */
 .note-modal{width:380px}
+/* Clickable link chips shown under a note field (Edit / Add / Note pop-ups) */
+.modal-links{display:none;flex-wrap:wrap;gap:6px;align-items:center;margin-top:9px}
+.modal-links .ml-lbl{width:100%;font-size:11px;color:var(--t3);margin-bottom:1px}
+.modal-links .klink{background:var(--surf2);border:1px solid var(--b1);border-radius:14px;padding:4px 11px 4px 8px;font-size:13px;color:var(--t1);text-decoration:none;display:inline-flex;align-items:center;gap:5px;max-width:100%;transition:background .15s,border-color .15s}
+.modal-links .klink:hover{background:var(--surf3);border-color:var(--gold)}
+.modal-links .klink .klink-ico{width:15px;height:15px;border-radius:3px;flex-shrink:0}
+.modal-links .klink span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:240px}
 /* STAGE/OWNER COLORS */
 .s-jobbrief{background:#1c2030;color:#7b9cf0}.s-design{background:#25163a;color:#b87ff0}
 .s-production{background:#0e2235;color:#5aaaf0}.s-review{background:#2a2008;color:#f0c040}
@@ -742,7 +749,7 @@ if(window._pendingLoad) window._pendingLoad();
 </select>
 </div>
 <div class="field"><label>Due date</label><input type="text" class="dp" id="e-due" placeholder="Select date…" readonly></div>
-<div class="field full"><label>Note</label><textarea id="e-note" style="min-height:72px"></textarea></div>
+<div class="field full"><label>Note</label><textarea id="e-note" style="min-height:72px" oninput="_updateNoteLinks('e-note-links',this.value)"></textarea><div id="e-note-links" class="modal-links"></div></div>
 </div>
 <div class="mactions">
 <button class="btn-sec" onclick="closeModal(&#39;edit-modal&#39;)">Cancel</button>
@@ -780,7 +787,7 @@ if(window._pendingLoad) window._pendingLoad();
 </select>
 </div>
 <div class="field"><label>Due date</label><input type="text" class="dp" id="a-due" placeholder="Select date…" readonly></div>
-<div class="field full"><label>Note</label><textarea id="a-note" placeholder="Brief, link, context…" style="min-height:64px"></textarea></div>
+<div class="field full"><label>Note</label><textarea id="a-note" placeholder="Brief, link, context…" style="min-height:64px" oninput="_updateNoteLinks('a-note-links',this.value)"></textarea><div id="a-note-links" class="modal-links"></div></div>
 </div>
 <div class="mactions">
 <button class="btn-sec" onclick="closeModal(&#39;add-modal&#39;)">Cancel</button>
@@ -791,7 +798,7 @@ if(window._pendingLoad) window._pendingLoad();
 <div class="modal-bg" id="note-modal">
 <div class="modal note-modal">
 <div class="modal-head"><h3 id="note-modal-title">Note</h3><button class="modal-close" onclick="closeModal(&#39;note-modal&#39;)"><i class="ti ti-x" aria-hidden="true"></i></button></div>
-<div class="field"><label>Note / context</label><textarea id="nm-text" style="min-height:100px" placeholder="Add context, blockers, links…"></textarea></div>
+<div class="field"><label>Note / context</label><textarea id="nm-text" style="min-height:100px" placeholder="Add context, blockers, links…" oninput="_updateNoteLinks('nm-links',this.value)"></textarea><div id="nm-links" class="modal-links"></div></div>
 <div class="mactions">
 <button class="btn-sec" onclick="closeModal(&#39;note-modal&#39;)">Cancel</button>
 <button class="btn-pri" onclick="saveNote()">Save note</button>
@@ -884,7 +891,7 @@ if(window._pendingLoad) window._pendingLoad();
 
 <script>
 // ═════════════ DATA ═════════════
-const APP_VERSION='v20260703r'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
+const APP_VERSION='v20260703s'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
 const STAGES=['Job Brief','Design','Production','Review','Approval Stage','On Hold','Complete'];
 const SKEY=s=>({
 'Job Brief':'jobbrief','Design':'design','Production':'production','Review':'review',
@@ -1733,6 +1740,7 @@ const t=tasks.find(t=>t.id===id); if(!t) return;
 noteId=id;
 document.getElementById('note-modal-title').textContent='Note — '+t.title.substring(0,40);
 document.getElementById('nm-text').value=t.note||'';
+_updateNoteLinks('nm-links',t.note||'');
 document.getElementById('note-modal').classList.add('open');
 }
 async function saveNote(){
@@ -1748,7 +1756,7 @@ if(error){alert('Failed to save note — please try again.');return;}
 if(_oldNote!==newNote) logActivity(_id,_title,_project,'updated','note',_oldNote,newNote);
 }
 // Add via modal
-function openAddModal(){ document.getElementById('add-modal').classList.add('open'); }
+function openAddModal(){ _updateNoteLinks('a-note-links',document.getElementById('a-note').value||''); document.getElementById('add-modal').classList.add('open'); }
 async function addTaskModal(){
 const title=document.getElementById('a-title').value.trim();
 const owner=document.getElementById('a-owner').value;
@@ -1830,6 +1838,13 @@ const base=h.split('.')[0];
 return base.charAt(0).toUpperCase()+base.slice(1);
 }catch(e){return 'Link';}
 }
+// Render clickable link chips from free text (used live under note fields in modals).
+function _noteLinkChips(text){
+const urls=(String(text||'').match(/(https?:\/\/[^\s]+)/g))||[];
+if(!urls.length)return '';
+return urls.map(u=>{const fav=_linkFavicon(u),lbl=_linkLabel(u);const ico=fav?`<img src="${fav}" class="klink-ico" alt="" loading="lazy" onerror="this.style.display='none'">`:'';return `<a class="klink" href="${esc(u)}" target="_blank" rel="noopener noreferrer" title="${esc(u)}">${ico}<span>${esc(lbl)}</span></a>`;}).join('');
+}
+function _updateNoteLinks(boxId,text){const box=document.getElementById(boxId);if(!box)return;const chips=_noteLinkChips(text);box.innerHTML=chips?('<span class="ml-lbl">🔗 Open link:</span>'+chips):'';box.style.display=chips?'flex':'none';}
 function noteHTML(note){
 const urlRe=/(https?:\/\/[^\s]+)/g;
 const urls=note.match(urlRe)||[];
@@ -2052,6 +2067,7 @@ document.getElementById('e-lead').value=t.lead||'';
 document.getElementById('e-stage').value=t.stage;
 _setDP(document.getElementById('e-due'),t.due||'');
 document.getElementById('e-note').value=t.note||'';
+_updateNoteLinks('e-note-links',t.note||'');
 document.getElementById('edit-modal').classList.add('open');
 }
 async function saveEdit(){
