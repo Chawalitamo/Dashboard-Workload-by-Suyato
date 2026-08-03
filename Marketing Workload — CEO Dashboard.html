@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260703t -->
+<!-- v20260703u -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -905,7 +905,7 @@ if(window._pendingLoad) window._pendingLoad();
 
 <script>
 // ═════════════ DATA ═════════════
-const APP_VERSION='v20260703t'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
+const APP_VERSION='v20260703u'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
 const STAGES=['Job Brief','Design','Production','Review','Approval Stage','On Hold','Complete'];
 const SKEY=s=>({
 'Job Brief':'jobbrief','Design':'design','Production':'production','Review':'review',
@@ -1103,10 +1103,11 @@ let tasks=[];
 // except Super Administrators (Sun, Por) who keep the full company-wide overview.
 const ADMIN_USERS=['Sun','Por'];
 function _isAdminUser(){return ADMIN_USERS.includes(_currentUser);}
-function applyUserFilter(list){
-if(!_currentUser||_isAdminUser()) return list;
-return list.filter(t=>t.owner===_currentUser||t.lead===_currentUser);
-}
+// Task visibility is fully shared — everyone sees everyone's tasks (Kanban, List,
+// Dashboard, PIC Calendar), matching the rest of the app (chat, leaderboard,
+// overdue-by-PIC). Kept as a function (not inlined) since it's still called from
+// a couple of places — just a no-op now rather than restricting to owner/lead.
+function applyUserFilter(list){return list;}
 // nextId → Supabase UUIDs
 let editId=null;
 let noteId=null;
