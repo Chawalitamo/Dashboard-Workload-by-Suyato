@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260703v -->
+<!-- v20260703w -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -426,6 +426,8 @@ button{font-family:'DBHeavent','Sarabun',sans-serif}
 #overdue-overlay.show{opacity:1;pointer-events:auto}
 #overdue-toast{width:480px;max-width:94vw;background:var(--surf);border:1px solid #f07070;border-radius:var(--rxl);padding:28px;box-shadow:0 24px 70px rgba(0,0,0,.75);display:flex;flex-direction:column;gap:12px;transform:scale(.85);opacity:0;transition:transform .3s cubic-bezier(.34,1.4,.64,1),opacity .25s}
 #overdue-overlay.show #overdue-toast{transform:scale(1);opacity:1}
+@keyframes ovpulse{0%,100%{box-shadow:0 24px 70px rgba(0,0,0,.75),0 0 0 0 rgba(240,112,112,.55)}50%{box-shadow:0 24px 70px rgba(0,0,0,.75),0 0 0 9px rgba(240,112,112,0)}}
+#overdue-toast.pulse{animation:ovpulse .55s ease}
 .overdue-item{display:flex;flex-direction:column;gap:7px;background:var(--surf2);border-left:3px solid #f07070;border-radius:6px;padding:10px 12px;transition:opacity .3s,transform .3s}
 .overdue-item.resolved{opacity:0;transform:translateX(10px)}
 .overdue-item .oi-ttl{font-size:13px;font-weight:600;color:var(--t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -911,7 +913,7 @@ if(window._pendingLoad) window._pendingLoad();
 
 <script>
 // ═════════════ DATA ═════════════
-const APP_VERSION='v20260703v'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
+const APP_VERSION='v20260703w'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
 const STAGES=['Job Brief','Design','Production','Review','Approval Stage','On Hold','Complete'];
 const SKEY=s=>({
 'Job Brief':'jobbrief','Design':'design','Production':'production','Review':'review',
@@ -1126,6 +1128,8 @@ function _showErr(msg){
   d.textContent=msg;
 }
 function showView(v,el){
+// Overdue-tasks gate must be resolved first — block navigating anywhere else.
+if(document.getElementById('overdue-overlay').classList.contains('show')){_shakeOverdueToast();return;}
 if((v==='activity'||v==='worklog')&&!_isAdminUser()){return;} // Activity Log & Work Log: Super Admins only
 document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
 document.querySelectorAll('.ptab').forEach(x=>x.classList.remove('active'));
@@ -2978,6 +2982,8 @@ function checkForNewAssignedTasks(){
 if(!_currentUser) return;
 // Don't restack while the user is reading an open pop-up.
 if(document.getElementById('new-task-overlay').classList.contains('show')) return;
+// The overdue-tasks gate takes priority — don't stack another pop-up under/over it.
+if(document.getElementById('overdue-overlay').classList.contains('show')) return;
 const acked=_getAcked();
 const cutoff=Date.now()-NOTIF_LOOKBACK_DAYS*24*60*60*1000;
 const fresh=tasks.filter(t=>t.owner===_currentUser && t.id && !acked.has(t.id)
@@ -3054,6 +3060,34 @@ showOverdueNotification(mine);
 function showOverdueNotification(list){
 _renderOverdueRows(list);
 document.getElementById('overdue-overlay').classList.add('show');
+_trapOverdueFocus();
+}
+// ── Focus-trap: while the gate is open, Tab cannot reach anything behind it
+// (mouse clicks are already blocked by the full-screen overlay + z-index). ──
+let _overdueTrapHandler=null,_overduePrevFocus=null;
+function _overdueFocusables(){return Array.from(document.querySelectorAll('#overdue-toast input:not([disabled]), #overdue-toast select:not([disabled]), #overdue-toast button:not([disabled])'));}
+function _trapOverdueFocus(){
+_overduePrevFocus=document.activeElement;
+if(_overdueTrapHandler)document.removeEventListener('keydown',_overdueTrapHandler,true);
+_overdueTrapHandler=function(e){
+if(e.key!=='Tab')return;
+const f=_overdueFocusables();if(!f.length)return;
+const first=f[0],last=f[f.length-1];
+const toast=document.getElementById('overdue-toast');
+if(!toast||!toast.contains(document.activeElement)){e.preventDefault();first.focus();return;}
+if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}
+else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}
+};
+document.addEventListener('keydown',_overdueTrapHandler,true);
+}
+function _releaseOverdueFocus(){
+if(_overdueTrapHandler){document.removeEventListener('keydown',_overdueTrapHandler,true);_overdueTrapHandler=null;}
+if(_overduePrevFocus&&typeof _overduePrevFocus.focus==='function'){try{_overduePrevFocus.focus();}catch(e){}}
+_overduePrevFocus=null;
+}
+function _shakeOverdueToast(){
+const el=document.getElementById('overdue-toast');if(!el)return;
+el.classList.remove('pulse');void el.offsetWidth;el.classList.add('pulse');
 }
 function _renderOverdueRows(list){
 const ttl=document.getElementById('overdue-ttl');
@@ -3084,6 +3118,7 @@ if(document.getElementById('view-list').classList.contains('active'))renderList(
 }
 function dismissOverdue(){
 if(document.getElementById('overdue-continue-btn').disabled)return; // must resolve every overdue task first
+_releaseOverdueFocus();
 document.getElementById('overdue-overlay').classList.remove('show');
 }
 function handleLoginKey(e){if(e.key==='Enter')doLogin();}
