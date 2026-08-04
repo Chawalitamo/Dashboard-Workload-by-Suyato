@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260703x -->
+<!-- v20260703y -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -292,6 +292,22 @@ nav h1{font-size:17px;font-weight:600;letter-spacing:-.01em}
 .btn-sec:hover{background:var(--surf2);color:var(--t1)}
 .btn-pri{background:var(--gold);border:none;border-radius:var(--rsm);color:#0d0d0c;padding:7px 16px;font-family:'DBHeavent','Sarabun',sans-serif;font-size:15px;font-weight:600;cursor:pointer}
 .btn-pri:hover{background:var(--gold2)}
+/* ── Multi-select PIC picker (chips + checkbox dropdown) ── */
+.pic-ms{position:relative}
+.pic-ms-field{display:flex;align-items:center;gap:6px;min-height:34px;background:var(--surf2);border:1px solid var(--b1);border-radius:var(--rsm);padding:5px 8px;cursor:pointer;transition:border-color .15s}
+.pic-ms-field:hover{border-color:var(--b2)}
+.pic-ms.open .pic-ms-field{border-color:var(--gold2)}
+.pic-ms-chips{flex:1;display:flex;flex-wrap:wrap;gap:4px;min-width:0}
+.pic-ms-ph{font-size:14px;color:var(--t3)}
+.pic-ms-chip{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;background:var(--surf3);border:1px solid var(--b1);border-radius:12px;padding:2px 4px 2px 8px;color:var(--t1)}
+.pic-ms-chip button{background:none;border:none;color:var(--t3);cursor:pointer;font-size:12px;line-height:1;padding:0 2px}
+.pic-ms-chip button:hover{color:#f07070}
+.pic-ms-caret{color:var(--t3);font-size:14px;flex-shrink:0}
+.pic-ms-panel{display:none;position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:400;background:var(--surf);border:1px solid var(--b2);border-radius:var(--rsm);box-shadow:0 10px 28px rgba(0,0,0,.5);max-height:210px;overflow-y:auto;padding:4px}
+.pic-ms.open .pic-ms-panel{display:block}
+.pic-ms-opt{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:var(--rsm);cursor:pointer;font-size:14px;color:var(--t1)}
+.pic-ms-opt:hover{background:var(--surf2)}
+.pic-ms-opt input{cursor:pointer;accent-color:var(--gold)}
 /* NOTE MODAL */
 .note-modal{width:380px}
 /* Clickable link chips shown under a note field (Edit / Add / Note pop-ups) */
@@ -670,12 +686,7 @@ if(window._pendingLoad) window._pendingLoad();
 </select>
 </div>
 <div class="field"><label>Person in charge *</label>
-<select id="f-owner"><option value="">— Select —</option>
-<option>Por</option><option>Sun</option><option>Jew</option><option>Nod</option>
-<option>Donut</option><option>Ji</option><option>Kanom</option>
-<option>Ton</option><option>Nick</option><option>Benz</option><option>Ju</option>
-<option>Toon</option><option>Witch</option><option>Aom</option>
-</select>
+<div class="pic-ms" id="f-pic-ms"><div class="pic-ms-field" onclick="_picMsOpen('f',event)"><span class="pic-ms-chips" id="f-pic-chips"></span><i class="ti ti-chevron-down pic-ms-caret" aria-hidden="true"></i></div><div class="pic-ms-panel" id="f-pic-panel"></div></div>
 </div>
 <div class="field"><label>Stage *</label>
 <select id="f-stage">
@@ -766,12 +777,7 @@ if(window._pendingLoad) window._pendingLoad();
 </select>
 </div>
 <div class="field"><label>Person in charge</label>
-<select id="e-owner">
-<option>Por</option><option>Sun</option><option>Jew</option><option>Nod</option>
-<option>Donut</option><option hidden disabled>Ming</option><option>Ji</option><option>Kanom</option>
-<option>Ton</option><option>Nick</option><option>Benz</option><option>Ju</option>
-<option>Toon</option><option>Witch</option><option>Aom</option>
-</select>
+<div class="pic-ms" id="e-pic-ms"><div class="pic-ms-field" onclick="_picMsOpen('e',event)"><span class="pic-ms-chips" id="e-pic-chips"></span><i class="ti ti-chevron-down pic-ms-caret" aria-hidden="true"></i></div><div class="pic-ms-panel" id="e-pic-panel"></div></div>
 </div>
 <div class="field"><label>Stage</label>
 <select id="e-stage">
@@ -804,12 +810,7 @@ if(window._pendingLoad) window._pendingLoad();
 </select>
 </div>
 <div class="field"><label>Person in charge *</label>
-<select id="a-owner"><option value="">— Select —</option>
-<option>Por</option><option>Sun</option><option>Jew</option><option>Nod</option>
-<option>Donut</option><option>Ji</option><option>Kanom</option>
-<option>Ton</option><option>Nick</option><option>Benz</option><option>Ju</option>
-<option>Toon</option><option>Witch</option><option>Aom</option>
-</select>
+<div class="pic-ms" id="a-pic-ms"><div class="pic-ms-field" onclick="_picMsOpen('a',event)"><span class="pic-ms-chips" id="a-pic-chips"></span><i class="ti ti-chevron-down pic-ms-caret" aria-hidden="true"></i></div><div class="pic-ms-panel" id="a-pic-panel"></div></div>
 </div>
 <div class="field"><label>Stage</label>
 <select id="a-stage">
@@ -923,7 +924,7 @@ if(window._pendingLoad) window._pendingLoad();
 
 <script>
 // ═════════════ DATA ═════════════
-const APP_VERSION='v20260703x'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
+const APP_VERSION='v20260703y'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
 const STAGES=['Job Brief','Design','Production','Review','Approval Stage','On Hold','Complete'];
 const SKEY=s=>({
 'Job Brief':'jobbrief','Design':'design','Production':'production','Review':'review',
@@ -939,7 +940,7 @@ function projColor(name){const p=projects.find(x=>x.name===name);return p?p.colo
 function showPICTasks(owner,mode){
 const dM=s=>{const d=new Date(s);return new Date(d.getFullYear(),d.getMonth(),d.getDate());};
 const today=new Date();today.setHours(0,0,0,0);
-let list=tasks.filter(t=>t.owner===owner&&t.due&&t.stage!=='Complete'&&t.stage!=='On Hold');
+let list=tasks.filter(t=>_isPIC(t,owner)&&t.due&&t.stage!=='Complete'&&t.stage!=='On Hold');
 if(mode==='overdue')list=list.filter(t=>dM(t.due)<today);
 else list=list.filter(t=>dM(t.due).getTime()===today.getTime());
 list.sort((a,b)=>new Date(a.due)-new Date(b.due));
@@ -1104,6 +1105,54 @@ renderProjTabs();renderKanban();
 const OWNERS=['Por','Sun','Jew','Nod','Donut','Ming','Ji','Kanom','Ton','Nick','Benz','Ju','Toon','Witch','Aom'];
 const LEADS=['Por','Jew','Sun','Nod','Ji','Donut','Aom','Ming'];
 const OKEY=n=>n.toLowerCase().replace(/\s/g,'');
+// Members offered when assigning a PIC (Ming has left the team; kept in OWNERS so
+// her historical tasks still render and stay filterable).
+const PIC_OPTIONS=OWNERS.filter(o=>o!=='Ming');
+// ── Multiple PICs per task ──────────────────────────────────────────────────
+// A task can have several people in charge; `pics` holds all of them and `owner`
+// mirrors the primary (first) PIC so legacy paths and edge functions still work.
+// _PICS(t) always returns an array — use it instead of reading t.owner directly.
+function _PICS(t){
+if(!t)return[];
+if(Array.isArray(t.pics)&&t.pics.length)return t.pics.filter(Boolean);
+return t.owner?[t.owner]:[];
+}
+function _isPIC(t,name){return _PICS(t).includes(name);}
+function _picsLabel(t){const p=_PICS(t);return p.length?p.join(', '):'';}
+// ── Multi-select PIC picker. One instance per form: 'f' (sidebar), 'a' (Add
+// modal), 'e' (Edit modal). Selection order is preserved; the first pick is the
+// primary PIC stored in `owner`. ──
+const _picSel={f:[],a:[],e:[]};
+function _picMsRender(k){
+const chips=document.getElementById(k+'-pic-chips');
+const panel=document.getElementById(k+'-pic-panel');
+if(!chips||!panel)return;
+const sel=_picSel[k]||[];
+chips.innerHTML=sel.length
+?sel.map(n=>`<span class="pic-ms-chip">${esc(n)}<button type="button" title="Remove" onclick="event.stopPropagation();_picMsRemove('${k}','${esc(n)}')">✕</button></span>`).join('')
+:'<span class="pic-ms-ph">— Select —</span>';
+// Offer the standard options plus any legacy name already assigned (e.g. Ming).
+const opts=PIC_OPTIONS.concat(sel.filter(n=>!PIC_OPTIONS.includes(n)));
+panel.innerHTML=opts.map(n=>`<label class="pic-ms-opt" onclick="event.stopPropagation()"><input type="checkbox" ${sel.includes(n)?'checked':''} onchange="_picMsToggleName('${k}','${esc(n)}',this.checked)">${esc(n)}</label>`).join('');
+}
+function _picMsToggleName(k,n,on){
+const sel=_picSel[k]||[];
+_picSel[k]=on?(sel.includes(n)?sel:sel.concat(n)):sel.filter(x=>x!==n);
+_picMsRender(k);
+}
+function _picMsRemove(k,n){_picSel[k]=(_picSel[k]||[]).filter(x=>x!==n);_picMsRender(k);}
+function _picMsSet(k,arr){_picSel[k]=Array.isArray(arr)?arr.filter(Boolean).slice():[];_picMsRender(k);}
+function _picMsGet(k){return (_picSel[k]||[]).slice();}
+function _picMsOpen(k,ev){
+if(ev)ev.stopPropagation();
+const wrap=document.getElementById(k+'-pic-ms');if(!wrap)return;
+const wasOpen=wrap.classList.contains('open');
+document.querySelectorAll('.pic-ms.open').forEach(w=>w.classList.remove('open'));
+if(!wasOpen)wrap.classList.add('open');
+}
+document.addEventListener('click',()=>{document.querySelectorAll('.pic-ms.open').forEach(w=>w.classList.remove('open'));});
+// Mark the PIC field red when nothing is selected (mirrors the old select's validation).
+function _picMsFlag(k,ok){const f=document.querySelector('#'+k+'-pic-ms .pic-ms-field');if(f)f.style.borderColor=ok?'':'#f07070';}
 // Thai-locale date pickers can save a Buddhist year (e.g. 2569). Normalise BE→CE on save.
 function _normDue(v){if(!v)return v;const m=/^(\d{4})(-\d{2}-\d{2})$/.exec(v);if(m&&+m[1]>2200)return(+m[1]-543)+m[2];return v;}
 // Calendar-dropdown date pickers (flatpickr). Click-only, always Gregorian — no typed Buddhist years.
@@ -1181,10 +1230,10 @@ const _nmEnd=new Date(_todayMid.getFullYear(),_todayMid.getMonth()+2,0);
 const _winLabel=`${_cmStart.toLocaleDateString('en-US',{month:'short'})}–${_nmEnd.toLocaleDateString('en-US',{month:'short',year:'numeric'})}`;
 const windowTasks=tasks.filter(t=>{if(!t.due)return false;const d=_dMid(t.due);return d>=_cmStart&&d<=_nmEnd;});
 const winStageCounts=STAGES.map(s=>windowTasks.filter(t=>t.stage===s).length);
-const winPersonData=OWNERS.map(owner=>{const ot=windowTasks.filter(t=>t.owner===owner);if(!ot.length)return null;const pct=Math.round(ot.reduce((s,t)=>s+STAGE_PCT[t.stage],0)/ot.length);const active=ot.filter(t=>!['Complete','On Hold'].includes(t.stage)).length;const done=ot.filter(t=>t.stage==='Complete').length;return{owner,pct,total:ot.length,active,done,ok:OKEY(owner)};}).filter(Boolean).sort((a,b)=>b.pct-a.pct);
+const winPersonData=OWNERS.map(owner=>{const ot=windowTasks.filter(t=>_isPIC(t,owner));if(!ot.length)return null;const pct=Math.round(ot.reduce((s,t)=>s+STAGE_PCT[t.stage],0)/ot.length);const active=ot.filter(t=>!['Complete','On Hold'].includes(t.stage)).length;const done=ot.filter(t=>t.stage==='Complete').length;return{owner,pct,total:ot.length,active,done,ok:OKEY(owner)};}).filter(Boolean).sort((a,b)=>b.pct-a.pct);
 // Per-person data scoped to the current month (for the heat map)
 const monthPersonData=OWNERS.map(owner=>{
-const ot=monthTasks.filter(t=>t.owner===owner);
+const ot=monthTasks.filter(t=>_isPIC(t,owner));
 if(!ot.length)return null;
 const pct=Math.round(ot.reduce((s,t)=>s+STAGE_PCT[t.stage],0)/ot.length);
 const active=ot.filter(t=>!['Complete','On Hold'].includes(t.stage)).length;
@@ -1193,7 +1242,7 @@ return{owner,pct,total:ot.length,active,done,ok:OKEY(owner)};
 }).filter(Boolean).sort((a,b)=>b.pct-a.pct);
 // ── Person progress data (sorted) ──
 const personData=OWNERS.map(owner=>{
-const ot=tasks.filter(t=>t.owner===owner);
+const ot=tasks.filter(t=>_isPIC(t,owner));
 if(!ot.length)return null;
 const pct=Math.round(ot.reduce((s,t)=>s+STAGE_PCT[t.stage],0)/ot.length);
 const active=ot.filter(t=>!['Complete','On Hold'].includes(t.stage)).length;
@@ -1211,7 +1260,7 @@ return{name:p,total:pt.length,done,pct,color:projColor(p)};
 });
 // ── Leaderboard: ranked by NUMBER of tasks completed THIS MONTH (most completions = #1) ──
 const lbData=OWNERS.map(owner=>{
-const ot=monthTasks.filter(t=>t.owner===owner);
+const ot=monthTasks.filter(t=>_isPIC(t,owner));
 if(!ot.length)return null;
 const done=ot.filter(t=>t.stage==='Complete').length;
 const pct=Math.round(done/ot.length*100);
@@ -1264,12 +1313,12 @@ return`<div class="flow-seg">
 // ── Overdue by owner ──
 const overdueByOwner=OWNERS.map(o=>({
 owner:o,
-count:tasks.filter(t=>t.owner===o&&t.due&&_dMid(t.due)<_todayMid&&t.stage!=='Complete'&&t.stage!=='On Hold').length
+count:tasks.filter(t=>_isPIC(t,o)&&t.due&&_dMid(t.due)<_todayMid&&t.stage!=='Complete'&&t.stage!=='On Hold').length
 })).filter(x=>x.count>0).sort((a,b)=>b.count-a.count);
 // ── Due today by PIC ──
 const dueTodayByOwner=OWNERS.map(o=>({
 owner:o,
-items:tasks.filter(t=>t.owner===o&&t.due&&_dMid(t.due).getTime()===_todayMid.getTime()&&t.stage!=='Complete'&&t.stage!=='On Hold')
+items:tasks.filter(t=>_isPIC(t,o)&&t.due&&_dMid(t.due).getTime()===_todayMid.getTime()&&t.stage!=='Complete'&&t.stage!=='On Hold')
 })).filter(x=>x.items.length>0).sort((a,b)=>b.items.length-a.items.length);
 const dueTodayTotal=dueTodayByOwner.reduce((s,o)=>s+o.items.length,0);
 const dueTodayPICHTML=dueTodayByOwner.length?dueTodayByOwner.map(o=>`
@@ -1409,7 +1458,7 @@ ${_isAdminUser()?`<div style="display:flex;justify-content:flex-end;margin-botto
 <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:14px">
 <div class="kpi"><div class="kpi-icon" style="background:#1e2840;color:#7b9cf0"><i class="ti ti-layout-kanban" aria-hidden="true"></i></div>
 <div class="kpi-big">${total}</div><div class="kpi-lbl">Total tasks</div>
-<div class="kpi-delta" style="color:var(--t3)">${projs.length} projects · ${OWNERS.filter(o=>tasks.some(t=>t.owner===o)).length} members</div>
+<div class="kpi-delta" style="color:var(--t3)">${projs.length} projects · ${OWNERS.filter(o=>tasks.some(t=>_isPIC(t,o))).length} members</div>
 </div>
 <div class="kpi"><div class="kpi-icon" style="background:#0d2010;color:#40c060"><i class="ti ti-circle-check" aria-hidden="true"></i></div>
 <div class="kpi-big" style="color:#40c060">${complete}</div><div class="kpi-lbl">Complete</div>
@@ -1514,8 +1563,8 @@ plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${ctx.parsed.y} 
 scales:{x:{grid:{color:CHART_GRID},ticks:{font:{size:10}}},y:{grid:{color:CHART_GRID},ticks:{stepSize:1,font:{size:10}},beginAtZero:true}}}
 });
 // 2b. Bar chart 2 – active tasks per person in charge (owner field)
-const activePIC=OWNERS.filter(o=>windowTasks.some(t=>t.owner===o&&t.stage!=='Complete'));
-const picCounts=activePIC.map(o=>windowTasks.filter(t=>t.owner===o&&t.stage!=='Complete').length);
+const activePIC=OWNERS.filter(o=>windowTasks.some(t=>_isPIC(t,o)&&t.stage!=='Complete'));
+const picCounts=activePIC.map(o=>windowTasks.filter(t=>_isPIC(t,o)&&t.stage!=='Complete').length);
 new Chart(document.getElementById('bar-chart2'),{
 type:'bar',
 data:{labels:activePIC,datasets:[{label:'Tasks',data:picCounts,backgroundColor:'#7b9cf0',borderRadius:4,borderSkipped:false}]},
@@ -1635,7 +1684,6 @@ el.classList.add('active');
 renderList();
 }
 function taskRowHTML(t){
-const ok=t.owner?OKEY(t.owner):'';
 const sk=SKEY(t.stage||'Job Brief');
 const pct=STAGE_PCT[t.stage]??0;
 const pc=projColor(t.project);
@@ -1658,11 +1706,8 @@ return `<tr data-task-id="${t.id}" style="${rowStyle}">
 </div>
 </td>
 <td>
-<div class="ow-cell">
-<div class="ow-av o-${ok}">${(t.owner||'?')[0]}</div>
-<select style="background:none;border:none;color:var(--t1);font-family:'DBHeavent','Sarabun',sans-serif;font-size:14px;outline:none;cursor:pointer" onchange="updateField('${t.id}','owner',this.value)">
-${OWNERS.map(o=>`<option value="${o}"${o===t.owner?' selected':''}>${o}</option>`).join('')}
-</select>
+<div class="ow-cell" style="cursor:pointer;flex-wrap:wrap;gap:5px" title="Click to change the people in charge" onclick="openEdit('${t.id}')">
+${_PICS(t).length?_PICS(t).map(p=>`<span style="display:inline-flex;align-items:center;gap:5px"><span class="ow-av o-${OKEY(p)}">${esc(p[0])}</span><span style="font-size:14px">${esc(p)}</span></span>`).join(''):'<span style="font-size:14px;color:var(--t3)">— none —</span>'}
 </div>
 </td>
 <td><span style="font-size:13px;font-weight:500">${esc(t.lead||'—')}</span></td>
@@ -1690,7 +1735,7 @@ const fo=document.getElementById('lf-owner').value;
 const fp=document.getElementById('lf-project').value;
 let list=tasks;
 if(listStageFilter!=='All') list=list.filter(t=>t.stage===listStageFilter);
-if(fo) list=list.filter(t=>t.owner===fo||t.lead===fo);
+if(fo) list=list.filter(t=>_isPIC(t,fo)||t.lead===fo);
 if(fp) list=list.filter(t=>t.project===fp);
 const tbody=document.getElementById('list-tbody');
 if(!list.length){tbody.innerHTML=`<tr><td colspan="8" style="text-align:center;padding:3rem;color:var(--t3)"><i class="ti ti-inbox" style="font-size:24px;display:block;margin-bottom:8px" aria-hidden="true"></i>No tasks found</td></tr>`;return;}
@@ -1791,23 +1836,24 @@ if(error){alert('Failed to save note — please try again.');return;}
 if(_oldNote!==newNote) logActivity(_id,_title,_project,'updated','note',_oldNote,newNote);
 }
 // Add via modal
-function openAddModal(){ _updateNoteLinks('a-note-links',document.getElementById('a-note').value||''); document.getElementById('add-modal').classList.add('open'); }
+function openAddModal(){ _updateNoteLinks('a-note-links',document.getElementById('a-note').value||''); _picMsSet('a',[]); document.getElementById('add-modal').classList.add('open'); }
 async function addTaskModal(){
 const title=document.getElementById('a-title').value.trim();
-const owner=document.getElementById('a-owner').value;
+const pics=_picMsGet('a');
+const owner=pics[0]||''; // primary PIC
 const lead=document.getElementById('a-lead').value;
-if(!title||!owner||!lead){ alert('Please fill in task name, owner, and person in charge.'); return; }
-const _nt={title,owner,lead,project:document.getElementById('a-project').value,stage:document.getElementById('a-stage').value,due:_normDue(document.getElementById('a-due').value)||null,note:document.getElementById('a-note').value.trim()};
+if(!title||!pics.length||!lead){ alert('Please fill in task name, owner, and at least one person in charge.'); return; }
+const _nt={title,owner,pics,lead,project:document.getElementById('a-project').value,stage:document.getElementById('a-stage').value,due:_normDue(document.getElementById('a-due').value)||null,note:document.getElementById('a-note').value.trim()};
 const{data:_nd,error:_ne}=await window._sb.from('mkt_tasks').insert(_nt).select().single();
 if(_ne){alert('Save failed');return;}
 tasks.unshift({id:_nd.id,..._nt,due:_nt.due||''});
 logActivity(_nd.id,_nt.title,_nt.project,'created',null,null,null);
 broadcastNewTask({id:_nd.id,..._nt});
-document.getElementById('a-title').value=''; _setDP(document.getElementById('a-due'),''); document.getElementById('a-note').value=''; document.getElementById('a-owner').value=''; document.getElementById('a-lead').value='';
+document.getElementById('a-title').value=''; _setDP(document.getElementById('a-due'),''); document.getElementById('a-note').value=''; _picMsSet('a',[]); document.getElementById('a-lead').value='';
 closeModal('add-modal'); renderList();
-postToTeams('created',{title:_nt.title,owner:_nt.owner,project:_nt.project,stage:_nt.stage,due:_nt.due||''});
-fetch('https://fxmigukayxvieziseqil.supabase.co/functions/v1/notify-new-task',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:_nt.title,owner:_nt.owner,lead:_nt.lead,project:_nt.project,stage:_nt.stage,due:_nt.due||'',note:_nt.note})}).catch(()=>{});
-if(_nt.due)fetch('https://fxmigukayxvieziseqil.supabase.co/functions/v1/add-to-calendar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:_nt.title,owner:_nt.owner,lead:_nt.lead,project:_nt.project,stage:_nt.stage,due:_nt.due,note:_nt.note,id:_nd.id})}).catch(()=>{});
+postToTeams('created',{title:_nt.title,owner:_PICS(_nt).join(', '),project:_nt.project,stage:_nt.stage,due:_nt.due||''});
+fetch('https://fxmigukayxvieziseqil.supabase.co/functions/v1/notify-new-task',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:_nt.title,owner:_nt.owner,pics:_nt.pics,lead:_nt.lead,project:_nt.project,stage:_nt.stage,due:_nt.due||'',note:_nt.note})}).catch(()=>{});
+if(_nt.due)fetch('https://fxmigukayxvieziseqil.supabase.co/functions/v1/add-to-calendar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:_nt.title,owner:_nt.owner,pics:_nt.pics,lead:_nt.lead,project:_nt.project,stage:_nt.stage,due:_nt.due,note:_nt.note,id:_nd.id})}).catch(()=>{});
 }
 // ═════════════ BOARD / KANBAN ═════════════
 function renderProjTabs(){
@@ -1825,7 +1871,7 @@ function renderKanban(){
 const fo=document.getElementById('bf-owner').value;
 let list=tasks;
 if(activeProj!=='All') list=list.filter(t=>t.project===activeProj);
-if(fo) list=list.filter(t=>t.owner===fo||t.lead===fo);
+if(fo) list=list.filter(t=>_isPIC(t,fo)||t.lead===fo);
 // sync sidebar project dropdown to active project filter
 const fp=document.getElementById('f-project');
 if(fp&&activeProj!=='All'&&fp.querySelector(`option[value="${activeProj.replace(/"/g,'\\"')}"]`))fp.value=activeProj;
@@ -1896,7 +1942,6 @@ return `<a class="klink k-link" href="${esc(u)}" target="_blank" rel="noopener n
 return html;
 }
 function kcardHTML(t,stage,si){
-const ok=OKEY(t.owner);
 const canL=si>0,canR=si<STAGES.length-1;
 const pc=projColor(t.project);
 let dueHTML='';
@@ -1911,7 +1956,7 @@ const ac=(t.attachments||[]).length;
 const attachBtn=`<button class="cta k-attach" title="Attachments">&#128206;${ac>0?`<span class="attach-badge">${ac}</span>`:''}</button>`;
 const pcnt=(t.proof||[]).length;
 const proofBtn=`<button class="cta k-proof" title="Proof of completed work (required to Complete)" style="${pcnt>0?'border-color:#2f9e44;color:#50d090':''}">&#127942;${pcnt>0?`<span class="attach-badge" style="background:#2f9e44">${pcnt}</span>`:''}</button>`;
-return `<div class="kcard" data-id="${t.id}" data-can-l="${canL?1:0}" data-can-r="${canR?1:0}"><div class="kcard-proj"><span style="width:6px;height:6px;border-radius:50%;background:${pc};flex-shrink:0;display:inline-block"></span>${esc(t.project)}</div><div class="kcard-title">${esc(t.title)}</div>${t.note?noteHTML(t.note):''}<div class="kcard-foot"><span class="owner-pip o-${ok}">${t.owner}</span>${t.lead?`<span style="font-size:11px;color:var(--t3);background:var(--surf3);border-radius:10px;padding:1px 7px;margin-left:4px">&#128100; ${esc(t.lead)}</span>`:''} ${dueHTML}</div>${thumbsHTML(t)}<div class="kcard-actions"><button class="cta k-edit">&#9998; Edit</button>${attachBtn}${proofBtn}<button class="cta del k-del">&#x2715; Del</button></div></div>`;
+return `<div class="kcard" data-id="${t.id}" data-can-l="${canL?1:0}" data-can-r="${canR?1:0}"><div class="kcard-proj"><span style="width:6px;height:6px;border-radius:50%;background:${pc};flex-shrink:0;display:inline-block"></span>${esc(t.project)}</div><div class="kcard-title">${esc(t.title)}</div>${t.note?noteHTML(t.note):''}<div class="kcard-foot" style="flex-wrap:wrap;gap:4px"><span style="display:flex;flex-wrap:wrap;gap:3px">${_PICS(t).map(p=>`<span class="owner-pip o-${OKEY(p)}">${esc(p)}</span>`).join('')}</span>${t.lead?`<span style="font-size:11px;color:var(--t3);background:var(--surf3);border-radius:10px;padding:1px 7px">&#128100; ${esc(t.lead)}</span>`:''} ${dueHTML}</div>${thumbsHTML(t)}<div class="kcard-actions"><button class="cta k-edit">&#9998; Edit</button>${attachBtn}${proofBtn}<button class="cta del k-del">&#x2715; Del</button></div></div>`;
 }
 function renderSbStats(){
 const list=activeProj==='All'?tasks:tasks.filter(t=>t.project===activeProj);
@@ -1984,7 +2029,7 @@ function setupDragDrop(){
       t.stage=newStage;
       try{await window._sb.from('mkt_tasks').update({stage:newStage}).eq('id',t.id);}catch(err){console.error(err);}
       logActivity(t.id,t.title,t.project,'updated','stage',_oldDragStage,newStage);
-      postToTeams('moved',{title:t.title,owner:t.owner,project:t.project,stage:newStage,due:t.due||''});
+      postToTeams('moved',{title:t.title,owner:_picsLabel(t),project:t.project,stage:newStage,due:t.due||''});
       renderKanban();
     });
   });
@@ -1998,14 +2043,14 @@ async function moveTask(rawId,dir){
   console.log('[move] id:',rawId,'→',t.stage);
   try{await window._sb.from('mkt_tasks').update({stage:t.stage}).eq('id',t.id);}catch(err){console.error(err);}
   logActivity(t.id,t.title,t.project,'updated','stage',_oldMoveStage,t.stage);
-  postToTeams('moved',{title:t.title,owner:t.owner,project:t.project,stage:t.stage,due:t.due||''});
+  postToTeams('moved',{title:t.title,owner:_picsLabel(t),project:t.project,stage:t.stage,due:t.due||''});
   renderKanban();
 }
 async function doDelete(rawId){
   if(!confirm('Delete this task?')) return;
   const t=findTask(rawId); if(!t) return;
   logActivity(t.id,t.title,t.project,'deleted',null,null,null);
-  postToTeams('deleted',{title:t.title,owner:t.owner,project:t.project,stage:t.stage,due:t.due||''});
+  postToTeams('deleted',{title:t.title,owner:_picsLabel(t),project:t.project,stage:t.stage,due:t.due||''});
   try{await window._sb.from('mkt_tasks').delete().eq('id',t.id);}catch(err){console.error(err);}
   tasks=tasks.filter(t=>String(t.id)!==String(rawId));
   renderKanban();
@@ -2097,7 +2142,7 @@ const t=findTask(id);if(!t)return;
 editId=t.id;
 document.getElementById('e-title').value=t.title;
 document.getElementById('e-project').value=t.project;
-document.getElementById('e-owner').value=t.owner;
+_picMsSet('e',_PICS(t));
 document.getElementById('e-lead').value=t.lead||'';
 document.getElementById('e-stage').value=t.stage;
 _setDP(document.getElementById('e-due'),t.due||'');
@@ -2107,17 +2152,21 @@ document.getElementById('edit-modal').classList.add('open');
 }
 async function saveEdit(){
 const t=findTask(editId);if(!t)return;
-const _snap={title:t.title,project:t.project,owner:t.owner,lead:t.lead,stage:t.stage,due:t.due||'',note:t.note||''};
+const _snap={title:t.title,project:t.project,owner:_PICS(t).join(', '),lead:t.lead,stage:t.stage,due:t.due||'',note:t.note||''};
+const _newPics=_picMsGet('e');
+if(!_newPics.length){_picMsFlag('e',false);alert('Please select at least one person in charge.');return;}
+_picMsFlag('e',true);
 t.title=document.getElementById('e-title').value.trim()||t.title;
 t.project=document.getElementById('e-project').value;
-t.owner=document.getElementById('e-owner').value;
+t.pics=_newPics;
+t.owner=_newPics[0]; // primary PIC
 t.lead=document.getElementById('e-lead').value;
 t.stage=document.getElementById('e-stage').value;
 t.due=_normDue(document.getElementById('e-due').value);
 t.note=document.getElementById('e-note').value.trim();
-await window._sb.from('mkt_tasks').update({title:t.title,owner:t.owner,lead:t.lead,project:t.project,stage:t.stage,due:t.due||null,note:t.note}).eq('id',editId);
-['title','project','owner','lead','stage','due','note'].forEach(f=>{const ov=_snap[f]||'';const nv=f==='due'?(t.due||''):(t[f]||'');if(ov!==nv)logActivity(editId,t.title,t.project,'updated',f,ov,nv);});
-postToTeams('updated',{title:t.title,owner:t.owner,project:t.project,stage:t.stage,due:t.due||''});
+await window._sb.from('mkt_tasks').update({title:t.title,owner:t.owner,pics:t.pics,lead:t.lead,project:t.project,stage:t.stage,due:t.due||null,note:t.note}).eq('id',editId);
+['title','project','owner','lead','stage','due','note'].forEach(f=>{const ov=_snap[f]||'';const nv=f==='due'?(t.due||''):(f==='owner'?_PICS(t).join(', '):(t[f]||''));if(ov!==nv)logActivity(editId,t.title,t.project,'updated',f==='owner'?'PIC':f,ov,nv);});
+postToTeams('updated',{title:t.title,owner:_picsLabel(t),project:t.project,stage:t.stage,due:t.due||''});
 closeModal('edit-modal');
 renderKanban();
 renderList();
@@ -2150,17 +2199,19 @@ return arr;
 }
 async function addTask(){
 const title=document.getElementById('f-title').value.trim();
-const owner=document.getElementById('f-owner').value;
+const pics=_picMsGet('f');
+const owner=pics[0]||''; // primary PIC
 const lead=document.getElementById('f-lead').value;
 const project=document.getElementById('f-project').value;
 const stage=document.getElementById('f-stage').value;
 const due=_normDue(document.getElementById('f-due').value);
 // All fields required except Note.
-const _req={'f-title':!!title,'f-lead':!!lead,'f-owner':!!owner,'f-project':!!project,'f-stage':!!stage,'f-due':!!due};
+const _req={'f-title':!!title,'f-lead':!!lead,'f-project':!!project,'f-stage':!!stage,'f-due':!!due};
 let _ok=true;
 Object.keys(_req).forEach(id=>{const el=document.getElementById(id);if(el)el.style.borderColor=_req[id]?'':'#f07070';if(!_req[id])_ok=false;});
+_picMsFlag('f',pics.length>0); if(!pics.length)_ok=false;
 if(!_ok)return;
-const _ft={title,owner,lead,project,stage,due:due||null,note:document.getElementById('f-note').value.trim()};
+const _ft={title,owner,pics,lead,project,stage,due:due||null,note:document.getElementById('f-note').value.trim()};
 const _btn=document.querySelector('.btn-add-sb');
 if(_newTaskFiles.length&&_btn){_btn.disabled=true;_btn.textContent='Uploading…';}
 const{data:_fd,error:_fe}=await window._sb.from('mkt_tasks').insert(_ft).select().single();
@@ -2173,10 +2224,10 @@ tasks.unshift({id:_fd.id,..._ft,due:_ft.due||'',attachments:_atts,proof:[]});
 _newTaskFiles=[];_renderNewTaskFiles();
 logActivity(_fd.id,_ft.title,_ft.project,'created',null,null,null);
 broadcastNewTask({id:_fd.id,..._ft});
-document.getElementById('f-title').value='';_setDP(document.getElementById('f-due'),'');document.getElementById('f-note').value='';document.getElementById('f-lead').value='';_updateNoteLinks('f-note-links','');
-postToTeams('created',{title:_ft.title,owner:_ft.owner,project:_ft.project,stage:_ft.stage,due:_ft.due||''});
-fetch('https://fxmigukayxvieziseqil.supabase.co/functions/v1/notify-new-task',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:_ft.title,owner:_ft.owner,lead:_ft.lead,project:_ft.project,stage:_ft.stage,due:_ft.due||'',note:_ft.note})}).catch(()=>{});
-if(_ft.due)fetch('https://fxmigukayxvieziseqil.supabase.co/functions/v1/add-to-calendar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:_ft.title,owner:_ft.owner,lead:_ft.lead,project:_ft.project,stage:_ft.stage,due:_ft.due,note:_ft.note,id:_fd.id})}).catch(()=>{});
+document.getElementById('f-title').value='';_setDP(document.getElementById('f-due'),'');document.getElementById('f-note').value='';document.getElementById('f-lead').value='';_updateNoteLinks('f-note-links','');_picMsSet('f',[]);
+postToTeams('created',{title:_ft.title,owner:_PICS(_ft).join(', '),project:_ft.project,stage:_ft.stage,due:_ft.due||''});
+fetch('https://fxmigukayxvieziseqil.supabase.co/functions/v1/notify-new-task',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:_ft.title,owner:_ft.owner,pics:_ft.pics,lead:_ft.lead,project:_ft.project,stage:_ft.stage,due:_ft.due||'',note:_ft.note})}).catch(()=>{});
+if(_ft.due)fetch('https://fxmigukayxvieziseqil.supabase.co/functions/v1/add-to-calendar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:_ft.title,owner:_ft.owner,pics:_ft.pics,lead:_ft.lead,project:_ft.project,stage:_ft.stage,due:_ft.due,note:_ft.note,id:_fd.id})}).catch(()=>{});
 renderKanban();
 }
 // ═════════════ UTILS ═════════════
@@ -2476,9 +2527,9 @@ ticks+=`<div class="cal-tick${isMonth?' month':''}" style="left:${i*PX}px">${isM
 }
 const todayLeft=idx(today)*PX;
 const todayLine=(today>=rangeStart&&today<=rangeEnd)?`<div class="cal-today" style="left:${todayLeft}px" title="Today"></div>`:'';
-// Group by PIC (owner)
+// Group by PIC — a task with several PICs appears under each of them.
 const byPic={};
-ongoing.forEach(t=>{const o=t.owner||'(Unassigned)';(byPic[o]=byPic[o]||[]).push(t);});
+ongoing.forEach(t=>{const ps=_PICS(t);(ps.length?ps:['(Unassigned)']).forEach(o=>{(byPic[o]=byPic[o]||[]).push(t);});});
 const picNames=Object.keys(byPic).sort((a,b)=>byPic[b].length-byPic[a].length);
 let rows='';
 // header tick row
@@ -2581,12 +2632,12 @@ const fo=document.getElementById('lf-owner').value;
 const fp=document.getElementById('lf-project').value;
 let list=tasks.slice();
 if(listStageFilter!=='All')list=list.filter(t=>t.stage===listStageFilter);
-if(fo)list=list.filter(t=>t.owner===fo||t.lead===fo);
+if(fo)list=list.filter(t=>_isPIC(t,fo)||t.lead===fo);
 if(fp)list=list.filter(t=>t.project===fp);
 if(!list.length){alert('No tasks match the current filters.');return;}
 const headers=['Task','Person in charge','Owner','Project','Stage','Progress %','Due date','Note','Created (Bangkok)'];
 const rows=list.map(t=>[
-t.title||'',t.owner||'',t.lead||'',t.project||'',t.stage||'',
+t.title||'',_PICS(t).join(', '),t.lead||'',t.project||'',t.stage||'',
 (STAGE_PCT[t.stage]!=null?STAGE_PCT[t.stage]:0),
 t.due||'',
 (t.note||'').replace(/\r?\n/g,' '),
@@ -2623,7 +2674,7 @@ const cm=metricsOf(inRange(cmStart,cmEnd)),pm=metricsOf(inRange(pmStart,pmEnd));
 const cmLbl=cmStart.toLocaleDateString('en-US',{month:'short',year:'numeric'}),pmLbl=pmStart.toLocaleDateString('en-US',{month:'short',year:'numeric'});
 const delta=(c,p,suffix,invert)=>{const d=c-p;const good=invert?d<0:d>0;const col=d===0?'#999':good?'#2f9e44':'#c92a2a';const arr=d>0?'▲':d<0?'▼':'—';return `<span style="color:${col};font-weight:700">${arr} ${d>0?'+':''}${d}${suffix||''}</span>`;};
 const svgBars=(groups,maxOverride)=>{const W=520,H=200,padL=30,padR=8,padT=22,padB=38;const plotW=W-padL-padR,plotH=H-padT-padB;const maxV=maxOverride||Math.max(1,...groups.flatMap(g=>[g.cur,g.prev]));const gw=plotW/groups.length;const bw=Math.min(24,gw/3.2);const yv=v=>padT+plotH-(v/maxV)*plotH;let s=`<svg width="100%" viewBox="0 0 ${W} ${H}" font-family="Arial,sans-serif">`;s+=`<line x1="${padL}" y1="${padT+plotH}" x2="${W-padR}" y2="${padT+plotH}" stroke="#ddd"/>`;groups.forEach((g,i)=>{const cx=padL+gw*i+gw/2,xp=cx-bw-2,xc=cx+2;s+=`<rect x="${xp}" y="${yv(g.prev)}" width="${bw}" height="${padT+plotH-yv(g.prev)}" fill="#c9c9c9" rx="2"/>`;s+=`<rect x="${xc}" y="${yv(g.cur)}" width="${bw}" height="${padT+plotH-yv(g.cur)}" fill="#e8c547" rx="2"/>`;s+=`<text x="${xp+bw/2}" y="${yv(g.prev)-3}" font-size="9" fill="#888" text-anchor="middle">${g.prev}${g.suf||''}</text>`;s+=`<text x="${xc+bw/2}" y="${yv(g.cur)-3}" font-size="9" fill="#333" text-anchor="middle">${g.cur}${g.suf||''}</text>`;s+=`<text x="${cx}" y="${padT+plotH+14}" font-size="9.5" fill="#555" text-anchor="middle">${g.label}</text>`;});s+=`</svg>`;return s;};
-const members=OWNERS.map(o=>{const ot=all.filter(t=>t.owner===o);if(!ot.length)return null;const d=ot.filter(t=>t.stage==='Complete').length;const ov=ot.filter(t=>t.due&&_dM(t.due)<today&&t.stage!=='Complete'&&t.stage!=='On Hold').length;const ap=Math.round(ot.reduce((s,t)=>s+(STAGE_PCT[t.stage]||0),0)/ot.length);return{o,total:ot.length,done:d,active:ot.length-d,rate:Math.round(d/ot.length*100),avg:ap,overdue:ov};}).filter(Boolean).sort((a,b)=>b.rate-a.rate||b.total-a.total);
+const members=OWNERS.map(o=>{const ot=all.filter(t=>_isPIC(t,o));if(!ot.length)return null;const d=ot.filter(t=>t.stage==='Complete').length;const ov=ot.filter(t=>t.due&&_dM(t.due)<today&&t.stage!=='Complete'&&t.stage!=='On Hold').length;const ap=Math.round(ot.reduce((s,t)=>s+(STAGE_PCT[t.stage]||0),0)/ot.length);return{o,total:ot.length,done:d,active:ot.length-d,rate:Math.round(d/ot.length*100),avg:ap,overdue:ov};}).filter(Boolean).sort((a,b)=>b.rate-a.rate||b.total-a.total);
 const projs=[...new Set(all.map(t=>t.project))].map(p=>{const pt=all.filter(t=>t.project===p);const d=pt.filter(t=>t.stage==='Complete').length;const ap=Math.round(pt.reduce((s,t)=>s+(STAGE_PCT[t.stage]||0),0)/pt.length);return{p,total:pt.length,done:d,pct:ap};}).sort((a,b)=>b.pct-a.pct);
 const genStr=new Date().toLocaleString('en-GB',{timeZone:'Asia/Bangkok',day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
 const monLbl=cmStart.toLocaleDateString('en-US',{month:'long',year:'numeric'});
@@ -2692,6 +2743,7 @@ document.querySelectorAll('.modal-bg').forEach(bg=>bg.addEventListener('click',e
 document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal-bg.open').forEach(m=>closeModal(m.id));});
 clock(); setInterval(clock,60000);
 initAttachZone();
+['f','a','e'].forEach(k=>_picMsRender(k)); // build the PIC multi-selects
 
 // ═════════════ NOTIFICATION SETTINGS ═════════════
 async function openTeamEmailsModal(){
@@ -2831,7 +2883,7 @@ async function loadFromSupabase(){
     if(e1) throw e1;
     if(e2) throw e2;
     projects=projs.map(p=>({name:p.name,color:p.color,id:p.id}));
-    const _all=tks.map(t=>({id:t.id,title:t.title||'(untitled)',owner:t.owner||'',lead:t.lead||'',project:t.project||'',stage:t.stage||'Job Brief',due:t.due||'',note:t.note||'',attachments:t.attachments||[],proof:t.proof||[],created_at:t.created_at||''}));
+    const _all=tks.map(t=>({id:t.id,title:t.title||'(untitled)',owner:t.owner||'',pics:(Array.isArray(t.pics)&&t.pics.length?t.pics.filter(Boolean):(t.owner?[t.owner]:[])),lead:t.lead||'',project:t.project||'',stage:t.stage||'Job Brief',due:t.due||'',note:t.note||'',attachments:t.attachments||[],proof:t.proof||[],created_at:t.created_at||''}));
     tasks=applyUserFilter(_all);
     checkForNewAssignedTasks();
     checkForOverdueTasks();
@@ -2997,7 +3049,7 @@ if(document.getElementById('new-task-overlay').classList.contains('show')) retur
 if(document.getElementById('overdue-overlay').classList.contains('show')) return;
 const acked=_getAcked();
 const cutoff=Date.now()-NOTIF_LOOKBACK_DAYS*24*60*60*1000;
-const fresh=tasks.filter(t=>t.owner===_currentUser && t.id && !acked.has(t.id)
+const fresh=tasks.filter(t=>_isPIC(t,_currentUser) && t.id && !acked.has(t.id)
 && t.created_at && new Date(t.created_at).getTime()>=cutoff);
 if(!fresh.length) return;
 fresh.sort((a,b)=>a.created_at<b.created_at?1:-1); // newest first
@@ -3055,8 +3107,8 @@ function _computeMyOverdue(){
 if(!_currentUser)return[];
 const today=new Date();today.setHours(0,0,0,0);
 const dMid=s=>{const d=new Date(s);return new Date(d.getFullYear(),d.getMonth(),d.getDate());};
-return tasks.filter(t=>t.due&&dMid(t.due)<today&&t.stage!=='Complete'&&t.stage!=='On Hold'&&(t.owner===_currentUser||t.lead===_currentUser))
-.map(t=>{const roles=[];if(t.owner===_currentUser)roles.push('PIC');if(t.lead===_currentUser)roles.push('Owner');return{t,role:roles.join(' & ')};})
+return tasks.filter(t=>t.due&&dMid(t.due)<today&&t.stage!=='Complete'&&t.stage!=='On Hold'&&(_isPIC(t,_currentUser)||t.lead===_currentUser))
+.map(t=>{const roles=[];if(_isPIC(t,_currentUser))roles.push('PIC');if(t.lead===_currentUser)roles.push('Owner');return{t,role:roles.join(' & ')};})
 .sort((a,b)=>new Date(a.t.due)-new Date(b.t.due));
 }
 function checkForOverdueTasks(){
@@ -3141,8 +3193,8 @@ function _computeMyDueToday(){
 if(!_currentUser)return[];
 const today=new Date();today.setHours(0,0,0,0);
 const dMid=s=>{const d=new Date(s);return new Date(d.getFullYear(),d.getMonth(),d.getDate());};
-return tasks.filter(t=>t.due&&dMid(t.due).getTime()===today.getTime()&&t.stage!=='Complete'&&t.stage!=='On Hold'&&(t.owner===_currentUser||t.lead===_currentUser))
-.map(t=>{const roles=[];if(t.owner===_currentUser)roles.push('PIC');if(t.lead===_currentUser)roles.push('Owner');return{t,role:roles.join(' & ')};});
+return tasks.filter(t=>t.due&&dMid(t.due).getTime()===today.getTime()&&t.stage!=='Complete'&&t.stage!=='On Hold'&&(_isPIC(t,_currentUser)||t.lead===_currentUser))
+.map(t=>{const roles=[];if(_isPIC(t,_currentUser))roles.push('PIC');if(t.lead===_currentUser)roles.push('Owner');return{t,role:roles.join(' & ')};});
 }
 function checkForDueTodayTasks(){
 if(!_currentUser)return;
@@ -3429,8 +3481,8 @@ if(row.changed_by===_currentUser)return; // don't notify whoever made the change
 const t=(tasks||[]).find(x=>String(x.id)===String(row.task_id));
 if(!t)return;
 // owner field = PIC, lead field = Owner. Notify either.
-if(_currentUser!==t.owner&&_currentUser!==t.lead)return;
-const role=_currentUser===t.owner?'you are PIC':'you are Owner';
+if(!_isPIC(t,_currentUser)&&_currentUser!==t.lead)return;
+const role=_isPIC(t,_currentUser)?'you are PIC':'you are Owner';
 _showStageToast(row.task_title||t.title||'Task',`${row.old_value||'?'} → ${row.new_value||'?'}`,`Moved by ${row.changed_by||'someone'} · ${role}`);
 }
 function _showStageToast(title,change,sub){
