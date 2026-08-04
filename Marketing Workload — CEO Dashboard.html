@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260703w -->
+<!-- v20260703x -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -428,6 +428,16 @@ button{font-family:'DBHeavent','Sarabun',sans-serif}
 #overdue-overlay.show #overdue-toast{transform:scale(1);opacity:1}
 @keyframes ovpulse{0%,100%{box-shadow:0 24px 70px rgba(0,0,0,.75),0 0 0 0 rgba(240,112,112,.55)}50%{box-shadow:0 24px 70px rgba(0,0,0,.75),0 0 0 9px rgba(240,112,112,0)}}
 #overdue-toast.pulse{animation:ovpulse .55s ease}
+/* Due-today login pop-up (informational — dismissible) */
+#duetoday-overlay{position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(8,8,14,.55);backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:opacity .25s}
+#duetoday-overlay.show{opacity:1;pointer-events:auto}
+#duetoday-toast{width:460px;max-width:94vw;background:var(--surf);border:1px solid var(--gold);border-radius:var(--rxl);padding:28px;box-shadow:0 24px 70px rgba(0,0,0,.75);display:flex;flex-direction:column;gap:12px;transform:scale(.85);opacity:0;transition:transform .3s cubic-bezier(.34,1.4,.64,1),opacity .25s}
+#duetoday-overlay.show #duetoday-toast{transform:scale(1);opacity:1}
+.duetoday-item{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--surf2);border-left:3px solid var(--gold);border-radius:6px;padding:9px 11px}
+.duetoday-item .dt-ttl{font-size:13px;font-weight:600;color:var(--t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.duetoday-item .dt-meta{font-size:11px;color:var(--t3);display:flex;align-items:center;gap:4px;margin-top:2px}
+.duetoday-item .dt-role{color:var(--gold);font-weight:700}
+.duetoday-item .dt-stage{font-size:11px;color:var(--t2);background:var(--surf3);border-radius:10px;padding:2px 9px;white-space:nowrap;flex-shrink:0}
 .overdue-item{display:flex;flex-direction:column;gap:7px;background:var(--surf2);border-left:3px solid #f07070;border-radius:6px;padding:10px 12px;transition:opacity .3s,transform .3s}
 .overdue-item.resolved{opacity:0;transform:translateX(10px)}
 .overdue-item .oi-ttl{font-size:13px;font-weight:600;color:var(--t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -913,7 +923,7 @@ if(window._pendingLoad) window._pendingLoad();
 
 <script>
 // ═════════════ DATA ═════════════
-const APP_VERSION='v20260703w'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
+const APP_VERSION='v20260703x'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
 const STAGES=['Job Brief','Design','Production','Review','Approval Stage','On Hold','Complete'];
 const SKEY=s=>({
 'Job Brief':'jobbrief','Design':'design','Production':'production','Review':'review',
@@ -2825,6 +2835,7 @@ async function loadFromSupabase(){
     tasks=applyUserFilter(_all);
     checkForNewAssignedTasks();
     checkForOverdueTasks();
+    checkForDueTodayTasks();
   }catch(err){
     _sync('err','⚠ Offline');
     console.error('Supabase error:',err);
@@ -3120,6 +3131,49 @@ function dismissOverdue(){
 if(document.getElementById('overdue-continue-btn').disabled)return; // must resolve every overdue task first
 _releaseOverdueFocus();
 document.getElementById('overdue-overlay').classList.remove('show');
+checkForDueTodayTasks(); // surface today's workload right after the gate clears
+}
+// ── "Due today" login pop-up: what's on the user's plate for the login day.
+// Informational (dismissible), shown once per Bangkok day per user, and only
+// after the overdue gate is cleared so the two never stack. ──
+const _dueTodayKey=()=>'mkt_duetoday_'+(_currentUser||'_');
+function _computeMyDueToday(){
+if(!_currentUser)return[];
+const today=new Date();today.setHours(0,0,0,0);
+const dMid=s=>{const d=new Date(s);return new Date(d.getFullYear(),d.getMonth(),d.getDate());};
+return tasks.filter(t=>t.due&&dMid(t.due).getTime()===today.getTime()&&t.stage!=='Complete'&&t.stage!=='On Hold'&&(t.owner===_currentUser||t.lead===_currentUser))
+.map(t=>{const roles=[];if(t.owner===_currentUser)roles.push('PIC');if(t.lead===_currentUser)roles.push('Owner');return{t,role:roles.join(' & ')};});
+}
+function checkForDueTodayTasks(){
+if(!_currentUser)return;
+// The overdue gate and new-brief pop-up take priority; retry on the next poll.
+if(document.getElementById('overdue-overlay').classList.contains('show'))return;
+if(document.getElementById('new-task-overlay').classList.contains('show'))return;
+if(document.getElementById('duetoday-overlay').classList.contains('show'))return;
+const day=_bkkDay();
+try{if(localStorage.getItem(_dueTodayKey())===day)return;}catch(e){}
+const mine=_computeMyDueToday();
+if(!mine.length)return;
+try{localStorage.setItem(_dueTodayKey(),day);}catch(e){}
+const n=mine.length;
+document.getElementById('duetoday-ttl').textContent=`${n} task${n>1?'s are':' is'} due today — plan your day.`;
+document.getElementById('duetoday-list').innerHTML=mine.map(({t,role})=>{
+const proj=projects.find(p=>p.name===t.project);
+const pc=proj?proj.color:'#888';
+return`<div class="duetoday-item"><div style="min-width:0">
+<div class="dt-ttl">${esc(t.title||'(untitled)')}</div>
+<div class="dt-meta"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${pc};flex-shrink:0"></span>${esc(t.project||'No project')} · <span class="dt-role">${esc(role)}</span></div>
+</div><div class="dt-stage">${esc(t.stage)}</div></div>`;
+}).join('');
+document.getElementById('duetoday-overlay').classList.add('show');
+}
+function dismissDueToday(){document.getElementById('duetoday-overlay').classList.remove('show');}
+function dueTodayGoToBoard(){
+dismissDueToday();
+activeProj='All';
+const bfo=document.getElementById('bf-owner');if(bfo)bfo.value='';
+const boardTab=document.querySelector('.ptab[onclick*="board"]');
+if(boardTab)showView('board',boardTab);
 }
 function handleLoginKey(e){if(e.key==='Enter')doLogin();}
 
@@ -3428,6 +3482,19 @@ setTimeout(()=>{el.style.transition='opacity .3s,transform .3s';el.style.opacity
 <div style="font-size:12px;color:var(--t3);text-align:center">Push the due date forward or change the stage for each task above.</div>
 <div class="toast-acts">
 <button class="toast-view" id="overdue-continue-btn" style="background:#f07070;color:#fff" disabled onclick="dismissOverdue()"><i class="ti ti-check" style="vertical-align:-2px"></i> Continue to Dashboard</button>
+</div>
+</div>
+</div>
+
+<!-- DUE-TODAY LOGIN NOTIFICATION (informational, once per day) -->
+<div id="duetoday-overlay">
+<div id="duetoday-toast">
+<div class="toast-hdr"><i class="ti ti-calendar-due"></i> Due today</div>
+<div class="toast-ttl" id="duetoday-ttl"></div>
+<div class="toast-meta" id="duetoday-list" style="max-height:320px;overflow:auto;gap:8px"></div>
+<div class="toast-acts">
+<button class="toast-view" onclick="dueTodayGoToBoard()"><i class="ti ti-layout-kanban" style="vertical-align:-2px"></i> Go to board</button>
+<button class="toast-dismiss" onclick="dismissDueToday()"><i class="ti ti-check" style="vertical-align:-2px"></i> Got it</button>
 </div>
 </div>
 </div>
