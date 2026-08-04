@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260703y -->
+<!-- v20260703z -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -305,9 +305,13 @@ nav h1{font-size:17px;font-weight:600;letter-spacing:-.01em}
 .pic-ms-caret{color:var(--t3);font-size:14px;flex-shrink:0}
 .pic-ms-panel{display:none;position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:400;background:var(--surf);border:1px solid var(--b2);border-radius:var(--rsm);box-shadow:0 10px 28px rgba(0,0,0,.5);max-height:210px;overflow-y:auto;padding:4px}
 .pic-ms.open .pic-ms-panel{display:block}
-.pic-ms-opt{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:var(--rsm);cursor:pointer;font-size:14px;color:var(--t1)}
-.pic-ms-opt:hover{background:var(--surf2)}
-.pic-ms-opt input{cursor:pointer;accent-color:var(--gold)}
+/* Selectors below are deliberately 2-class deep so they outrank the generic
+   `.field label` / `.field input` form rules (which would otherwise stretch the
+   checkbox full-width and push each name to the far right). */
+.pic-ms-panel .pic-ms-opt{display:flex;align-items:center;gap:9px;padding:6px 9px;border-radius:var(--rsm);cursor:pointer;font-size:14px;font-weight:500;color:var(--t1);text-align:left;width:auto}
+.pic-ms-panel .pic-ms-opt:hover{background:var(--surf2)}
+.pic-ms-panel .pic-ms-opt input[type=checkbox]{width:15px;min-width:15px;height:15px;flex:0 0 auto;margin:0;padding:0;background:none;border:none;border-radius:0;cursor:pointer;accent-color:var(--gold);appearance:auto;-webkit-appearance:checkbox}
+.pic-ms-panel .pic-ms-opt span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 /* NOTE MODAL */
 .note-modal{width:380px}
 /* Clickable link chips shown under a note field (Edit / Add / Note pop-ups) */
@@ -924,7 +928,7 @@ if(window._pendingLoad) window._pendingLoad();
 
 <script>
 // ═════════════ DATA ═════════════
-const APP_VERSION='v20260703y'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
+const APP_VERSION='v20260703z'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
 const STAGES=['Job Brief','Design','Production','Review','Approval Stage','On Hold','Complete'];
 const SKEY=s=>({
 'Job Brief':'jobbrief','Design':'design','Production':'production','Review':'review',
@@ -1133,7 +1137,7 @@ chips.innerHTML=sel.length
 :'<span class="pic-ms-ph">— Select —</span>';
 // Offer the standard options plus any legacy name already assigned (e.g. Ming).
 const opts=PIC_OPTIONS.concat(sel.filter(n=>!PIC_OPTIONS.includes(n)));
-panel.innerHTML=opts.map(n=>`<label class="pic-ms-opt" onclick="event.stopPropagation()"><input type="checkbox" ${sel.includes(n)?'checked':''} onchange="_picMsToggleName('${k}','${esc(n)}',this.checked)">${esc(n)}</label>`).join('');
+panel.innerHTML=opts.map(n=>`<label class="pic-ms-opt" onclick="event.stopPropagation()"><input type="checkbox" ${sel.includes(n)?'checked':''} onchange="_picMsToggleName('${k}','${esc(n)}',this.checked)"><span>${esc(n)}</span></label>`).join('');
 }
 function _picMsToggleName(k,n,on){
 const sel=_picSel[k]||[];
