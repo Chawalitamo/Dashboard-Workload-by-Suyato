@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260804d -->
+<!-- v20260804e -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -10,7 +10,9 @@
 <link href="./Marketing Workload — CEO Dashboard_files/css2" rel="stylesheet">
 <link href="./Marketing Workload — CEO Dashboard_files/css2" rel="stylesheet"><style>@font-face{font-family:'DBHeavent';font-weight:400;src:local('DB Heavent'),local('DBHeavent')}@font-face{font-family:'DBHeavent';font-weight:500;src:local('DB Heavent Med'),local('DBHeaventMed')}@font-face{font-family:'DBHeavent';font-weight:700;src:local('DB Heavent Bd'),local('DBHeaventBd')}</style>
 <script src="./Marketing Workload — CEO Dashboard_files/chart.umd.min.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.9.0/tabler-icons.min.css">
+<!-- Icon font served from this repo, not a CDN: corporate networks that block
+     jsdelivr were leaving every toolbar icon invisible. -->
+<link rel="stylesheet" href="./Marketing Workload — CEO Dashboard_files/tabler-icons.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css">
 <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js"></script>
 <style>
@@ -920,7 +922,7 @@ if(window._pendingLoad) window._pendingLoad();
 <p style="margin:6px 0 0;font-size:12px;color:var(--t3)">Use <strong>Power Automate</strong> to post to a group chat: make.powerautomate.com → New flow → HTTP trigger → Post message in Teams group chat → copy the HTTP POST URL here.</p>
 </div>
 
-<p style="font-size:14px;color:var(--t3);margin:0 0 10px">📧 <strong style="color:var(--t2)">Email reminders</strong> — sent when an admin clicks <strong style="color:var(--gold)">“Send Reminders Now”</strong> below. Leave blank to skip a member.</p>
+<p style="font-size:14px;color:var(--t3);margin:0 0 10px">📧 <strong style="color:var(--t2)">Email reminders</strong> — sent automatically every morning at <strong style="color:var(--gold)">10:00 AM</strong> (Bangkok), or on demand via <strong style="color:var(--gold)">“Send Reminders Now”</strong>. Leave blank to skip a member.</p>
 <div id="team-emails-list" style="display:flex;flex-direction:column;gap:7px;max-height:280px;overflow-y:auto;padding-right:4px"></div>
 <div id="notify-status" style="display:none;margin-top:10px;font-size:14px;padding:7px 10px;border-radius:6px;background:var(--surf2)"></div>
 <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--b1);display:flex;gap:8px;justify-content:space-between;align-items:center;flex-wrap:wrap">
@@ -970,7 +972,7 @@ if(window._pendingLoad) window._pendingLoad();
 
 <script>
 // ═════════════ DATA ═════════════
-const APP_VERSION='v20260804d'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
+const APP_VERSION='v20260804e'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
 const STAGES=['Job Brief','Design','Production','Review','Approval Stage','On Hold','Complete'];
 const SKEY=s=>({
 'Job Brief':'jobbrief','Design':'design','Production':'production','Review':'review',
@@ -1290,7 +1292,15 @@ function _picMsFlag(k,ok){const f=document.querySelector('#'+k+'-pic-ms .pic-ms-
 function _normDue(v){if(!v)return v;const m=/^(\d{4})(-\d{2}-\d{2})$/.exec(v);if(m&&+m[1]>2200)return(+m[1]-543)+m[2];return v;}
 // Calendar-dropdown date pickers (flatpickr). Click-only, always Gregorian — no typed Buddhist years.
 function _initDP(){
-if(typeof flatpickr==='undefined')return;
+// If the flatpickr CDN is blocked, fall back to typeable/native date fields
+// rather than leaving read-only inputs nobody can fill in.
+if(typeof flatpickr==='undefined'){
+document.querySelectorAll('input.dp, input.due-inp').forEach(el=>{
+if(el._dpFallback)return;el._dpFallback=true;
+el.removeAttribute('readonly');el.type='date';el.placeholder='YYYY-MM-DD';
+});
+return;
+}
 document.querySelectorAll('input.dp, input.due-inp').forEach(el=>{
 if(el._flatpickr)return;
 flatpickr(el,{dateFormat:'Y-m-d',allowInput:false,disableMobile:true});
@@ -1560,9 +1570,15 @@ const loginWeekCardHTML=_isAdminUser()?`
 ${prevWeekLogin.length?`<div class="chart-wrap" style="height:${Math.max(160,prevWeekLogin.length*30)}px"><canvas id="loginweek-chart"></canvas></div>`:`<div style="color:var(--t3);padding:16px 2px;font-size:13px">No login data recorded for last week yet — this fills in as the team uses the dashboard.</div>`}
 </div></div>`:'';
 // ── Destroy old charts before replacing DOM ──
+// Guarded: if Chart.js failed to load, the dashboard must still render its
+// numbers and cards. Previously an undefined `Chart` threw here — before the
+// HTML below was written — leaving the page stuck on "Loading dashboard…".
+const _chartsOK=(typeof Chart!=='undefined'&&Chart&&typeof Chart.getChart==='function');
+if(_chartsOK){
 ['donut-chart','bar-chart','bar-chart2','radar-chart','pipeline-chart','bubble-chart','period-chart','loginweek-chart'].forEach(id=>{
-const el=document.getElementById(id);if(el){const inst=Chart.getChart(el);if(inst)inst.destroy();}
+try{const el=document.getElementById(id);if(el){const inst=Chart.getChart(el);if(inst)inst.destroy();}}catch(e){}
 });
+}
 document.getElementById('dash-inner').innerHTML=`
 ${_isAdminUser()?`<div style="display:flex;justify-content:flex-end;margin-bottom:12px"><button onclick="exportPDFReport()" class="act-export-btn" style="font-size:14px"><i class="ti ti-file-type-pdf" aria-hidden="true"></i>Export PDF report</button></div>`:''}
 <div class="dash-grid-top">
@@ -1669,7 +1685,15 @@ ${loginWeekCardHTML}
 </div>
 </div>
 `;
+if(!_chartsOK){
+// Charts unavailable (chart.umd.min.js blocked or failed) — say so plainly
+// instead of leaving silent blank boxes, and keep every number above working.
+document.querySelectorAll('#dash-inner .chart-wrap').forEach(w=>{
+w.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;min-height:90px;color:var(--t3);font-size:12px;text-align:center;padding:10px">Charts unavailable — refresh the page.<br>All figures above are up to date.</div>';
+});
+}
 try{
+if(!_chartsOK)throw new Error('Chart.js unavailable');
 const CHART_TEXT=getComputedStyle(document.documentElement).getPropertyValue('--t2').trim()||'#9e9b94';
 const CHART_GRID=getComputedStyle(document.documentElement).getPropertyValue('--chart-grid').trim()||'rgba(255,255,255,0.18)';
 Chart.defaults.font.family="'DBHeavent','Sarabun',sans-serif";
