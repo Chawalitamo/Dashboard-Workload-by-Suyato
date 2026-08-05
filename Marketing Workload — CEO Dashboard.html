@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260804a -->
+<!-- v20260804b -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -312,6 +312,18 @@ nav h1{font-size:17px;font-weight:600;letter-spacing:-.01em}
 .pic-ms-panel .pic-ms-opt:hover{background:var(--surf2)}
 .pic-ms-panel .pic-ms-opt input[type=checkbox]{width:15px;min-width:15px;height:15px;flex:0 0 auto;margin:0;padding:0;background:none;border:none;border-radius:0;cursor:pointer;accent-color:var(--gold);appearance:auto;-webkit-appearance:checkbox}
 .pic-ms-panel .pic-ms-opt span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* ── Recycle Bin ── */
+.rb-group{margin-bottom:16px}
+.rb-group h4{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);margin-bottom:8px}
+.rb-item{display:flex;align-items:center;gap:10px;background:var(--surf2);border:1px solid var(--b1);border-left:3px solid var(--t4);border-radius:var(--rsm);padding:9px 12px;margin-bottom:6px}
+.rb-item.proj{border-left-color:#f0a840}
+.rb-item .rb-main{flex:1;min-width:0}
+.rb-item .rb-ttl{font-size:14px;font-weight:600;color:var(--t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rb-item .rb-meta{font-size:11px;color:var(--t3);margin-top:2px}
+.rb-restore{background:var(--gold);color:#13131f;border:none;border-radius:var(--rsm);padding:6px 14px;font-family:'DBHeavent','Sarabun',sans-serif;font-size:13px;font-weight:700;cursor:pointer;flex-shrink:0}
+.rb-restore:hover{background:var(--gold2)}
+.rb-restore:disabled{opacity:.5;cursor:default}
+.rb-empty{color:var(--t3);font-size:14px;padding:26px 0;text-align:center}
 /* NOTE MODAL */
 .note-modal{width:380px}
 /* Clickable link chips shown under a note field (Edit / Add / Note pop-ups) */
@@ -601,6 +613,7 @@ if(window._pendingLoad) window._pendingLoad();
 <button id="activity-tab" class="ptab" onclick="showView(&#39;activity&#39;,this)" style="display:none"><i class="ti ti-history" aria-hidden="true"></i>Activity Log</button>
 <button id="worklog-tab" class="ptab" onclick="showView(&#39;worklog&#39;,this)" style="display:none"><i class="ti ti-clock-hour-4" aria-hidden="true"></i>Work Log</button>
 <div style="flex:1"></div>
+<button class="ptab" onclick="openRecycleBin()" title="Recycle Bin — restore deleted tasks or projects"><i class="ti ti-trash" aria-hidden="true"></i>Recycle Bin</button>
 <button class="ptab" onclick="openTeamEmailsModal()" title="Notification settings" style="margin-right:6px"><i class="ti ti-bell-ringing" aria-hidden="true"></i>Notify</button>
 <div id="project-nav-tabs" style="display:flex;align-items:center;gap:4px;padding:0 4px"><div style="display:flex;align-items:center;gap:0">
 <button class="pnav-tab" onclick="quickSwitchProject(&#39;Spot &amp; Production&#39;)" title="Spot &amp; Production" style="border-radius:var(--rsm) 0 0 var(--rsm);border-right:none"><div class="pnav-dot" style="background:#5aaaf0"></div>Spot &amp; Productio…</button>
@@ -926,9 +939,22 @@ if(window._pendingLoad) window._pendingLoad();
 </div>
 </div>
 
+<!-- RECYCLE BIN -->
+<div class="modal-bg" id="recycle-modal">
+<div class="modal" style="width:680px">
+<div class="modal-head"><h3>🗑 Recycle Bin</h3><button class="modal-close" onclick="closeModal('recycle-modal')">&#x2715;</button></div>
+<div style="font-size:13px;color:var(--t3);margin-bottom:12px">Deleted tasks and projects are kept here instead of being destroyed — click <strong style="color:var(--t2)">Restore</strong> to put anything back exactly as it was, attachments included.</div>
+<div id="recycle-body" style="max-height:420px;overflow-y:auto"></div>
+<div class="mactions">
+<button class="btn-sec" onclick="renderRecycleBin()"><i class="ti ti-refresh" aria-hidden="true"></i> Refresh</button>
+<button class="btn-pri" onclick="closeModal('recycle-modal')">Close</button>
+</div>
+</div>
+</div>
+
 <script>
 // ═════════════ DATA ═════════════
-const APP_VERSION='v20260804a'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
+const APP_VERSION='v20260804b'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
 const STAGES=['Job Brief','Design','Production','Review','Approval Stage','On Hold','Complete'];
 const SKEY=s=>({
 'Job Brief':'jobbrief','Design':'design','Production':'production','Review':'review',
@@ -1044,14 +1070,15 @@ if(!_isAdminUser()){alert('Only a Super Admin can delete a project.\n\nAsk Sun o
 const name=editingProjectName;
 const taskCount=tasks.filter(t=>t.project===name).length;
 if(taskCount>0){
-const typed=prompt(`⚠ DELETE PROJECT "${name}"\n\nThis permanently deletes the project AND all ${taskCount} task${taskCount!==1?'s':''} in it, including their attachments. This cannot be undone.\n\nTo confirm, type the project name exactly:`);
+const typed=prompt(`⚠ DELETE PROJECT "${name}"\n\nThis removes the project AND all ${taskCount} task${taskCount!==1?'s':''} in it from every view.\n\nIt goes to the Recycle Bin (🗑 in the tab bar), so it can be restored if this is a mistake.\n\nTo confirm, type the project name exactly:`);
 if(typed===null)return;
 if(typed.trim()!==name){alert('Name did not match — nothing was deleted.');return;}
-}else if(!confirm(`Delete the empty project "${name}"? This cannot be undone.`))return;
+}else if(!confirm(`Move the empty project "${name}" to the Recycle Bin?`))return;
 tasks.filter(t=>t.project===editingProjectName).forEach(t=>logActivity(t.id,t.title,t.project,'deleted',null,null,null));
+const _batch=_softDelPatch(_uuid()); // one batch id so the project restores together with its tasks
 await Promise.all([
-  window._sb.from('mkt_projects').delete().eq('name',editingProjectName),
-  window._sb.from('mkt_tasks').delete().eq('project',editingProjectName)
+  window._sb.from('mkt_projects').update(_batch).eq('name',editingProjectName),
+  window._sb.from('mkt_tasks').update(_batch).eq('project',editingProjectName).is('deleted_at',null)
 ]);
 tasks=tasks.filter(t=>t.project!==editingProjectName);
 projects=projects.filter(x=>x.name!==editingProjectName);
@@ -1063,7 +1090,15 @@ renderProjTabs();
 renderKanban();
 renderDash();
 }
-// Deleting a project also deletes every task inside it, so this is guarded:
+// ── Soft delete ────────────────────────────────────────────────────────────
+// Nothing is ever physically removed: rows are stamped deleted_at/deleted_by and
+// hidden from every view, so anything can be restored from the Recycle Bin. A
+// project delete stamps the project and its tasks with the same deleted_batch so
+// they come back together.
+function _uuid(){try{if(crypto&&crypto.randomUUID)return crypto.randomUUID();}catch(e){}
+return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{const r=Math.random()*16|0;return (c==='x'?r:(r&0x3|0x8)).toString(16);});}
+function _softDelPatch(batch){return{deleted_at:new Date().toISOString(),deleted_by:_currentUser||null,deleted_batch:batch||_uuid()};}
+// Deleting a project also removes every task inside it, so this is guarded:
 // admins only, and when the project still holds tasks the exact project name
 // must be typed. (A single mis-click on a header ✕ once wiped 136 tasks.)
 async function quickDeleteProject(name){
@@ -1072,16 +1107,84 @@ if(!_isAdminUser()){alert('Only a Super Admin can delete a project.\n\nAsk Sun o
 const doomed=tasks.filter(t=>t.project===name);
 const taskCount=doomed.length;
 if(taskCount>0){
-const typed=prompt(`⚠ DELETE PROJECT "${name}"\n\nThis permanently deletes the project AND all ${taskCount} task${taskCount!==1?'s':''} in it, including their attachments. This cannot be undone.\n\nIf you only want to stop seeing it, close this and use ✏️ Edit instead.\n\nTo confirm, type the project name exactly:`);
+const typed=prompt(`⚠ DELETE PROJECT "${name}"\n\nThis removes the project AND all ${taskCount} task${taskCount!==1?'s':''} in it from every view.\n\nIt goes to the Recycle Bin (🗑 in the tab bar), so it can be restored if this is a mistake.\n\nIf you only want to stop seeing it, close this and use ✏️ Edit instead.\n\nTo confirm, type the project name exactly:`);
 if(typed===null)return;
 if(typed.trim()!==name){alert('Name did not match — nothing was deleted.');return;}
-}else if(!confirm(`Delete the empty project "${name}"? This cannot be undone.`))return;
+}else if(!confirm(`Move the empty project "${name}" to the Recycle Bin?`))return;
 doomed.forEach(t=>logActivity(t.id,t.title,t.project,'deleted',null,null,null));
-try{await Promise.all([window._sb.from('mkt_projects').delete().eq('name',name),window._sb.from('mkt_tasks').delete().eq('project',name)]);}catch(err){console.error(err);}
+const _batch=_softDelPatch(_uuid());
+try{await Promise.all([window._sb.from('mkt_projects').update(_batch).eq('name',name),window._sb.from('mkt_tasks').update(_batch).eq('project',name).is('deleted_at',null)]);}catch(err){console.error(err);}
 tasks=tasks.filter(t=>t.project!==name);
 projects=projects.filter(x=>x.name!==name);
 if(activeProj===name)activeProj='All';
 populateAllProjectSelects();renderProjectNavTabs();renderProjTabs();renderKanban();renderDash();
+}
+// ── Recycle Bin: list and restore soft-deleted projects/tasks ──────────────
+function openRecycleBin(){document.getElementById('recycle-modal').classList.add('open');renderRecycleBin();}
+function _rbAgo(iso){const d=new Date(iso),m=Math.floor((Date.now()-d.getTime())/60000);
+if(m<1)return 'just now';if(m<60)return m+' min ago';const h=Math.floor(m/60);if(h<24)return h+(h===1?' hour ago':' hours ago');
+const dd=Math.floor(h/24);return dd+(dd===1?' day ago':' days ago');}
+async function renderRecycleBin(){
+const body=document.getElementById('recycle-body');if(!body)return;
+body.innerHTML='<div class="rb-empty">Loading…</div>';
+let dp=[],dt=[];
+try{
+const [{data:p,error:e1},{data:t,error:e2}]=await Promise.all([
+window._sb.from('mkt_projects').select('name,color,deleted_at,deleted_by,deleted_batch').not('deleted_at','is',null).order('deleted_at',{ascending:false}).limit(50),
+window._sb.from('mkt_tasks').select('id,title,project,stage,due,deleted_at,deleted_by,deleted_batch').not('deleted_at','is',null).order('deleted_at',{ascending:false}).limit(300)
+]);
+if(e1)throw e1;if(e2)throw e2;dp=p||[];dt=t||[];
+}catch(e){body.innerHTML='<div class="rb-empty" style="color:#f07070">Could not load the Recycle Bin.</div>';return;}
+// Tasks removed as part of a project delete are shown under that project, not individually.
+const projBatches=new Set(dp.map(p=>p.deleted_batch).filter(Boolean));
+const loose=dt.filter(t=>!t.deleted_batch||!projBatches.has(t.deleted_batch));
+if(!dp.length&&!loose.length){body.innerHTML='<div class="rb-empty">✓ Nothing deleted — the bin is empty.</div>';return;}
+let html='';
+if(dp.length){
+html+='<div class="rb-group"><h4>Projects</h4>'+dp.map(p=>{
+const n=dt.filter(t=>t.deleted_batch&&t.deleted_batch===p.deleted_batch).length;
+return `<div class="rb-item proj">
+<div class="rb-main"><div class="rb-ttl">📁 ${esc(p.name)}</div>
+<div class="rb-meta">${n} task${n===1?'':'s'} · deleted ${_rbAgo(p.deleted_at)}${p.deleted_by?' by '+esc(p.deleted_by):''}</div></div>
+<button class="rb-restore" onclick="restoreProject('${esc(p.name).replace(/'/g,"&#39;")}','${p.deleted_batch||''}',this)">Restore</button>
+</div>`;}).join('')+'</div>';
+}
+if(loose.length){
+html+='<div class="rb-group"><h4>Tasks</h4>'+loose.map(t=>`<div class="rb-item">
+<div class="rb-main"><div class="rb-ttl">${esc(t.title||'(untitled)')}</div>
+<div class="rb-meta">${esc(t.project||'—')} · ${esc(t.stage||'')}${t.due?' · due '+esc(t.due):''} · deleted ${_rbAgo(t.deleted_at)}${t.deleted_by?' by '+esc(t.deleted_by):''}</div></div>
+<button class="rb-restore" onclick="restoreTask('${t.id}',this)">Restore</button>
+</div>`).join('')+'</div>';
+}
+body.innerHTML=html;
+}
+const _rbClear={deleted_at:null,deleted_by:null,deleted_batch:null};
+async function restoreTask(id,btn){
+if(btn){btn.disabled=true;btn.textContent='Restoring…';}
+try{
+const{data,error}=await window._sb.from('mkt_tasks').update(_rbClear).eq('id',id).select().single();
+if(error)throw error;
+// If its project was deleted too, bring that back as well — otherwise the task would be invisible.
+if(data&&data.project){
+const{data:pr}=await window._sb.from('mkt_projects').select('name,deleted_at').eq('name',data.project).maybeSingle();
+if(pr&&pr.deleted_at)await window._sb.from('mkt_projects').update(_rbClear).eq('name',data.project);
+}
+if(data)logActivity(data.id,data.title,data.project,'updated','restored','deleted','restored');
+await loadFromSupabase();
+renderRecycleBin();
+}catch(e){alert('Could not restore: '+(e.message||e));if(btn){btn.disabled=false;btn.textContent='Restore';}}
+}
+async function restoreProject(name,batch,btn){
+if(btn){btn.disabled=true;btn.textContent='Restoring…';}
+try{
+const{error}=await window._sb.from('mkt_projects').update(_rbClear).eq('name',name);
+if(error)throw error;
+// Restore exactly the tasks that were removed with this project.
+if(batch)await window._sb.from('mkt_tasks').update(_rbClear).eq('deleted_batch',batch);
+logActivity(null,'Project: '+name,name,'updated','restored','deleted','restored');
+await loadFromSupabase();
+renderRecycleBin();
+}catch(e){alert('Could not restore: '+(e.message||e));if(btn){btn.disabled=false;btn.textContent='Restore';}}
 }
 let editingProjectName=null;
 let selectedEpColor=PROJECT_PALETTE[0];
@@ -1822,10 +1925,10 @@ await window._sb.from('mkt_tasks').update({[field]:val}).eq('id',id);
 if(String(_oldVal||'')!==String(val||'')) logActivity(id,t.title,t.project,'updated',field,_oldVal,val);
 }
 async function deleteTaskList(id){
-if(!confirm('Delete this task?')) return;
+if(!confirm('Move this task to the Recycle Bin?\n\nYou can restore it from 🗑 Recycle Bin.')) return;
 const _dt=tasks.find(t=>t.id===id);
 if(_dt) logActivity(_dt.id,_dt.title,_dt.project,'deleted',null,null,null);
-await window._sb.from('mkt_tasks').delete().eq('id',id);
+await window._sb.from('mkt_tasks').update(_softDelPatch()).eq('id',id);
 tasks=tasks.filter(t=>t.id!==id); renderList();
 }
 // Note
@@ -2061,11 +2164,11 @@ async function moveTask(rawId,dir){
   renderKanban();
 }
 async function doDelete(rawId){
-  if(!confirm('Delete this task?')) return;
+  if(!confirm('Move this task to the Recycle Bin?\n\nYou can restore it from 🗑 Recycle Bin.')) return;
   const t=findTask(rawId); if(!t) return;
   logActivity(t.id,t.title,t.project,'deleted',null,null,null);
   postToTeams('deleted',{title:t.title,owner:_picsLabel(t),project:t.project,stage:t.stage,due:t.due||''});
-  try{await window._sb.from('mkt_tasks').delete().eq('id',t.id);}catch(err){console.error(err);}
+  try{await window._sb.from('mkt_tasks').update(_softDelPatch()).eq('id',t.id);}catch(err){console.error(err);}
   tasks=tasks.filter(t=>String(t.id)!==String(rawId));
   renderKanban();
 }
@@ -2891,8 +2994,8 @@ async function loadFromSupabase(){
   // ── 1. Data fetch — only this can cause ⚠ Offline ──
   try{
     const [{data:projs,error:e1},{data:tks,error:e2}]=await Promise.all([
-      window._sb.from('mkt_projects').select('*').order('sort_order'),
-      window._sb.from('mkt_tasks').select('*').order('created_at')
+      window._sb.from('mkt_projects').select('*').is('deleted_at',null).order('sort_order'),
+      window._sb.from('mkt_tasks').select('*').is('deleted_at',null).order('created_at')
     ]);
     if(e1) throw e1;
     if(e2) throw e2;
