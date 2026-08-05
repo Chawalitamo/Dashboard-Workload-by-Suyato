@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260804b -->
+<!-- v20260804c -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -312,6 +312,14 @@ nav h1{font-size:17px;font-weight:600;letter-spacing:-.01em}
 .pic-ms-panel .pic-ms-opt:hover{background:var(--surf2)}
 .pic-ms-panel .pic-ms-opt input[type=checkbox]{width:15px;min-width:15px;height:15px;flex:0 0 auto;margin:0;padding:0;background:none;border:none;border-radius:0;cursor:pointer;accent-color:var(--gold);appearance:auto;-webkit-appearance:checkbox}
 .pic-ms-panel .pic-ms-opt span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* ── Kanban search box ── */
+.bsearch-wrap{position:relative;display:flex;align-items:center}
+.bsearch-ico{position:absolute;left:9px;font-size:15px;color:var(--t3);pointer-events:none}
+.bsearch{background:var(--surf2);border:1px solid var(--b1);border-radius:var(--rsm);padding:6px 28px 6px 29px;color:var(--t1);font-family:'DBHeavent','Sarabun',sans-serif;font-size:14px;outline:none;width:210px;transition:border-color .15s,width .15s}
+.bsearch::placeholder{color:var(--t3)}
+.bsearch:focus{border-color:var(--gold2);width:260px}
+.bsearch-clear{position:absolute;right:6px;background:none;border:none;color:var(--t3);cursor:pointer;font-size:12px;padding:2px 4px;line-height:1}
+.bsearch-clear:hover{color:#f07070}
 /* ── Recycle Bin ── */
 .rb-group{margin-bottom:16px}
 .rb-group h4{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);margin-bottom:8px}
@@ -679,7 +687,13 @@ if(window._pendingLoad) window._pendingLoad();
 <div style="display:flex;flex-direction:column;flex:1;overflow:hidden">
 <div class="board-top">
 <div class="proj-tabs-wrap" id="proj-tabs"></div>
-<div style="display:flex;gap:6px">
+<div style="display:flex;gap:6px;align-items:center">
+<div class="bsearch-wrap">
+<i class="ti ti-search bsearch-ico" aria-hidden="true"></i>
+<input id="bf-search" class="bsearch" type="text" placeholder="Search task name…" autocomplete="off" oninput="renderKanban()" onkeydown="if(event.key==='Escape')clearBoardSearch()">
+<button type="button" id="bf-search-clear" class="bsearch-clear" title="Clear search" onclick="clearBoardSearch()" style="display:none">&#x2715;</button>
+</div>
+<span id="bf-search-count" style="font-size:12px;color:var(--t3);white-space:nowrap"></span>
 <select class="fsel" id="bf-owner" onchange="renderKanban()">
 <option value="">All members</option>
 <option>Por</option><option>Sun</option><option>Jew</option><option>Nod</option>
@@ -954,7 +968,7 @@ if(window._pendingLoad) window._pendingLoad();
 
 <script>
 // ═════════════ DATA ═════════════
-const APP_VERSION='v20260804b'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
+const APP_VERSION='v20260804c'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
 const STAGES=['Job Brief','Design','Production','Review','Approval Stage','On Hold','Complete'];
 const SKEY=s=>({
 'Job Brief':'jobbrief','Design':'design','Production':'production','Review':'review',
@@ -1859,14 +1873,14 @@ if(!list.length){tbody.innerHTML=`<tr><td colspan="8" style="text-align:center;p
 
 // When showing "Complete" filter only, render flat (no split needed)
 if(listStageFilter==='Complete'){
-  tbody.innerHTML=list.map(t=>taskRowHTML(t)).join('');
+  tbody.innerHTML=list.slice().sort(_recentFirst).map(t=>taskRowHTML(t)).join('');
   _initDP();
   return;
 }
 
 // Split into active and completed
 const active=list.filter(t=>t.stage!=='Complete');
-const done=list.filter(t=>t.stage==='Complete');
+const done=list.filter(t=>t.stage==='Complete').slice().sort(_recentFirst);
 
 let html=active.map(t=>taskRowHTML(t)).join('');
 
@@ -1978,22 +1992,35 @@ const projs=['All',...projects.map(p=>p.name)];
 document.getElementById('proj-tabs').innerHTML=projs.map(p=>{
 const col=p==='All'?null:projColor(p);
 if(p==='All') return `<button class="pjtab${activeProj==='All'?' active':''}" onclick="switchProj('All',this)">All projects</button>`;
-return `<div style="display:inline-flex;align-items:center;gap:0;margin-right:2px"><button class="pjtab${p===activeProj?' active':''}" onclick="switchProj('${esc(p)}',this)" style="border-radius:var(--rsm) 0 0 var(--rsm);border-right:none"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${col};margin-right:5px;vertical-align:middle"></span>${esc(p)}</button><button onclick="quickDeleteProject('${esc(p)}')" title="Delete project" style="display:flex;align-items:center;justify-content:center;height:100%;padding:0 7px;background:none;border:1px solid var(--b1);border-left:none;border-radius:0 var(--rsm) var(--rsm) 0;color:#f07070;cursor:pointer;font-size:13px;font-weight:700;transition:all .15s" onmouseover="this.style.background='rgba(240,112,112,0.12)'" onmouseout="this.style.background='none'">&#x2715;</button></div>`;
+// No inline ✕ delete here — a mis-click on one of these once wiped 136 tasks.
+// Project deletion lives in ✏️ Edit project (admin-only, type-to-confirm).
+return `<button class="pjtab${p===activeProj?' active':''}" onclick="switchProj('${esc(p)}',this)" style="margin-right:2px"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${col};margin-right:5px;vertical-align:middle"></span>${esc(p)}</button>`;
 }).join('');
 }
 function switchProj(p,el){
 activeProj=p; document.querySelectorAll('.pjtab').forEach(x=>x.classList.remove('active')); el.classList.add('active'); renderKanban();
 }
+function clearBoardSearch(){const el=document.getElementById('bf-search');if(el){el.value='';el.focus();}renderKanban();}
+// Most-recent action first — `updated_at` is refreshed by a DB trigger on every edit.
+const _recentFirst=(a,b)=>new Date(b.updated_at||b.created_at||0)-new Date(a.updated_at||a.created_at||0);
 function renderKanban(){
 const fo=document.getElementById('bf-owner').value;
+const qEl=document.getElementById('bf-search');
+const q=(qEl?qEl.value:'').trim().toLowerCase();
 let list=tasks;
 if(activeProj!=='All') list=list.filter(t=>t.project===activeProj);
 if(fo) list=list.filter(t=>_isPIC(t,fo)||t.lead===fo);
+if(q) list=list.filter(t=>(t.title||'').toLowerCase().includes(q));
+// search box affordances: clear button + result count
+const clr=document.getElementById('bf-search-clear');if(clr)clr.style.display=q?'':'none';
+const cnt=document.getElementById('bf-search-count');
+if(cnt)cnt.textContent=q?`${list.length} match${list.length===1?'':'es'}`:'';
 // sync sidebar project dropdown to active project filter
 const fp=document.getElementById('f-project');
 if(fp&&activeProj!=='All'&&fp.querySelector(`option[value="${activeProj.replace(/"/g,'\\"')}"]`))fp.value=activeProj;
 document.getElementById('kanban').innerHTML=STAGES.map((stage,si)=>{
-const cards=list.filter(t=>t.stage===stage);
+// Completed work is browsed newest-first so the latest finished job is on top.
+const cards=stage==='Complete'?list.filter(t=>t.stage===stage).slice().sort(_recentFirst):list.filter(t=>t.stage===stage);
 const key=SKEY(stage);
 return `<div class="kcol" data-si="${si}"><div class="kcol-head"><div style="display:flex;align-items:center;gap:6px"><div style="width:7px;height:7px;border-radius:50%;flex-shrink:0" class="d-${key}"></div><span class="kcol-ttl">${stage==='AW Release / Event Live'?'AW Release':stage}</span></div><span class="kcol-cnt">${cards.length}</span></div><div class="kcol-body" style="min-height:80px">${cards.length===0?'<div class="kcol-empty">Empty</div>':cards.map(t=>kcardHTML(t,stage,si)).join('')}</div></div>`;
 }).join('');
@@ -3000,7 +3027,7 @@ async function loadFromSupabase(){
     if(e1) throw e1;
     if(e2) throw e2;
     projects=projs.map(p=>({name:p.name,color:p.color,id:p.id}));
-    const _all=tks.map(t=>({id:t.id,title:t.title||'(untitled)',owner:t.owner||'',pics:(Array.isArray(t.pics)&&t.pics.length?t.pics.filter(Boolean):(t.owner?[t.owner]:[])),lead:t.lead||'',project:t.project||'',stage:t.stage||'Job Brief',due:t.due||'',note:t.note||'',attachments:t.attachments||[],proof:t.proof||[],created_at:t.created_at||''}));
+    const _all=tks.map(t=>({id:t.id,title:t.title||'(untitled)',owner:t.owner||'',pics:(Array.isArray(t.pics)&&t.pics.length?t.pics.filter(Boolean):(t.owner?[t.owner]:[])),lead:t.lead||'',project:t.project||'',stage:t.stage||'Job Brief',due:t.due||'',note:t.note||'',attachments:t.attachments||[],proof:t.proof||[],created_at:t.created_at||'',updated_at:t.updated_at||t.created_at||''}));
     tasks=applyUserFilter(_all);
     checkForNewAssignedTasks();
     checkForOverdueTasks();
