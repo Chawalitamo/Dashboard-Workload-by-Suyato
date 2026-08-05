@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260804c -->
+<!-- v20260804d -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -67,6 +67,8 @@ nav h1{font-size:17px;font-weight:600;letter-spacing:-.01em}
 .page-tabs{display:flex;border-bottom:1px solid var(--b1);flex-shrink:0;padding:0 24px;background:var(--bg)}
 .ptab{display:flex;align-items:center;gap:7px;padding:10px 18px;font-size:15px;font-weight:500;color:var(--t3);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;margin-bottom:-1px}
 .ptab i{font-size:18px}
+/* Emoji tab icon — renders regardless of whether the icon font has loaded */
+.ptab .tab-emoji{font-size:15px;line-height:1}
 .ptab.active{color:var(--gold);border-bottom-color:var(--gold)}
 .ptab:hover:not(.active){color:var(--t2)}
 /* project nav tabs in header */
@@ -621,8 +623,8 @@ if(window._pendingLoad) window._pendingLoad();
 <button id="activity-tab" class="ptab" onclick="showView(&#39;activity&#39;,this)" style="display:none"><i class="ti ti-history" aria-hidden="true"></i>Activity Log</button>
 <button id="worklog-tab" class="ptab" onclick="showView(&#39;worklog&#39;,this)" style="display:none"><i class="ti ti-clock-hour-4" aria-hidden="true"></i>Work Log</button>
 <div style="flex:1"></div>
-<button class="ptab" onclick="openRecycleBin()" title="Recycle Bin — restore deleted tasks or projects"><i class="ti ti-trash" aria-hidden="true"></i>Recycle Bin</button>
-<button class="ptab" onclick="openTeamEmailsModal()" title="Notification settings" style="margin-right:6px"><i class="ti ti-bell-ringing" aria-hidden="true"></i>Notify</button>
+<button class="ptab" onclick="openRecycleBin()" title="Recycle Bin — restore deleted tasks or projects" style="margin-right:6px"><span class="tab-emoji" aria-hidden="true">🗑️</span>Recycle Bin</button>
+<button id="notify-tab" class="ptab" onclick="openTeamEmailsModal()" title="Notification settings" style="margin-right:6px;display:none"><i class="ti ti-bell-ringing" aria-hidden="true"></i>Notify</button>
 <div id="project-nav-tabs" style="display:flex;align-items:center;gap:4px;padding:0 4px"><div style="display:flex;align-items:center;gap:0">
 <button class="pnav-tab" onclick="quickSwitchProject(&#39;Spot &amp; Production&#39;)" title="Spot &amp; Production" style="border-radius:var(--rsm) 0 0 var(--rsm);border-right:none"><div class="pnav-dot" style="background:#5aaaf0"></div>Spot &amp; Productio…</button>
 <button onclick="openEditProject(&#39;Spot &amp; Production&#39;)" title="Edit project" style="display:flex;align-items:center;justify-content:center;padding:5px 7px;background:none;border:1px solid var(--b1);border-left:none;border-radius:0 var(--rsm) var(--rsm) 0;color:var(--t3);cursor:pointer;font-size:14px;transition:all .15s;margin:6px 0" onmouseover="this.style.background=&#39;var(--surf2)&#39;;this.style.color=&#39;var(--t1)&#39;" onmouseout="this.style.background=&#39;none&#39;;this.style.color=&#39;var(--t3)&#39;"><i class="ti ti-dots-vertical" aria-hidden="true"></i></button>
@@ -968,7 +970,7 @@ if(window._pendingLoad) window._pendingLoad();
 
 <script>
 // ═════════════ DATA ═════════════
-const APP_VERSION='v20260804c'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
+const APP_VERSION='v20260804d'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
 const STAGES=['Job Brief','Design','Production','Review','Approval Stage','On Hold','Complete'];
 const SKEY=s=>({
 'Job Brief':'jobbrief','Design':'design','Production':'production','Review':'review',
@@ -2385,11 +2387,13 @@ const disp=document.getElementById('user-display-name');
 if(disp)disp.textContent=name;
 const info=document.getElementById('user-info');
 if(info)info.style.display=name?'flex':'none';
-// Activity Log & Work Log are for Super Administrators only.
+// Activity Log, Work Log & Notify settings are for Super Administrators only.
 const at=document.getElementById('activity-tab');
 if(at)at.style.display=_isAdminUser()?'':'none';
 const wt=document.getElementById('worklog-tab');
 if(wt)wt.style.display=_isAdminUser()?'':'none';
+const nt=document.getElementById('notify-tab');
+if(nt)nt.style.display=_isAdminUser()?'':'none';
 if(name){setupPresence();recordLogin(name);loadUserTheme();syncUserTheme();initWorktime();initChat();setupStageNotify();} else {teardownPresence();teardownChat();teardownStageNotify();_myAvatar='';renderMyAvatar();_workStart=null;updateWorktimeChip();}
 }
 // ── Profile picture (stored in Supabase user_metadata, shared live via presence) ──
