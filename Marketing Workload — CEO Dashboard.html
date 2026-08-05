@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260703z -->
+<!-- v20260804a -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -848,7 +848,7 @@ if(window._pendingLoad) window._pendingLoad();
 <div style="display:flex;flex-direction:column;gap:12px">
 <div class="field"><label>Project name *</label><input type="text" id="ep-name" placeholder="Project name…" maxlength="60" onkeydown="if(event.key===&#39;Enter&#39;)saveEditProject()"></div>
 <div class="field"><label>Color</label><div id="ep-color-swatches" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px"></div></div>
-<div style="border-top:1px solid var(--b1);padding-top:12px">
+<div style="border-top:1px solid var(--b1);padding-top:12px" id="ep-danger-zone">
 <button onclick="deleteProjectConfirm()" style="display:flex;align-items:center;gap:7px;width:100%;background:rgba(240,112,112,0.08);border:1px solid rgba(240,112,112,0.3);border-radius:var(--rsm);color:#f07070;padding:9px 14px;cursor:pointer;font-family:&#39;DBHeavent&#39;,&#39;Sarabun&#39;,sans-serif;font-size:13px;font-weight:500">
 <i class="ti ti-trash" aria-hidden="true"></i> Delete this project
 </button>
@@ -928,7 +928,7 @@ if(window._pendingLoad) window._pendingLoad();
 
 <script>
 // ═════════════ DATA ═════════════
-const APP_VERSION='v20260703z'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
+const APP_VERSION='v20260804a'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
 const STAGES=['Job Brief','Design','Production','Review','Approval Stage','On Hold','Complete'];
 const SKEY=s=>({
 'Job Brief':'jobbrief','Design':'design','Production':'production','Review':'review',
@@ -1003,6 +1003,8 @@ const p=projects.find(x=>x.name===name);if(!p)return;
 editingProjectName=name;
 document.getElementById('ep-name').value=p.name;
 selectedEpColor=p.color;
+// Project deletion (which also destroys every task inside) is Super-Admin only.
+const _dz=document.getElementById('ep-danger-zone');if(_dz)_dz.style.display=_isAdminUser()?'':'none';
 renderEditProjectSwatches();
 document.getElementById('edit-project-modal').classList.add('open');
 setTimeout(()=>document.getElementById('ep-name').focus(),100);
@@ -1038,11 +1040,14 @@ renderDash();
 }
 async function deleteProjectConfirm(){
 const p=projects.find(x=>x.name===editingProjectName);if(!p)return;
-const taskCount=tasks.filter(t=>t.project===editingProjectName).length;
-const msg=taskCount>0
-?`Delete "${editingProjectName}"? This will also delete its ${taskCount} task${taskCount!==1?'s':''}. This cannot be undone.`
-:`Delete "${editingProjectName}"? This cannot be undone.`;
-if(!confirm(msg))return;
+if(!_isAdminUser()){alert('Only a Super Admin can delete a project.\n\nAsk Sun or Por if this project really needs to be removed.');return;}
+const name=editingProjectName;
+const taskCount=tasks.filter(t=>t.project===name).length;
+if(taskCount>0){
+const typed=prompt(`⚠ DELETE PROJECT "${name}"\n\nThis permanently deletes the project AND all ${taskCount} task${taskCount!==1?'s':''} in it, including their attachments. This cannot be undone.\n\nTo confirm, type the project name exactly:`);
+if(typed===null)return;
+if(typed.trim()!==name){alert('Name did not match — nothing was deleted.');return;}
+}else if(!confirm(`Delete the empty project "${name}"? This cannot be undone.`))return;
 tasks.filter(t=>t.project===editingProjectName).forEach(t=>logActivity(t.id,t.title,t.project,'deleted',null,null,null));
 await Promise.all([
   window._sb.from('mkt_projects').delete().eq('name',editingProjectName),
@@ -1058,14 +1063,20 @@ renderProjTabs();
 renderKanban();
 renderDash();
 }
+// Deleting a project also deletes every task inside it, so this is guarded:
+// admins only, and when the project still holds tasks the exact project name
+// must be typed. (A single mis-click on a header ✕ once wiped 136 tasks.)
 async function quickDeleteProject(name){
 const p=projects.find(x=>x.name===name);if(!p)return;
-const taskCount=tasks.filter(t=>t.project===name).length;
-const msg=taskCount>0
-?`Delete "${name}"?\nThis will also delete ${taskCount} task${taskCount!==1?'s':''}.\nThis cannot be undone.`
-:`Delete "${name}"? This cannot be undone.`;
-if(!confirm(msg))return;
-tasks.filter(t=>t.project===name).forEach(t=>logActivity(t.id,t.title,t.project,'deleted',null,null,null));
+if(!_isAdminUser()){alert('Only a Super Admin can delete a project.\n\nAsk Sun or Por if this project really needs to be removed.');return;}
+const doomed=tasks.filter(t=>t.project===name);
+const taskCount=doomed.length;
+if(taskCount>0){
+const typed=prompt(`⚠ DELETE PROJECT "${name}"\n\nThis permanently deletes the project AND all ${taskCount} task${taskCount!==1?'s':''} in it, including their attachments. This cannot be undone.\n\nIf you only want to stop seeing it, close this and use ✏️ Edit instead.\n\nTo confirm, type the project name exactly:`);
+if(typed===null)return;
+if(typed.trim()!==name){alert('Name did not match — nothing was deleted.');return;}
+}else if(!confirm(`Delete the empty project "${name}"? This cannot be undone.`))return;
+doomed.forEach(t=>logActivity(t.id,t.title,t.project,'deleted',null,null,null));
 try{await Promise.all([window._sb.from('mkt_projects').delete().eq('name',name),window._sb.from('mkt_tasks').delete().eq('project',name)]);}catch(err){console.error(err);}
 tasks=tasks.filter(t=>t.project!==name);
 projects=projects.filter(x=>x.name!==name);
@@ -1093,8 +1104,7 @@ function renderProjectNavTabs(){
 const el=document.getElementById('project-nav-tabs');if(!el)return;
 el.innerHTML=projects.map(p=>`<div style="display:flex;align-items:center;gap:0">
 <button class="pnav-tab" onclick="quickSwitchProject('${esc(p.name)}')" title="${esc(p.name)}" style="border-radius:var(--rsm) 0 0 var(--rsm);border-right:none"><div class="pnav-dot" style="background:${p.color}"></div>${esc(p.name.length>14?p.name.substring(0,14)+'…':p.name)}</button>
-<button onclick="openEditProject('${esc(p.name)}')" title="Edit project" style="display:flex;align-items:center;justify-content:center;padding:5px 7px;background:none;border:1px solid var(--b1);border-left:none;border-right:none;color:var(--t3);cursor:pointer;font-size:14px;transition:all .15s;margin:6px 0" onmouseover="this.style.background='var(--surf2)';this.style.color='var(--t1)'" onmouseout="this.style.background='none';this.style.color='var(--t3)'">&#9998;</button>
-<button onclick="quickDeleteProject('${esc(p.name)}')" title="Delete project" style="display:flex;align-items:center;justify-content:center;padding:5px 7px;background:none;border:1px solid var(--b1);border-left:none;border-radius:0 var(--rsm) var(--rsm) 0;color:#f07070;cursor:pointer;font-size:14px;font-weight:700;transition:all .15s;margin:6px 0" onmouseover="this.style.background='rgba(240,112,112,0.12)'" onmouseout="this.style.background='none'">&#x2715;</button>
+<button onclick="openEditProject('${esc(p.name)}')" title="Edit project" style="display:flex;align-items:center;justify-content:center;padding:5px 7px;background:none;border:1px solid var(--b1);border-left:none;border-radius:0 var(--rsm) var(--rsm) 0;color:var(--t3);cursor:pointer;font-size:14px;transition:all .15s;margin:6px 0" onmouseover="this.style.background='var(--surf2)';this.style.color='var(--t1)'" onmouseout="this.style.background='none';this.style.color='var(--t3)'">&#9998;</button>
 </div>`).join('');
 }
 function quickSwitchProject(name){
