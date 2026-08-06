@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260805a -->
+<!-- v20260806a -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -656,6 +656,12 @@ if(window._pendingLoad) window._pendingLoad();
 <div class="list-top">
 <div class="filter-pills" id="list-stage-pills"></div>
 <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+<div class="bsearch-wrap">
+<i class="ti ti-search bsearch-ico" aria-hidden="true"></i>
+<input id="lf-search" class="bsearch" type="text" placeholder="Search task name…" autocomplete="off" oninput="renderList()" onkeydown="if(event.key==='Escape')clearListSearch()">
+<button type="button" id="lf-search-clear" class="bsearch-clear" title="Clear search" onclick="clearListSearch()" style="display:none">&#x2715;</button>
+</div>
+<span id="lf-search-count" style="font-size:12px;color:var(--t3);white-space:nowrap"></span>
 <select class="fsel" id="lf-owner" onchange="renderList()">
 <option value="">All members</option>
 <option>Por</option><option>Sun</option><option>Jew</option><option>Nod</option>
@@ -972,7 +978,7 @@ if(window._pendingLoad) window._pendingLoad();
 
 <script>
 // ═════════════ DATA ═════════════
-const APP_VERSION='v20260805a'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
+const APP_VERSION='v20260806a'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
 const STAGES=['Job Brief','Design','Production','Review','Approval Stage','On Hold','Complete'];
 const SKEY=s=>({
 'Job Brief':'jobbrief','Design':'design','Production':'production','Review':'review',
@@ -1887,13 +1893,20 @@ ${_PICS(t).length?_PICS(t).map(p=>`<span style="display:inline-flex;align-items:
 </tr>`;
 }
 
+function clearListSearch(){const el=document.getElementById('lf-search');if(el){el.value='';el.focus();}renderList();}
 function renderList(){
 const fo=document.getElementById('lf-owner').value;
 const fp=document.getElementById('lf-project').value;
+const qEl=document.getElementById('lf-search');
+const q=(qEl?qEl.value:'').trim().toLowerCase();
 let list=tasks;
 if(listStageFilter!=='All') list=list.filter(t=>t.stage===listStageFilter);
 if(fo) list=list.filter(t=>_isPIC(t,fo)||t.lead===fo);
 if(fp) list=list.filter(t=>t.project===fp);
+if(q) list=list.filter(t=>(t.title||'').toLowerCase().includes(q));
+const clr=document.getElementById('lf-search-clear');if(clr)clr.style.display=q?'':'none';
+const scnt=document.getElementById('lf-search-count');
+if(scnt)scnt.textContent=q?`${list.length} match${list.length===1?'':'es'}`:'';
 const tbody=document.getElementById('list-tbody');
 if(!list.length){tbody.innerHTML=`<tr><td colspan="8" style="text-align:center;padding:3rem;color:var(--t3)"><i class="ti ti-inbox" style="font-size:24px;display:block;margin-bottom:8px" aria-hidden="true"></i>No tasks found</td></tr>`;return;}
 
