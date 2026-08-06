@@ -1,0 +1,41 @@
+name: Daily Data Backup
+
+# Snapshots every table to the PRIVATE Supabase `db-backups` bucket and emails a
+# copy to the admin. Nothing is written into this repository — it is public, so
+# committing task data or staff emails here would publish them.
+
+on:
+  schedule:
+    # 17:10 UTC = 00:10 Bangkok (UTC+7) — captures the full working day just ended.
+    - cron: '10 17 * * *'
+  workflow_dispatch:   # Allow manual trigger from GitHub UI
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Take daily snapshot via Supabase Edge Function
+        run: |
+          RESPONSE=$(curl -s --max-time 300 -o /tmp/backup.json -w "%{http_code}" \
+            -X POST \
+            "https://fxmigukayxvieziseqil.supabase.co/functions/v1/daily-backup" \
+            -H "Content-Type: application/json" \
+            -d '{}')
+
+          echo "HTTP Status: $RESPONSE"
+          echo "Response body:"
+          cat /tmp/backup.json
+          echo
+
+          if [ "$RESPONSE" != "200" ]; then
+            echo "::error::Backup failed with HTTP $RESPONSE — the team's data was NOT backed up today."
+            exit 1
+          fi
+
+          # Fail loudly if the snapshot came back suspiciously empty.
+          if grep -q '"mkt_tasks":0' /tmp/backup.json; then
+            echo "::error::Backup contained 0 tasks — treating as a failure."
+            exit 1
+          fi
+
+          echo "::notice::Backup completed successfully."
