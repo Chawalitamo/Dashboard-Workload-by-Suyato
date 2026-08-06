@@ -9,10 +9,12 @@ name: Daily Data Backup (manual / standby)
 # shared runner queue being free at one particular minute is not a backup.
 #
 # The schedule now lives in Postgres itself (pg_cron + pg_net), which has no
-# runner to wait for:
-#   daily-backup-primary  17:10 UTC (00:10 Bangkok) -> mkt_run_backup('scheduled')
-#   daily-backup-guard-1  18:40 UTC  -> mkt_backup_guard(), re-runs the backup
-#   daily-backup-guard-2  20:40 UTC  -> only if no snapshot in the last 20 hours
+# runner to wait for. It runs at 06:00 Bangkok rather than overnight so that the
+# backup email lands at the start of the working day, where a missing one is
+# noticed immediately instead of scrolling past unread:
+#   daily-backup-primary  23:00 UTC (06:00 Bangkok) -> mkt_run_backup('scheduled')
+#   daily-backup-guard-1  00:30 UTC (07:30 Bangkok) -> mkt_backup_guard(), re-runs
+#   daily-backup-guard-2  02:30 UTC (09:30 Bangkok) -> if no snapshot in 20 hours
 # The guards are no-ops on a healthy day, so there are never duplicate emails.
 #
 # This workflow is kept as a manual button: use it to take an extra snapshot on
