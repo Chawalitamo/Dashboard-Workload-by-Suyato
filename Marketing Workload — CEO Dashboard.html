@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260804e -->
+<!-- v20260805a -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -972,7 +972,7 @@ if(window._pendingLoad) window._pendingLoad();
 
 <script>
 // ═════════════ DATA ═════════════
-const APP_VERSION='v20260804e'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
+const APP_VERSION='v20260805a'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
 const STAGES=['Job Brief','Design','Production','Review','Approval Stage','On Hold','Complete'];
 const SKEY=s=>({
 'Job Brief':'jobbrief','Design':'design','Production':'production','Review':'review',
@@ -1978,6 +1978,7 @@ noteId=id;
 document.getElementById('note-modal-title').textContent='Note — '+t.title.substring(0,40);
 document.getElementById('nm-text').value=t.note||'';
 _updateNoteLinks('nm-links',t.note||'');
+_noteOpenedStamp=t.updated_at||'';
 document.getElementById('note-modal').classList.add('open');
 }
 async function saveNote(){
@@ -1986,6 +1987,7 @@ if(!t){closeModal('note-modal');return;}
 const _id=t.id,_title=t.title,_project=t.project;
 const _oldNote=t.note||'';
 const newNote=document.getElementById('nm-text').value.trim();
+if(!await _staleCheck(_id,_noteOpenedStamp,'note'))return;
 t.note=newNote;
 closeModal('note-modal'); renderList();
 const{error}=await window._sb.from('mkt_tasks').update({note:newNote}).eq('id',_id);
@@ -2268,31 +2270,48 @@ async function uploadFiles(files){
   const F=_attField();
   const prog=document.getElementById('upload-progress');
   prog.style.display='block';
-  const arr=[...(t[F]||[])];
+  const added=[];
   for(const file of Array.from(files)){
     prog.textContent=`Uploading "${file.name}"…`;
     const safeName=file.name.replace(/[^a-zA-Z0-9._\-() ]/g,'_');
     const path=`task-files/${t.id}/${F==='proof'?'proof/':''}${Date.now()}_${safeName}`;
     const{error}=await window._sb.storage.from('task-files').upload(path,file,{upsert:true});
     if(error){console.error('upload error',error);prog.textContent=`Failed: ${file.name}`;continue;}
-    arr.push({name:file.name,path,size:file.size,type:file.type||'application/octet-stream',uploaded_at:new Date().toISOString()});
+    added.push({name:file.name,path,size:file.size,type:file.type||'application/octet-stream',uploaded_at:new Date().toISOString()});
   }
-  t[F]=arr;
-  try{await window._sb.from('mkt_tasks').update({[F]:arr}).eq('id',t.id);}catch(e){console.error(e);}
+  if(added.length){
+    // Merge onto the CURRENT server value, never the possibly-stale local copy —
+    // writing our in-memory array would erase files a colleague just attached.
+    const merged=await _attMerge(t,F,cur=>cur.concat(added.filter(a=>!cur.some(c=>c.path===a.path))));
+    if(merged)t[F]=merged; else t[F]=[...(t[F]||[]),...added];
+  }
   prog.style.display='none';
   renderAttachList(t);
   renderKanban();
 }
+// Re-read the row, apply `mutate` to the freshest array, write it back.
+async function _attMerge(t,F,mutate){
+  try{
+    const{data,error}=await window._sb.from('mkt_tasks').select(F).eq('id',t.id).maybeSingle();
+    if(error)throw error;
+    const cur=Array.isArray(data&&data[F])?data[F]:[];
+    const next=mutate(cur);
+    const{error:e2}=await window._sb.from('mkt_tasks').update({[F]:next}).eq('id',t.id);
+    if(e2)throw e2;
+    return next;
+  }catch(e){console.error('attachment merge failed',e);alert('Could not save the attachment list — please refresh and try again.');return null;}
+}
 async function deleteAttachment(idx){
   const t=findTask(attachTaskId);if(!t)return;
   const F=_attField();
-  const list=[...(t[F]||[])];
-  const a=list[idx];if(!a)return;
-  if(!confirm(`Remove "${a.name}"?`))return;
-  await window._sb.storage.from('task-files').remove([a.path]);
-  list.splice(idx,1);
-  t[F]=list;
-  try{await window._sb.from('mkt_tasks').update({[F]:list}).eq('id',t.id);}catch(e){console.error(e);}
+  const a=(t[F]||[])[idx];if(!a)return;
+  if(!confirm(`Remove "${a.name}" from this task?\n\nThe file itself is kept, so it can be recovered if this was a mistake.`))return;
+  // Deliberately NOT deleting the object from storage: unlinking is reversible,
+  // destroying the file is not. Path is recorded below so it can be relinked.
+  const next=await _attMerge(t,F,cur=>cur.filter(c=>c.path!==a.path));
+  if(next===null)return;
+  t[F]=next;
+  logActivity(t.id,t.title,t.project,'updated',F==='proof'?'proof removed':'attachment removed',a.name+' — '+a.path,'');
   renderAttachList(t);
   renderKanban();
 }
@@ -2318,10 +2337,27 @@ document.getElementById('e-stage').value=t.stage;
 _setDP(document.getElementById('e-due'),t.due||'');
 document.getElementById('e-note').value=t.note||'';
 _updateNoteLinks('e-note-links',t.note||'');
+_editOpenedStamp=t.updated_at||''; // to detect someone else editing while this form is open
 document.getElementById('edit-modal').classList.add('open');
+}
+// ── Lost-update guard ───────────────────────────────────────────────────────
+// A form holds a snapshot from when it opened. Saving writes every field, so if
+// someone else changed the task meanwhile, a blind save would wipe their work.
+// Compare updated_at first and let the user decide.
+let _editOpenedStamp='',_noteOpenedStamp='';
+async function _staleCheck(id,openedStamp,what){
+try{
+const{data}=await window._sb.from('mkt_tasks').select('updated_at').eq('id',id).maybeSingle();
+const now=data&&data.updated_at||'';
+if(openedStamp&&now&&now!==openedStamp){
+return confirm(`⚠ Someone else changed this task while you had it open.\n\nSaving your ${what} will overwrite their change.\n\nOK = save mine anyway\nCancel = keep theirs (your edits are discarded, reopen to see the latest)`);
+}
+}catch(e){}
+return true;
 }
 async function saveEdit(){
 const t=findTask(editId);if(!t)return;
+if(!await _staleCheck(editId,_editOpenedStamp,'edits'))return;
 const _snap={title:t.title,project:t.project,owner:_PICS(t).join(', '),lead:t.lead,stage:t.stage,due:t.due||'',note:t.note||''};
 const _newPics=_picMsGet('e');
 if(!_newPics.length){_picMsFlag('e',false);alert('Please select at least one person in charge.');return;}
@@ -3023,12 +3059,44 @@ function _renderBanner(){
   const b=document.getElementById('app-banner');if(!b)return;
   const msg=document.getElementById('app-banner-msg'),btn=document.getElementById('app-banner-btn');
   if(_bannerOffline){b.className='show err';msg.textContent='⚠ You are offline — reconnecting… your latest changes may not be saved.';btn.style.display='none';}
+  else if(_renderFail){b.className='show err';msg.textContent='⚠ A part of the page failed to display (your data is safe and saved).';btn.style.display='';btn.textContent='Reload';}
   else if(_bannerNewVer){b.className='show warn';msg.textContent='🔄 A new version of the dashboard is available.';btn.style.display='';btn.textContent='Refresh now';}
   else{b.className='';}
 }
-function _bannerRefresh(){const sv=sessionStorage.getItem('_verReload')||('t'+Date.now());location.replace(location.pathname+'?v='+encodeURIComponent(sv)+location.hash);}
+function _bannerRefresh(){const sv=_ss('get','_verReload')||('t'+Date.now());location.replace(location.pathname+'?v='+encodeURIComponent(sv)+location.hash);}
 window.addEventListener('offline',()=>{_bannerOffline=true;_renderBanner();});
 window.addEventListener('online',()=>{_bannerOffline=false;_renderBanner();});
+// sessionStorage can throw or be disabled (private mode / locked-down browser).
+// Without this guard the version check below could reload the page forever.
+function _ss(op,k,v){try{if(op==='get')return sessionStorage.getItem(k);sessionStorage.setItem(k,v);}catch(e){return null;}}
+// Is there unsaved work on screen that an auto-reload would throw away?
+function _hasUnsavedWork(){
+try{
+if(_newTaskFiles&&_newTaskFiles.length)return true;                       // files staged on the Add form
+const ids=['f-title','f-note','a-title','a-note','e-title','e-note','nm-text'];
+if(ids.some(id=>{const el=document.getElementById(id);return el&&el.value&&el.value.trim();}))return true;
+return ['edit-modal','add-modal','note-modal'].some(id=>{const m=document.getElementById(id);return m&&m.classList.contains('open');});
+}catch(e){return false;}
+}
+// Warn before a manual close/refresh would discard typing.
+window.addEventListener('beforeunload',e=>{if(_hasUnsavedWork()&&!window._allowUnload){e.preventDefault();e.returnValue='';return '';}});
+// Run a view's render in isolation. On failure show the reason in place of the
+// view (never an endless spinner) and surface it in the top banner.
+let _renderFail='';
+function _safeRender(name,fn,hostId){
+  try{ fn(); if(_renderFail===name){_renderFail='';_renderBanner();} }
+  catch(err){
+    console.error('Render error in '+name+':',err);
+    if(hostId){
+      const host=document.getElementById(hostId);
+      if(host)host.innerHTML='<div style="padding:40px 20px;text-align:center;color:var(--t2)">'
+        +'<div style="font-size:15px;font-weight:700;color:#f07070;margin-bottom:8px">This view could not be drawn</div>'
+        +'<div style="font-size:13px;color:var(--t3);max-width:520px;margin:0 auto 14px">Your data is safe and saved — only the display failed. Try a hard refresh (Ctrl/Cmd + Shift + R). If it keeps happening, send this message to your admin:</div>'
+        +'<div style="font-family:monospace;font-size:12px;color:var(--t3);background:var(--surf2);border:1px solid var(--b1);border-radius:8px;padding:10px;display:inline-block;max-width:90%;overflow:auto">'+esc(String(err&&err.message||err))+'</div></div>';
+    }
+    _renderFail=name;_renderBanner();
+  }
+}
 async function loadFromSupabase(){
   if(!window._sb){_sync('err','Client not ready'); return;}
   // Auto-refresh stale/long-open tabs when a newer version has shipped.
@@ -3036,12 +3104,15 @@ async function loadFromSupabase(){
     const{data:_vv}=await window._sb.from('mkt_settings').select('value').eq('key','app_version').maybeSingle();
     const _sv=_vv&&_vv.value;
     if(_sv&&_sv!==APP_VERSION){
-      if(sessionStorage.getItem('_verReload')!==_sv){
-        sessionStorage.setItem('_verReload',_sv);
+      const alreadyTried=_ss('get','_verReload')===_sv;
+      const urlTried=(location.search||'').indexOf('v='+encodeURIComponent(_sv))>=0; // fallback when storage is blocked
+      if(!alreadyTried&&!urlTried&&!_hasUnsavedWork()){
+        _ss('set','_verReload',_sv);
+        window._allowUnload=true; // our own reload — don't prompt
         location.replace(location.pathname+'?v='+encodeURIComponent(_sv)+location.hash);
         return;
       }
-      _bannerNewVer=true; // auto-reload already tried this session — nudge manually
+      _bannerNewVer=true; // never auto-reload over unsaved typing — nudge instead
     } else { _bannerNewVer=false; }
     _renderBanner();
   }catch(e){}
@@ -3078,9 +3149,12 @@ async function loadFromSupabase(){
     populateAllProjectSelects();
     renderProjectNavTabs();
     await loadEngagementData();
-    if(document.getElementById('view-dashboard').classList.contains('active'))renderDash();
-    if(document.getElementById('view-list').classList.contains('active')){renderListPills();renderList();}
-    else if(document.getElementById('view-board').classList.contains('active')){renderProjTabs();renderKanban();}
+    // Each view renders independently: one failing view must not block the rest,
+    // and a failure must be VISIBLE — a silently-swallowed render error is what
+    // left the dashboard stuck on "Loading…" instead of reporting the problem.
+    if(document.getElementById('view-dashboard').classList.contains('active'))_safeRender('dashboard',renderDash,'dash-inner');
+    if(document.getElementById('view-list').classList.contains('active'))_safeRender('list',()=>{renderListPills();renderList();});
+    else if(document.getElementById('view-board').classList.contains('active'))_safeRender('board',()=>{renderProjTabs();renderKanban();});
     else if(document.getElementById('view-calendar').classList.contains('active'))renderCalendar();
   }catch(renderErr){
     console.warn('Render error (data is live):',renderErr);
