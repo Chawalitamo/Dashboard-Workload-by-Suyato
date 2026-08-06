@@ -14,16 +14,16 @@ name: Daily Data Backup (manual / standby)
 # noticed immediately instead of scrolling past unread:
 #   daily-backup-primary  23:00 UTC (06:00 Bangkok) -> mkt_run_backup('scheduled')
 #   daily-backup-guard-1  00:30 UTC (07:30 Bangkok) -> mkt_backup_guard(), re-runs
-#   daily-backup-guard-2  02:30 UTC (09:30 Bangkok) -> if no snapshot in 20 hours
+#   daily-backup-guard-2  02:30 UTC (09:30 Bangkok) -> the backup if no snapshot
+#                                                      landed since 05:30 today
 # The guards are no-ops on a healthy day, so there are never duplicate emails.
 #
 # This workflow is kept as a manual button: use it to take an extra snapshot on
 # demand (before a risky change, say). Equivalent from the SQL editor:
 #   select mkt_run_backup('manual');
-# and to see recent triggers and their HTTP results:
-#   select r.*, h.status_code from mkt_backup_runs r
-#     left join net._http_response h on h.id = r.request_id
-#     order by r.triggered_at desc limit 20;
+# To see recent triggers and how they went:
+#   select triggered_at, reason, status_code, left(result, 200)
+#     from mkt_backup_runs order by triggered_at desc limit 20;
 
 on:
   workflow_dispatch:   # Manual trigger only — see note above.
