@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260806a -->
+<!-- v20260806b -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -978,7 +978,7 @@ if(window._pendingLoad) window._pendingLoad();
 
 <script>
 // ═════════════ DATA ═════════════
-const APP_VERSION='v20260806a'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
+const APP_VERSION='v20260806b'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
 const STAGES=['Job Brief','Design','Production','Review','Approval Stage','On Hold','Complete'];
 const SKEY=s=>({
 'Job Brief':'jobbrief','Design':'design','Production':'production','Review':'review',
@@ -3180,23 +3180,24 @@ window.onerror=function(msg,src,line,col,err){
 };
 
 // ═════════════ AUTH ═════════════
-const EMAIL_TO_NAME={
-'chawalit.amo@cjmart.co.th':'Sun',
-'prapat.kav@cjmart.co.th':'Nick',
-'siriyaporn.sa@cjmart.co.th':'Ming',
-'pornsawan.ji@cjmart.co.th':'Kanom',
-'warut.ka@cjmart.co.th':'Ton',
-'jutharat.su@cjmart.co.th':'Ju',
-'suthida.li@cjmart.co.th':'Jew',
-'surasit.wa@cjmart.co.th':'Benz',
-'witch.me@cjmart.co.th':'Witch',
-'pimkamon.ki@cjmart.co.th':'Nod',
-'thanatchaporn.ch@cjmart.co.th':'Donut',
-'rungkit.tu@cjmart.co.th':'Toon',
-'jomkwan.sr@cjmart.co.th':'Por',
-'adirut.nar@cjmart.co.th':'Ji',
-'narueporn.vit@cjmart.co.th':'Aom'
-};
+// The email→name mapping used to be hard-coded here, which published all 15 staff
+// addresses in this page's source (the repository is public). It now resolves
+// server-side via mkt_me(), which returns only the signed-in user's own name and
+// reads a table that anon can no longer see.
+async function _resolveMyName(email){
+try{
+const{data,error}=await window._sb.rpc('mkt_me');
+if(!error&&data)return data;
+}catch(e){}
+// Fallback for an odd session state: look ourselves up (allowed once signed in).
+try{
+if(email){
+const{data}=await window._sb.from('mkt_owners').select('name').ilike('email',email).maybeSingle();
+if(data&&data.name)return data.name;
+}
+}catch(e){}
+return email||'';
+}
 async function doLogin(){
 const email=document.getElementById('login-email').value.trim().toLowerCase();
 const pw=document.getElementById('login-password').value;
@@ -3210,7 +3211,7 @@ errEl.textContent=error.message==='Invalid login credentials'?'Incorrect email o
 btn.disabled=false;btn.textContent='Sign in';
 return;
 }
-const name=EMAIL_TO_NAME[email]||email;
+const name=await _resolveMyName(email);
 setCurrentUser(name);
 if(data.user?.user_metadata?.must_change_password){
 document.getElementById('login-screen').style.display='none';
@@ -3237,7 +3238,7 @@ if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){errEl.textContent='Type your email
 const link=document.getElementById('forgot-link');
 if(link){link.style.pointerEvents='none';link.textContent='Sending…';}
 try{
-const res=await fetch('https://fxmigukayxvieziseqil.supabase.co/functions/v1/notify-password-reset',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,name:(EMAIL_TO_NAME&&EMAIL_TO_NAME[email])||''})});
+const res=await fetch('https://fxmigukayxvieziseqil.supabase.co/functions/v1/notify-password-reset',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});
 if(!res.ok)throw new Error('request failed');
 errEl.style.color='#50d090';
 errEl.textContent='✓ Request sent to the admin. They’ll reset your password and share a new one with you shortly.';
@@ -3270,7 +3271,7 @@ const{error}=await window._sb.auth.updateUser({password:newPw,data:{must_change_
 if(error){errEl.textContent=error.message;btn.disabled=false;btn.textContent='Update password';return;}
 localStorage.setItem('mkt_login_time',Date.now().toString());
 // After a reset-link recovery there's no _currentUser yet — set it from the session.
-if(!_currentUser){try{const{data:{session}}=await window._sb.auth.getSession();const em=(session?.user?.email||'').toLowerCase();if(em)setCurrentUser(EMAIL_TO_NAME[em]||em);}catch(e){}}
+if(!_currentUser){try{const{data:{session}}=await window._sb.auth.getSession();const em=(session?.user?.email||'').toLowerCase();if(em)setCurrentUser(await _resolveMyName(em));}catch(e){}}
 if(location.hash)history.replaceState(null,'',location.pathname+location.search);
 document.getElementById('change-pw-modal').style.display='none';
 setupRealtimeNotification();
@@ -3503,7 +3504,7 @@ window._pendingLoad = async function(){
   const sameDay=loginTime>0&&_bkkDate(loginTime)===_bkkDate(Date.now());
   if(session&&session.user&&sameDay){
     const email=(session.user.email||'').toLowerCase();
-    const name=EMAIL_TO_NAME[email]||email;
+    const name=await _resolveMyName(email);
     setCurrentUser(name);
     setupRealtimeNotification();
     loadFromSupabase();
