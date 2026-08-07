@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260807e -->
+<!-- v20260807f -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -117,6 +117,41 @@
 --t1:#ffffff;--t2:#dfe9f7;--t3:#b2c3db;--t4:#8798b1;
 --gold:#5fc8f5;--gold2:#3aa4d4;--gold3:rgba(95,200,245,.14);
 --chart-grid:rgba(255,255,255,0.16);--wp-scrim:rgba(11,22,38,.86);
+}
+/* Nature set. Alpine and Waterfall are bright, sunlit pictures and take light
+   scrims; Sunset Valley, Autumn and Butterfly are richly coloured and read
+   better under a dark veil that lets the colour glow through. */
+:root[data-theme="alpine"]{
+--bg:#eef4ec;--surf:#ffffff;--surf2:#ebf2e9;--surf3:#dde8da;--surf4:#c9dbc5;
+--b0:#0000000f;--b1:#0000001f;--b2:#00000033;--b3:#00000055;
+--t1:#14200f;--t2:#2c3a26;--t3:#55654e;--t4:#829179;
+--gold:#2f7d32;--gold2:#226226;--gold3:rgba(47,125,50,.12);
+--chart-grid:rgba(0,0,0,0.12);--wp-scrim:rgba(238,244,236,.85);
+}
+:root[data-theme="waterfall"]{
+--bg:#ecf6f4;--surf:#ffffff;--surf2:#e8f4f1;--surf3:#d8ebe7;--surf4:#c2dfd9;
+--b0:#0000000f;--b1:#0000001f;--b2:#00000033;--b3:#00000055;
+--t1:#0f2320;--t2:#263d39;--t3:#4e6864;--t4:#7c9490;
+--gold:#0f8b80;--gold2:#0a6e65;--gold3:rgba(15,139,128,.12);
+--chart-grid:rgba(0,0,0,0.12);--wp-scrim:rgba(236,246,244,.85);
+}
+:root[data-theme="sunset-valley"]{
+--bg:#1a150a;--surf:#241d0f;--surf2:#2e2614;--surf3:#3a301a;--surf4:#473b21;
+--t1:#ffffff;--t2:#f5e9d2;--t3:#dbc9a6;--t4:#ad9d7f;
+--gold:#f0b53a;--gold2:#cf9527;--gold3:rgba(240,181,58,.14);
+--chart-grid:rgba(255,255,255,0.16);--wp-scrim:rgba(26,21,10,.85);
+}
+:root[data-theme="autumn"]{
+--bg:#1d1008;--surf:#28170c;--surf2:#331e11;--surf3:#402616;--surf4:#4e2f1b;
+--t1:#ffffff;--t2:#f7e0cf;--t3:#dcbca0;--t4:#b0917a;
+--gold:#f27430;--gold2:#cf5a1c;--gold3:rgba(242,116,48,.15);
+--chart-grid:rgba(255,255,255,0.16);--wp-scrim:rgba(29,16,8,.85);
+}
+:root[data-theme="butterfly"]{
+--bg:#0c1710;--surf:#112016;--surf2:#16291d;--surf3:#1d3425;--surf4:#25422e;
+--t1:#ffffff;--t2:#dff0e2;--t3:#b3ccb9;--t4:#87a08e;
+--gold:#4fb3e8;--gold2:#3492c6;--gold3:rgba(79,179,232,.14);
+--chart-grid:rgba(255,255,255,0.16);--wp-scrim:rgba(12,23,16,.85);
 }
 :root.has-wp{background-image:var(--wp);background-size:cover;background-position:center center;background-repeat:no-repeat;background-attachment:fixed}
 :root.has-wp body{background:var(--wp-scrim,rgba(13,13,12,.86))}
@@ -1044,7 +1079,7 @@ if(window._pendingLoad) window._pendingLoad();
 
 <script>
 // ═════════════ DATA ═════════════
-const APP_VERSION='v20260807e'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
+const APP_VERSION='v20260807f'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
 const STAGES=['Job Brief','Design','Production','Review','Approval Stage','On Hold','Complete'];
 const DONE_STAGE=STAGES[STAGES.length-1];
 const SKEY=s=>({
@@ -2705,6 +2740,11 @@ const THEMES=[
 {id:'toy-story',label:'Toy Story',sw:'#eef6fd',ac:'#1f7ae0',wp:'toy-story.jpg'},
 {id:'disney',label:'Disney',sw:'#0b1626',ac:'#5fc8f5',wp:'disney.png'},
 {id:'jungle',label:'Jungle',sw:'#eff0ec',ac:'#4f7a4a',wp:'jungle.jpg'},
+{id:'alpine',label:'Alpine',sw:'#eef4ec',ac:'#2f7d32',wp:'alpine.jpg'},
+{id:'waterfall',label:'Waterfall',sw:'#ecf6f4',ac:'#0f8b80',wp:'waterfall.jpg'},
+{id:'sunset-valley',label:'Sunset Valley',sw:'#1a150a',ac:'#f0b53a',wp:'sunset-valley.jpg'},
+{id:'autumn',label:'Autumn',sw:'#1d1008',ac:'#f27430',wp:'autumn.jpg'},
+{id:'butterfly',label:'Butterfly',sw:'#0c1710',ac:'#4fb3e8',wp:'butterfly.jpg'},
 ];
 let _currentTheme='black';
 // Wallpapers live in a public Supabase bucket rather than this repository — the
