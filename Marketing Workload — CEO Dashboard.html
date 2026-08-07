@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260807f -->
+<!-- v20260807g -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -118,16 +118,9 @@
 --gold:#5fc8f5;--gold2:#3aa4d4;--gold3:rgba(95,200,245,.14);
 --chart-grid:rgba(255,255,255,0.16);--wp-scrim:rgba(11,22,38,.86);
 }
-/* Nature set. Alpine and Waterfall are bright, sunlit pictures and take light
-   scrims; Sunset Valley, Autumn and Butterfly are richly coloured and read
-   better under a dark veil that lets the colour glow through. */
-:root[data-theme="alpine"]{
---bg:#eef4ec;--surf:#ffffff;--surf2:#ebf2e9;--surf3:#dde8da;--surf4:#c9dbc5;
---b0:#0000000f;--b1:#0000001f;--b2:#00000033;--b3:#00000055;
---t1:#14200f;--t2:#2c3a26;--t3:#55654e;--t4:#829179;
---gold:#2f7d32;--gold2:#226226;--gold3:rgba(47,125,50,.12);
---chart-grid:rgba(0,0,0,0.12);--wp-scrim:rgba(238,244,236,.85);
-}
+/* Nature set. Waterfall is a bright, sunlit picture and takes a light scrim;
+   Sunset Valley, Autumn and Butterfly are richly coloured and read better under
+   a dark veil that lets the colour glow through. */
 :root[data-theme="waterfall"]{
 --bg:#ecf6f4;--surf:#ffffff;--surf2:#e8f4f1;--surf3:#d8ebe7;--surf4:#c2dfd9;
 --b0:#0000000f;--b1:#0000001f;--b2:#00000033;--b3:#00000055;
@@ -1079,7 +1072,7 @@ if(window._pendingLoad) window._pendingLoad();
 
 <script>
 // ═════════════ DATA ═════════════
-const APP_VERSION='v20260807f'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
+const APP_VERSION='v20260807g'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
 const STAGES=['Job Brief','Design','Production','Review','Approval Stage','On Hold','Complete'];
 const DONE_STAGE=STAGES[STAGES.length-1];
 const SKEY=s=>({
@@ -2740,9 +2733,8 @@ const THEMES=[
 {id:'toy-story',label:'Toy Story',sw:'#eef6fd',ac:'#1f7ae0',wp:'toy-story.jpg'},
 {id:'disney',label:'Disney',sw:'#0b1626',ac:'#5fc8f5',wp:'disney.png'},
 {id:'jungle',label:'Jungle',sw:'#eff0ec',ac:'#4f7a4a',wp:'jungle.jpg'},
-{id:'alpine',label:'Alpine',sw:'#eef4ec',ac:'#2f7d32',wp:'alpine.jpg'},
 {id:'waterfall',label:'Waterfall',sw:'#ecf6f4',ac:'#0f8b80',wp:'waterfall.jpg'},
-{id:'sunset-valley',label:'Sunset Valley',sw:'#1a150a',ac:'#f0b53a',wp:'sunset-valley.jpg'},
+{id:'sunset-valley',label:'Sunset Valley',sw:'#1a150a',ac:'#f0b53a',wp:'sunset-valley.jpeg'},
 {id:'autumn',label:'Autumn',sw:'#1d1008',ac:'#f27430',wp:'autumn.jpg'},
 {id:'butterfly',label:'Butterfly',sw:'#0c1710',ac:'#4fb3e8',wp:'butterfly.jpg'},
 ];
