@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260807h -->
+<!-- v20260807i -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -539,6 +539,7 @@ button{font-family:'DBHeavent','Sarabun',sans-serif}
 .theme-sw{width:32px;height:32px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--b2)}
 .theme-ac{width:11px;height:11px;border-radius:50%}
 .theme-lbl{font-size:11px;color:var(--t2);white-space:nowrap}
+.bf-showall{background:none;border:none;padding:0;font:inherit;color:var(--gold);text-decoration:underline;cursor:pointer}
 .preset-opt{aspect-ratio:1;border:1px solid var(--b1);background:var(--surf2);border-radius:10px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;overflow:hidden;padding:0}
 .preset-opt:hover{background:var(--surf3);border-color:var(--b2)}
 .preset-opt.sel{border-color:var(--gold);background:var(--gold3);box-shadow:0 0 0 2px var(--gold3)}
@@ -1079,7 +1080,7 @@ if(window._pendingLoad) window._pendingLoad();
 
 <script>
 // ═════════════ DATA ═════════════
-const APP_VERSION='v20260807h'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
+const APP_VERSION='v20260807i'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
 const STAGES=['Job Brief','Design','Production','Review','Approval Stage','On Hold','Complete'];
 const DONE_STAGE=STAGES[STAGES.length-1];
 const SKEY=s=>({
@@ -2144,6 +2145,23 @@ function switchProj(p,el){
 activeProj=p; document.querySelectorAll('.pjtab').forEach(x=>x.classList.remove('active')); el.classList.add('active'); renderKanban();
 }
 function clearBoardSearch(){const el=document.getElementById('bf-search');if(el){el.value='';el.focus();}renderKanban();}
+// The board opens on your own work: at sign-in the member filter is preset to
+// you. After that it is an ordinary filter — switch it to "All members" or to a
+// colleague and that choice stands for the rest of the session, so this never
+// yanks the board back to your own tasks while you are looking at someone else's.
+function showAllMembers(){const sel=document.getElementById('bf-owner');if(sel)sel.value='';renderKanban();}
+let _boardFilterDefaulted=false;
+function applyDefaultBoardFilter(){
+if(_boardFilterDefaulted)return;
+const sel=document.getElementById('bf-owner');
+if(!sel||!_currentUser)return;
+// Leave it on "All members" if the signed-in name isn't one of the options,
+// otherwise the board would silently show nothing.
+if(!Array.from(sel.options).some(o=>o.value===_currentUser))return;
+sel.value=_currentUser;
+_boardFilterDefaulted=true;
+if(document.getElementById('view-board').classList.contains('active'))renderKanban();
+}
 // Most-recent action first — `updated_at` is refreshed by a DB trigger on every edit.
 const _recentFirst=(a,b)=>new Date(b.updated_at||b.created_at||0)-new Date(a.updated_at||a.created_at||0);
 function renderKanban(){
@@ -2157,7 +2175,13 @@ if(q) list=list.filter(t=>(t.title||'').toLowerCase().includes(q));
 // search box affordances: clear button + result count
 const clr=document.getElementById('bf-search-clear');if(clr)clr.style.display=q?'':'none';
 const cnt=document.getElementById('bf-search-count');
-if(cnt)cnt.textContent=q?`${list.length} match${list.length===1?'':'es'}`:'';
+if(cnt){
+if(q)cnt.textContent=`${list.length} match${list.length===1?'':'es'}`;
+// An all-empty board is alarming if you don't notice the member filter, which
+// now starts on your own name — say so and offer the way out.
+else if(fo&&list.length===0)cnt.innerHTML=`No tasks for ${esc(fo)} — <button type="button" class="bf-showall" onclick="showAllMembers()">show all members</button>`;
+else cnt.textContent='';
+}
 // sync sidebar project dropdown to active project filter
 const fp=document.getElementById('f-project');
 if(fp&&activeProj!=='All'&&fp.querySelector(`option[value="${activeProj.replace(/"/g,'\\"')}"]`))fp.value=activeProj;
@@ -2596,7 +2620,7 @@ const wt=document.getElementById('worklog-tab');
 if(wt)wt.style.display=_isAdminUser()?'':'none';
 const nt=document.getElementById('notify-tab');
 if(nt)nt.style.display=_isAdminUser()?'':'none';
-if(name){setupPresence();recordLogin(name);loadUserTheme();syncUserTheme();initWorktime();initChat();setupStageNotify();} else {teardownPresence();teardownChat();teardownStageNotify();_myAvatar='';renderMyAvatar();_workStart=null;updateWorktimeChip();}
+if(name){setupPresence();recordLogin(name);loadUserTheme();syncUserTheme();initWorktime();initChat();setupStageNotify();applyDefaultBoardFilter();} else {teardownPresence();teardownChat();teardownStageNotify();_myAvatar='';renderMyAvatar();_workStart=null;updateWorktimeChip();_boardFilterDefaulted=false;}
 }
 // ── Profile picture (stored in Supabase user_metadata, shared live via presence) ──
 let _myAvatar='',_profileChoice='';
