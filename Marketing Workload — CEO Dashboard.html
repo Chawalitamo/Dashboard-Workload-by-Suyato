@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260807a -->
+<!-- v20260807b -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -57,6 +57,48 @@
 --gold:#b8860b;--gold2:#9a6f08;--gold3:rgba(184,134,11,.12);
 --chart-grid:rgba(0,0,0,0.12);
 }
+/* ── Wallpaper themes ──────────────────────────────────────────────────────
+   Game-art themes. The picture is painted on <html> and the body sits on top
+   as a translucent scrim, so the art shows through but every number and label
+   keeps its contrast. Cards keep their solid --surf backgrounds and are never
+   drawn over the picture directly.
+   If a wallpaper file is missing the image simply doesn't load and the theme
+   degrades to its plain colour palette — nothing breaks. */
+:root[data-theme="ragnarok"]{
+--bg:#0c1220;--surf:#111a2c;--surf2:#172338;--surf3:#1e2c45;--surf4:#263654;
+--t1:#ffffff;--t2:#e2eaf7;--t3:#b9c7de;--t4:#8d9bb3;
+--gold:#7fb2f0;--gold2:#5b93d8;--gold3:rgba(127,178,240,.14);
+--chart-grid:rgba(255,255,255,0.16);--wp-scrim:rgba(12,18,32,.86);
+}
+:root[data-theme="ragnarok-classic"]{
+--bg:#1a0f0c;--surf:#241610;--surf2:#2e1d15;--surf3:#3a251b;--surf4:#472e22;
+--t1:#ffffff;--t2:#f2e2d6;--t3:#d6bda9;--t4:#ac9280;
+--gold:#e8a33d;--gold2:#c8842a;--gold3:rgba(232,163,61,.14);
+--chart-grid:rgba(255,255,255,0.16);--wp-scrim:rgba(26,15,12,.86);
+}
+:root[data-theme="red-alert"]{
+--bg:#1c0a06;--surf:#26100a;--surf2:#31170f;--surf3:#3d1e14;--surf4:#4b2619;
+--t1:#ffffff;--t2:#f7ddd2;--t3:#dcb6a4;--t4:#b08a79;
+--gold:#ff7a3d;--gold2:#dd5c22;--gold3:rgba(255,122,61,.15);
+--chart-grid:rgba(255,255,255,0.16);--wp-scrim:rgba(28,10,6,.85);
+}
+:root[data-theme="cs-maps"]{
+--bg:#0a1418;--surf:#0f1d23;--surf2:#14262e;--surf3:#1a303a;--surf4:#213c48;
+--t1:#ffffff;--t2:#d9ecf0;--t3:#aac6cd;--t4:#7f9aa2;
+--gold:#4fd1c5;--gold2:#33ada3;--gold3:rgba(79,209,197,.14);
+--chart-grid:rgba(255,255,255,0.16);--wp-scrim:rgba(10,20,24,.86);
+}
+:root[data-theme="csgo"]{
+--bg:#0a121c;--surf:#0f1926;--surf2:#142131;--surf3:#1a2a3e;--surf4:#22354d;
+--t1:#ffffff;--t2:#dde8f5;--t3:#b0c2d8;--t4:#8496ac;
+--gold:#6fa8dc;--gold2:#4d88bd;--gold3:rgba(111,168,220,.14);
+--chart-grid:rgba(255,255,255,0.16);--wp-scrim:rgba(10,18,28,.87);
+}
+:root.has-wp{background-image:var(--wp);background-size:cover;background-position:center center;background-repeat:no-repeat;background-attachment:fixed}
+:root.has-wp body{background:var(--wp-scrim,rgba(13,13,12,.86))}
+/* Bars sit directly on the art, so give them their own slightly heavier veil. */
+:root.has-wp nav,:root.has-wp .page-tabs{background:var(--wp-scrim,rgba(13,13,12,.86));backdrop-filter:blur(6px)}
+@media (prefers-reduced-motion:no-preference){:root.has-wp{transition:background-image .2s}}
 html,body{height:100%;overflow:hidden}
 body{font-family:'DBHeavent','Sarabun',sans-serif;background:var(--bg);color:var(--t1);font-size:17px;display:flex;flex-direction:column}
 /* NAV */
@@ -978,7 +1020,7 @@ if(window._pendingLoad) window._pendingLoad();
 
 <script>
 // ═════════════ DATA ═════════════
-const APP_VERSION='v20260807a'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
+const APP_VERSION='v20260807b'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
 const STAGES=['Job Brief','Design','Production','Review','Approval Stage','On Hold','Complete'];
 const DONE_STAGE=STAGES[STAGES.length-1];
 const SKEY=s=>({
@@ -2629,12 +2671,39 @@ const THEMES=[
 {id:'dark-blue',label:'Dark Blue',sw:'#0a0e16',ac:'#5aaaf0'},
 {id:'grey',label:'Grey',sw:'#26262a',ac:'#c8ccd4'},
 {id:'white',label:'White',sw:'#ffffff',ac:'#b8860b'},
+// Game-art wallpaper themes. `wp` is the file name in the public `wallpapers`
+// storage bucket; drop a new image in there and it appears with no code change.
+{id:'ragnarok',label:'Ragnarok',sw:'#0c1220',ac:'#7fb2f0',wp:'ragnarok.jpg'},
+{id:'ragnarok-classic',label:'RO Classic',sw:'#1a0f0c',ac:'#e8a33d',wp:'ragnarok-classic.jpg'},
+{id:'red-alert',label:'Red Alert 2',sw:'#1c0a06',ac:'#ff7a3d',wp:'red-alert.jpg'},
+{id:'cs-maps',label:'CS Maps',sw:'#0a1418',ac:'#4fd1c5',wp:'cs-maps.jpg'},
+{id:'csgo',label:'CS:GO',sw:'#0a121c',ac:'#6fa8dc',wp:'csgo.jpg'},
 ];
 let _currentTheme='black';
+// Wallpapers live in a public Supabase bucket rather than this repository — the
+// repo is public and the images are the game publishers' artwork.
+const WP_BASE='https://fxmigukayxvieziseqil.supabase.co/storage/v1/object/public/wallpapers/';
+function _wpUrl(file){return WP_BASE+encodeURIComponent(file);}
 function _themeKey(){return 'mkt_theme_'+(_currentUser||'_');}
-function applyTheme(id){id=id||'black';_currentTheme=id;if(id==='black')document.documentElement.removeAttribute('data-theme');else document.documentElement.setAttribute('data-theme',id);}
+function applyTheme(id){
+id=id||'black';_currentTheme=id;
+const root=document.documentElement;
+if(id==='black')root.removeAttribute('data-theme');else root.setAttribute('data-theme',id);
+const t=THEMES.find(x=>x.id===id);
+if(t&&t.wp){root.classList.add('has-wp');root.style.setProperty('--wp','url("'+_wpUrl(t.wp)+'")');}
+else{root.classList.remove('has-wp');root.style.removeProperty('--wp');}
+}
 function loadUserTheme(){let id='black';try{id=localStorage.getItem(_themeKey())||'black';}catch(e){}applyTheme(id);}
-function _renderThemeSwatches(active){const el=document.getElementById('theme-grid');if(!el)return;el.innerHTML=THEMES.map(t=>`<button type="button" class="theme-opt${t.id===active?' sel':''}" onclick="setTheme('${t.id}')" title="${t.label}"><span class="theme-sw" style="background:${t.sw}"><span class="theme-ac" style="background:${t.ac}"></span></span><span class="theme-lbl">${t.label}</span></button>`).join('');}
+function _renderThemeSwatches(active){const el=document.getElementById('theme-grid');if(!el)return;
+// Wallpaper themes preview the picture itself; colour themes show their swatch.
+el.innerHTML=THEMES.map(t=>{
+const sw=t.wp
+// Single quotes inside url(): this string goes into a double-quoted style="…"
+// attribute, and a double quote here would close the attribute early.
+?`background-color:${t.sw};background-image:url('${_wpUrl(t.wp)}');background-size:cover;background-position:center`
+:`background:${t.sw}`;
+return `<button type="button" class="theme-opt${t.id===active?' sel':''}" onclick="setTheme('${t.id}')" title="${t.label}"><span class="theme-sw" style="${sw}"><span class="theme-ac" style="background:${t.ac}"></span></span><span class="theme-lbl">${t.label}</span></button>`;
+}).join('');}
 function _refreshDashForTheme(){const dv=document.getElementById('view-dashboard');if(dv&&dv.classList.contains('active')&&typeof renderDash==='function'){try{renderDash();}catch(e){}}}
 function setTheme(id){applyTheme(id);try{localStorage.setItem(_themeKey(),id);}catch(e){}_renderThemeSwatches(id);_refreshDashForTheme();
 // Persist to the account so the theme follows the user across devices.
