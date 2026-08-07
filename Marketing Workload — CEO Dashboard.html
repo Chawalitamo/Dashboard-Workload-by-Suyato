@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260806b -->
+<!-- v20260807a -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -978,8 +978,9 @@ if(window._pendingLoad) window._pendingLoad();
 
 <script>
 // ═════════════ DATA ═════════════
-const APP_VERSION='v20260806b'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
+const APP_VERSION='v20260807a'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
 const STAGES=['Job Brief','Design','Production','Review','Approval Stage','On Hold','Complete'];
+const DONE_STAGE=STAGES[STAGES.length-1];
 const SKEY=s=>({
 'Job Brief':'jobbrief','Design':'design','Production':'production','Review':'review',
 'Approval Stage':'approval','AW Release / Event Live':'awrelease','On Hold':'onhold','Complete':'complete'
@@ -2140,7 +2141,8 @@ dueHTML=`<span class="due-tag ${cls}">${lbl}</span>`;
 const ac=(t.attachments||[]).length;
 const attachBtn=`<button class="cta k-attach" title="Attachments">&#128206;${ac>0?`<span class="attach-badge">${ac}</span>`:''}</button>`;
 const pcnt=(t.proof||[]).length;
-const proofBtn=`<button class="cta k-proof" title="Proof of completed work (required to Complete)" style="${pcnt>0?'border-color:#2f9e44;color:#50d090':''}">&#127942;${pcnt>0?`<span class="attach-badge" style="background:#2f9e44">${pcnt}</span>`:''}</button>`;
+const _isDone=(t.stage===DONE_STAGE);
+const proofBtn=`<button class="cta k-proof" title="${_isDone?'Proof of completed work — attach or view files':'Mark complete — moves this card straight to Complete'}" style="${pcnt>0?'border-color:#2f9e44;color:#50d090':''}">&#127942;${pcnt>0?`<span class="attach-badge" style="background:#2f9e44">${pcnt}</span>`:''}</button>`;
 return `<div class="kcard" data-id="${t.id}" data-can-l="${canL?1:0}" data-can-r="${canR?1:0}"><div class="kcard-proj"><span style="width:6px;height:6px;border-radius:50%;background:${pc};flex-shrink:0;display:inline-block"></span>${esc(t.project)}</div><div class="kcard-title">${esc(t.title)}</div>${t.note?noteHTML(t.note):''}<div class="kcard-foot" style="flex-wrap:wrap;gap:4px"><span style="display:flex;flex-wrap:wrap;gap:3px">${_PICS(t).map(p=>`<span class="owner-pip o-${OKEY(p)}">${esc(p)}</span>`).join('')}</span>${t.lead?`<span style="font-size:11px;color:var(--t3);background:var(--surf3);border-radius:10px;padding:1px 7px">&#128100; ${esc(t.lead)}</span>`:''} ${dueHTML}</div>${thumbsHTML(t)}<div class="kcard-actions"><button class="cta k-edit">&#9998; Edit</button>${attachBtn}${proofBtn}<button class="cta del k-del">&#x2715; Del</button></div></div>`;
 }
 function renderSbStats(){
@@ -2172,7 +2174,7 @@ function setupDragDrop(){
     if(btnNext)   btnNext.addEventListener('click',e=>{e.stopPropagation();moveTask(rawId,1);});
     if(btnDel)    btnDel.addEventListener('click',e=>{e.stopPropagation();doDelete(rawId);});
     card.querySelectorAll('.k-attach').forEach(el=>el.addEventListener('click',e=>{e.stopPropagation();openAttachModal(rawId);}));
-    card.querySelectorAll('.k-proof').forEach(el=>el.addEventListener('click',e=>{e.stopPropagation();openAttachModal(rawId,'proof');}));
+    card.querySelectorAll('.k-proof').forEach(el=>el.addEventListener('click',e=>{e.stopPropagation();completeTask(rawId);}));
     // Link chips: open the URL without triggering the card's edit/drag.
     card.querySelectorAll('.k-link').forEach(el=>el.addEventListener('click',e=>{e.stopPropagation();}));
     card.setAttribute('draggable','true');
@@ -2229,6 +2231,32 @@ async function moveTask(rawId,dir){
   try{await window._sb.from('mkt_tasks').update({stage:t.stage}).eq('id',t.id);}catch(err){console.error(err);}
   logActivity(t.id,t.title,t.project,'updated','stage',_oldMoveStage,t.stage);
   postToTeams('moved',{title:t.title,owner:_picsLabel(t),project:t.project,stage:t.stage,due:t.due||''});
+  renderKanban();
+}
+// 🏆 on a card is a one-click "mark complete" — no dragging through every stage.
+// Once a card is already in Complete there is nothing to move it to, so the same
+// button opens its proof files instead, which is when proof gets attached anyway.
+// Proof stays optional; it never blocks completing.
+async function completeTask(rawId){
+  const t=findTask(rawId); if(!t){console.warn('[complete] task not found:',rawId);return;}
+  if(t.stage===DONE_STAGE){openAttachModal(rawId,'proof');return;}
+  if(!confirm(`🏆 Mark this task as Complete?\n\n${t.title}\n\nIt moves from "${t.stage}" straight to Complete.\n\nAttaching proof is optional — click 🏆 again afterwards if you want to add it.`)) return;
+  const _oldStage=t.stage;
+  t.stage=DONE_STAGE;
+  try{
+    const{error}=await window._sb.from('mkt_tasks').update({stage:DONE_STAGE}).eq('id',t.id);
+    if(error)throw error;
+  }catch(err){
+    // Put the card back where it was rather than leaving the board showing a
+    // move that never reached the server.
+    console.error(err);
+    t.stage=_oldStage;
+    renderKanban();
+    alert('Could not move this card to Complete — nothing was changed. Please try again.');
+    return;
+  }
+  logActivity(t.id,t.title,t.project,'updated','stage',_oldStage,DONE_STAGE);
+  postToTeams('moved',{title:t.title,owner:_picsLabel(t),project:t.project,stage:DONE_STAGE,due:t.due||''});
   renderKanban();
 }
 async function doDelete(rawId){
