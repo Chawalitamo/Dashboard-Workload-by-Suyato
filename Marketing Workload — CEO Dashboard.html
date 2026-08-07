@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260807i -->
+<!-- v20260807j -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -24,6 +24,8 @@
 --gold:#e8c547;--gold2:#c4a830;--gold3:rgba(232,197,71,.12);
 --chart-grid:rgba(255,255,255,0.18);
 --r:10px;--rsm:6px;--rxl:16px;
+/* Sun used as the progress-slider handle; a mask, so it takes --gold as its colour. */
+--sun-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='5.2' fill='%23000'/%3E%3Cpath d='M12 1.6v2.8M12 19.6v2.8M1.6 12h2.8M19.6 12h2.8M4.9 4.9l2 2M17.1 17.1l2 2M19.1 4.9l-2 2M6.9 17.1l-2 2' stroke='%23000' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E");
 }
 /* ── Per-user color themes (set via <html data-theme="…">) ── */
 :root[data-theme="dark-yellow"]{
@@ -265,7 +267,19 @@ nav h1{font-size:17px;font-weight:600;letter-spacing:-.01em}
 /* Progress cell */
 .prog-wrap{display:flex;flex-direction:column;gap:4px;min-width:180px}
 .prog-slider-row{display:flex;align-items:center;gap:8px}
-.prog-slider-row input[type=range]{flex:1;accent-color:var(--gold);cursor:pointer;height:4px}
+/* The slider handle is a sun. It is drawn as an SVG used as a mask rather than
+   the ☀️ character, for two reasons: a masked shape takes its colour from
+   var(--gold) so it matches whichever theme is on, and it renders identically
+   everywhere instead of depending on which emoji font the machine happens to
+   have. Styling the thumb means opting out of the native control, so the track
+   and its filled portion are drawn here too — --fill is set per row. */
+.prog-slider-row input[type=range]{flex:1;cursor:pointer;height:18px;-webkit-appearance:none;appearance:none;background:transparent}
+.prog-slider-row input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:2px;background:linear-gradient(var(--gold),var(--gold)) left/var(--fill,0%) 100% no-repeat,var(--surf4)}
+.prog-slider-row input[type=range]::-moz-range-track{height:4px;border-radius:2px;background:linear-gradient(var(--gold),var(--gold)) left/var(--fill,0%) 100% no-repeat,var(--surf4)}
+.prog-slider-row input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:18px;height:18px;margin-top:-7px;border:none;background-color:var(--gold);-webkit-mask:var(--sun-mask) center/18px 18px no-repeat;mask:var(--sun-mask) center/18px 18px no-repeat;cursor:grab}
+.prog-slider-row input[type=range]::-moz-range-thumb{width:18px;height:18px;border:none;background-color:var(--gold);mask:var(--sun-mask) center/18px 18px no-repeat;cursor:grab}
+.prog-slider-row input[type=range]:active::-webkit-slider-thumb{cursor:grabbing;transform:scale(1.12)}
+.prog-slider-row input[type=range]:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:4px}
 .prog-pct{font-family:'DBHeavent',monospace;font-size:13px;color:var(--gold);min-width:30px}
 .prog-bar-row{display:flex;align-items:center;gap:6px}
 .prog-stage-sel{font-size:13px;background:none;border:none;color:var(--t2);font-family:'DBHeavent','Sarabun',sans-serif;cursor:pointer;outline:none;padding:0}
@@ -1080,7 +1094,7 @@ if(window._pendingLoad) window._pendingLoad();
 
 <script>
 // ═════════════ DATA ═════════════
-const APP_VERSION='v20260807i'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
+const APP_VERSION='v20260807j'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
 const STAGES=['Job Brief','Design','Production','Review','Approval Stage','On Hold','Complete'];
 const DONE_STAGE=STAGES[STAGES.length-1];
 const SKEY=s=>({
@@ -1981,7 +1995,7 @@ ${_PICS(t).length?_PICS(t).map(p=>`<span style="display:inline-flex;align-items:
 <td>
 <div class="prog-wrap">
 <div class="prog-slider-row">
-<input type="range" min="0" max="100" step="5" value="${pct}" oninput="slideProgress('${t.id}',parseInt(this.value),this)"/>
+<input type="range" min="0" max="100" step="5" value="${pct}" style="--fill:${pct}%" oninput="slideProgress('${t.id}',parseInt(this.value),this)"/>
 <span class="prog-pct" id="pct-${t.id}">${pct}%</span>
 </div>
 <div class="prog-bar-row">
@@ -2053,6 +2067,9 @@ const _oldStage=t.stage;
 t.stage=best[0];
 const pct=best[1];
 inp.value=pct;
+// Keep the track's filled portion in step with the snapped value, not the raw
+// drag position — otherwise the fill and the sun would sit at different points.
+inp.style.setProperty('--fill',pct+'%');
 const pctEl=document.getElementById('pct-'+id);
 const pbEl=document.getElementById('pb-'+id);
 if(pctEl) pctEl.textContent=pct+'%';
