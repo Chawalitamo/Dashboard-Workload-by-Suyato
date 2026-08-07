@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260807d -->
+<!-- v20260807e -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -87,12 +87,6 @@
 --t1:#ffffff;--t2:#d9ecf0;--t3:#aac6cd;--t4:#7f9aa2;
 --gold:#4fd1c5;--gold2:#33ada3;--gold3:rgba(79,209,197,.14);
 --chart-grid:rgba(255,255,255,0.16);--wp-scrim:rgba(10,20,24,.86);
-}
-:root[data-theme="csgo"]{
---bg:#0a121c;--surf:#0f1926;--surf2:#142131;--surf3:#1a2a3e;--surf4:#22354d;
---t1:#ffffff;--t2:#dde8f5;--t3:#b0c2d8;--t4:#8496ac;
---gold:#6fa8dc;--gold2:#4d88bd;--gold3:rgba(111,168,220,.14);
---chart-grid:rgba(255,255,255,0.16);--wp-scrim:rgba(10,18,28,.87);
 }
 /* Cartoon set. Two of these pictures are light (Bananas sits on white, the palm
    mural is pale sage), so they use a *light* scrim with dark text and dark
@@ -1050,7 +1044,7 @@ if(window._pendingLoad) window._pendingLoad();
 
 <script>
 // ═════════════ DATA ═════════════
-const APP_VERSION='v20260807d'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
+const APP_VERSION='v20260807e'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
 const STAGES=['Job Brief','Design','Production','Review','Approval Stage','On Hold','Complete'];
 const DONE_STAGE=STAGES[STAGES.length-1];
 const SKEY=s=>({
@@ -2707,7 +2701,6 @@ const THEMES=[
 {id:'ragnarok-classic',label:'RO Classic',sw:'#1a0f0c',ac:'#e8a33d',wp:'ragnarok-classic.jpg'},
 {id:'red-alert',label:'Red Alert 2',sw:'#1c0a06',ac:'#ff7a3d',wp:'red-alert.jpg'},
 {id:'cs-maps',label:'CS Maps',sw:'#0a1418',ac:'#4fd1c5',wp:'cs-maps.jpg'},
-{id:'csgo',label:'CS:GO',sw:'#0a121c',ac:'#6fa8dc',wp:'csgo.jpg'},
 {id:'bananas',label:'Bananas',sw:'#f7f4e8',ac:'#2f4bb5',wp:'bananas.jpg'},
 {id:'toy-story',label:'Toy Story',sw:'#eef6fd',ac:'#1f7ae0',wp:'toy-story.jpg'},
 {id:'disney',label:'Disney',sw:'#0b1626',ac:'#5fc8f5',wp:'disney.png'},
@@ -2720,10 +2713,15 @@ const WP_BASE='https://fxmigukayxvieziseqil.supabase.co/storage/v1/object/public
 function _wpUrl(file){return WP_BASE+encodeURIComponent(file);}
 function _themeKey(){return 'mkt_theme_'+(_currentUser||'_');}
 function applyTheme(id){
-id=id||'black';_currentTheme=id;
+id=id||'black';
+// A theme that no longer exists — retired from THEMES, but still saved on the
+// account or in localStorage — falls back to Black rather than leaving an
+// unknown data-theme on <html> that matches no palette.
+const t=THEMES.find(x=>x.id===id);
+if(!t)id='black';
+_currentTheme=id;
 const root=document.documentElement;
 if(id==='black')root.removeAttribute('data-theme');else root.setAttribute('data-theme',id);
-const t=THEMES.find(x=>x.id===id);
 if(t&&t.wp){root.classList.add('has-wp');root.style.setProperty('--wp','url("'+_wpUrl(t.wp)+'")');}
 else{root.classList.remove('has-wp');root.style.removeProperty('--wp');}
 }
