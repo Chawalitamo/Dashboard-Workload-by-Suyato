@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260807b -->
+<!-- v20260807c -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -93,6 +93,36 @@
 --t1:#ffffff;--t2:#dde8f5;--t3:#b0c2d8;--t4:#8496ac;
 --gold:#6fa8dc;--gold2:#4d88bd;--gold3:rgba(111,168,220,.14);
 --chart-grid:rgba(255,255,255,0.16);--wp-scrim:rgba(10,18,28,.87);
+}
+/* Cartoon set. Two of these pictures are light (Bananas sits on white, the palm
+   mural is pale sage), so they use a *light* scrim with dark text and dark
+   borders — a dark veil over a white picture just turns it into grey mud. */
+:root[data-theme="bananas"]{
+--bg:#f7f4e8;--surf:#ffffff;--surf2:#f6f2e4;--surf3:#ece7d4;--surf4:#e0dac4;
+--b0:#0000000f;--b1:#0000001f;--b2:#00000033;--b3:#00000055;
+--t1:#1b1c22;--t2:#33353d;--t3:#5c5f68;--t4:#878a93;
+--gold:#2f4bb5;--gold2:#243a90;--gold3:rgba(47,75,181,.12);
+--chart-grid:rgba(0,0,0,0.12);--wp-scrim:rgba(250,247,236,.86);
+}
+:root[data-theme="toy-story"]{
+--bg:#eef6fd;--surf:#ffffff;--surf2:#eaf3fc;--surf3:#dcebf8;--surf4:#c9dff3;
+--b0:#0000000f;--b1:#0000001f;--b2:#00000033;--b3:#00000055;
+--t1:#14202e;--t2:#2b3a4d;--t3:#54657a;--t4:#8092a6;
+--gold:#1f7ae0;--gold2:#1560b4;--gold3:rgba(31,122,224,.12);
+--chart-grid:rgba(0,0,0,0.12);--wp-scrim:rgba(238,246,253,.85);
+}
+:root[data-theme="jungle"]{
+--bg:#eff0ec;--surf:#ffffff;--surf2:#eceee7;--surf3:#e0e3da;--surf4:#d0d5c7;
+--b0:#0000000f;--b1:#0000001f;--b2:#00000033;--b3:#00000055;
+--t1:#1c2019;--t2:#333a2e;--t3:#5b6353;--t4:#868d7e;
+--gold:#4f7a4a;--gold2:#3c6038;--gold3:rgba(79,122,74,.13);
+--chart-grid:rgba(0,0,0,0.12);--wp-scrim:rgba(239,240,236,.85);
+}
+:root[data-theme="disney"]{
+--bg:#0b1626;--surf:#101d31;--surf2:#15253d;--surf3:#1b2e4b;--surf4:#23395a;
+--t1:#ffffff;--t2:#dfe9f7;--t3:#b2c3db;--t4:#8798b1;
+--gold:#5fc8f5;--gold2:#3aa4d4;--gold3:rgba(95,200,245,.14);
+--chart-grid:rgba(255,255,255,0.16);--wp-scrim:rgba(11,22,38,.86);
 }
 :root.has-wp{background-image:var(--wp);background-size:cover;background-position:center center;background-repeat:no-repeat;background-attachment:fixed}
 :root.has-wp body{background:var(--wp-scrim,rgba(13,13,12,.86))}
@@ -1020,7 +1050,7 @@ if(window._pendingLoad) window._pendingLoad();
 
 <script>
 // ═════════════ DATA ═════════════
-const APP_VERSION='v20260807b'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
+const APP_VERSION='v20260807c'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
 const STAGES=['Job Brief','Design','Production','Review','Approval Stage','On Hold','Complete'];
 const DONE_STAGE=STAGES[STAGES.length-1];
 const SKEY=s=>({
@@ -2678,6 +2708,10 @@ const THEMES=[
 {id:'red-alert',label:'Red Alert 2',sw:'#1c0a06',ac:'#ff7a3d',wp:'red-alert.jpg'},
 {id:'cs-maps',label:'CS Maps',sw:'#0a1418',ac:'#4fd1c5',wp:'cs-maps.jpg'},
 {id:'csgo',label:'CS:GO',sw:'#0a121c',ac:'#6fa8dc',wp:'csgo.jpg'},
+{id:'bananas',label:'Bananas',sw:'#f7f4e8',ac:'#2f4bb5',wp:'bananas.jpg'},
+{id:'toy-story',label:'Toy Story',sw:'#eef6fd',ac:'#1f7ae0',wp:'toy-story.jpg'},
+{id:'disney',label:'Disney',sw:'#0b1626',ac:'#5fc8f5',wp:'disney.jpg'},
+{id:'jungle',label:'Jungle',sw:'#eff0ec',ac:'#4f7a4a',wp:'jungle.jpg'},
 ];
 let _currentTheme='black';
 // Wallpapers live in a public Supabase bucket rather than this repository — the
