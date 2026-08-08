@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260807j -->
+<!-- v20260807k -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -1094,7 +1094,7 @@ if(window._pendingLoad) window._pendingLoad();
 
 <script>
 // ═════════════ DATA ═════════════
-const APP_VERSION='v20260807j'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
+const APP_VERSION='v20260807k'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
 const STAGES=['Job Brief','Design','Production','Review','Approval Stage','On Hold','Complete'];
 const DONE_STAGE=STAGES[STAGES.length-1];
 const SKEY=s=>({
@@ -2166,12 +2166,15 @@ function clearBoardSearch(){const el=document.getElementById('bf-search');if(el)
 // you. After that it is an ordinary filter — switch it to "All members" or to a
 // colleague and that choice stands for the rest of the session, so this never
 // yanks the board back to your own tasks while you are looking at someone else's.
+// Super Admins are the exception: their job is the whole team's board, so they
+// start on "All members" and can filter down to one person from there.
 function showAllMembers(){const sel=document.getElementById('bf-owner');if(sel)sel.value='';renderKanban();}
 let _boardFilterDefaulted=false;
 function applyDefaultBoardFilter(){
 if(_boardFilterDefaulted)return;
 const sel=document.getElementById('bf-owner');
 if(!sel||!_currentUser)return;
+if(_isAdminUser()){sel.value='';_boardFilterDefaulted=true;return;}
 // Leave it on "All members" if the signed-in name isn't one of the options,
 // otherwise the board would silently show nothing.
 if(!Array.from(sel.options).some(o=>o.value===_currentUser))return;
