@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260807k -->
+<!-- v20260807l -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -147,6 +147,43 @@
 --t1:#ffffff;--t2:#dff0e2;--t3:#b3ccb9;--t4:#87a08e;
 --gold:#4fb3e8;--gold2:#3492c6;--gold3:rgba(79,179,232,.14);
 --chart-grid:rgba(255,255,255,0.16);--wp-scrim:rgba(12,23,16,.85);
+}
+/* Character set. Misae, Ultraman and Dexter sit on white, yellow and pale blue
+   and take light scrims; Lucifer and Sadness are dark artwork and keep the dark
+   veil. Each accent is pulled from the picture — Lucifer's green eyes, Misae's
+   orange banner, Ultraman's red, Dexter's hair, Sadness's periwinkle. */
+:root[data-theme="lucifer"]{
+--bg:#141a20;--surf:#1b232b;--surf2:#222c36;--surf3:#2a3641;--surf4:#33414e;
+--t1:#ffffff;--t2:#e0e7ee;--t3:#b5c1cc;--t4:#8a97a3;
+--gold:#9ed36a;--gold2:#7fb14e;--gold3:rgba(158,211,106,.14);
+--chart-grid:rgba(255,255,255,0.16);--wp-scrim:rgba(20,26,32,.85);
+}
+:root[data-theme="misae"]{
+--bg:#fdf2ee;--surf:#ffffff;--surf2:#fbeee9;--surf3:#f5e0d8;--surf4:#eccdc0;
+--b0:#0000000f;--b1:#0000001f;--b2:#00000033;--b3:#00000055;
+--t1:#26181a;--t2:#3d2a2c;--t3:#68504f;--t4:#93797a;
+--gold:#e8632e;--gold2:#c44a1a;--gold3:rgba(232,99,46,.12);
+--chart-grid:rgba(0,0,0,0.12);--wp-scrim:rgba(253,242,238,.86);
+}
+:root[data-theme="ultraman"]{
+--bg:#fdf4e0;--surf:#ffffff;--surf2:#fbf0d9;--surf3:#f4e4c2;--surf4:#ecd5a5;
+--b0:#0000000f;--b1:#0000001f;--b2:#00000033;--b3:#00000055;
+--t1:#241c10;--t2:#3b3020;--t3:#655843;--t4:#918370;
+--gold:#d63b31;--gold2:#b32a21;--gold3:rgba(214,59,49,.12);
+--chart-grid:rgba(0,0,0,0.12);--wp-scrim:rgba(253,244,224,.86);
+}
+:root[data-theme="dexter"]{
+--bg:#e9f4fb;--surf:#ffffff;--surf2:#e5f1fa;--surf3:#d5e8f6;--surf4:#bcd9ee;
+--b0:#0000000f;--b1:#0000001f;--b2:#00000033;--b3:#00000055;
+--t1:#0f1e29;--t2:#263945;--t3:#4f6472;--t4:#7d919d;
+--gold:#f07a1a;--gold2:#cc6109;--gold3:rgba(240,122,26,.13);
+--chart-grid:rgba(0,0,0,0.12);--wp-scrim:rgba(233,244,251,.85);
+}
+:root[data-theme="sadness"]{
+--bg:#0e1130;--surf:#141840;--surf2:#1a1f4f;--surf3:#22285f;--surf4:#2c3372;
+--t1:#ffffff;--t2:#dfe3ff;--t3:#b3b9ee;--t4:#8a90c4;
+--gold:#8fa8ff;--gold2:#6f8bea;--gold3:rgba(143,168,255,.15);
+--chart-grid:rgba(255,255,255,0.16);--wp-scrim:rgba(14,17,48,.85);
 }
 :root.has-wp{background-image:var(--wp);background-size:cover;background-position:center center;background-repeat:no-repeat;background-attachment:fixed}
 :root.has-wp body{background:var(--wp-scrim,rgba(13,13,12,.86))}
@@ -1094,7 +1131,7 @@ if(window._pendingLoad) window._pendingLoad();
 
 <script>
 // ═════════════ DATA ═════════════
-const APP_VERSION='v20260807k'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
+const APP_VERSION='v20260807l'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
 const STAGES=['Job Brief','Design','Production','Review','Approval Stage','On Hold','Complete'];
 const DONE_STAGE=STAGES[STAGES.length-1];
 const SKEY=s=>({
@@ -2788,6 +2825,11 @@ const THEMES=[
 {id:'sunset-valley',label:'Sunset Valley',sw:'#1a150a',ac:'#f0b53a',wp:'sunset-valley.jpeg'},
 {id:'autumn',label:'Autumn',sw:'#1d1008',ac:'#f27430',wp:'autumn.jpg'},
 {id:'butterfly',label:'Butterfly',sw:'#0c1710',ac:'#4fb3e8',wp:'butterfly.jpg'},
+{id:'lucifer',label:'Lucifer',sw:'#141a20',ac:'#9ed36a',wp:'lucifer.jpg'},
+{id:'misae',label:'Misae',sw:'#fdf2ee',ac:'#e8632e',wp:'misae.jpg'},
+{id:'ultraman',label:'Ultraman',sw:'#fdf4e0',ac:'#d63b31',wp:'ultraman.jpg'},
+{id:'dexter',label:'Dexter',sw:'#e9f4fb',ac:'#f07a1a',wp:'dexter.jpg'},
+{id:'sadness',label:'Sadness',sw:'#0e1130',ac:'#8fa8ff',wp:'sadness.jpg'},
 ];
 let _currentTheme='black';
 // Wallpapers live in a public Supabase bucket rather than this repository — the
