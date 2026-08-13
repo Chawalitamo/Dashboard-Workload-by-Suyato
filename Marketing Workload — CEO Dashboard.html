@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260813a -->
+<!-- v20260813b -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -1010,7 +1010,8 @@ if(window._pendingLoad) window._pendingLoad();
 <option value="done">ครบทุกข้อ</option>
 </select>
 <span id="nsg-count" style="font-size:13px;color:var(--t3);white-space:nowrap"></span>
-<button class="act-export-btn" onclick="openNSGImport()"><i class="ti ti-table-import" aria-hidden="true"></i>Import จาก Sheet</button>
+<button class="act-export-btn" id="nsg-sync-btn" onclick="manualNSGSync()"><i class="ti ti-cloud-download" aria-hidden="true"></i>Sync จาก Sheet</button>
+<button class="act-export-btn" onclick="openNSGImport()" style="background:var(--surf3);border-color:var(--b2);color:var(--t2)"><i class="ti ti-table-import" aria-hidden="true"></i>วางข้อมูลเอง</button>
 <button class="act-export-btn" onclick="exportNSGCSV()"><i class="ti ti-file-spreadsheet" aria-hidden="true"></i>Export Excel</button>
 <button class="act-export-btn" onclick="loadNSG(true)" style="background:var(--surf3);border-color:var(--b2);color:var(--t2)"><i class="ti ti-refresh" aria-hidden="true"></i>Refresh</button>
 </div>
@@ -1021,8 +1022,14 @@ if(window._pendingLoad) window._pendingLoad();
 <div class="modal" style="width:760px">
 <div class="modal-head"><h3><i class="ti ti-table-import" style="vertical-align:-2px"></i> Import รายชื่อสาขาจาก Google Sheet</h3><button class="modal-close" onclick="closeModal('nsg-import-modal')">&#x2715;</button></div>
 <div style="font-size:13px;color:var(--t3);line-height:1.7;margin-bottom:10px">
+ปกติใช้ปุ่ม <b>Sync จาก Sheet</b> ได้เลย — หน้านี้ไว้ใช้เมื่อ sync ไม่ผ่าน<br>
 เปิดชีท <b>NSG Plan_Store List</b> → เลือกทั้งตาราง <b>รวมหัวตาราง</b> (Ctrl/Cmd + A) → Copy → วางในช่องด้านล่าง<br>
 ระบบจะเก็บเฉพาะแถวที่ <b>MKT = ซัน</b> และจะ <b>ไม่ลบเครื่องหมายถูกที่ติ๊กไว้แล้ว</b>
+</div>
+<div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
+<span style="font-size:12px;color:var(--t3);white-space:nowrap">ลิงก์ชีท</span>
+<input id="nsg-sheet-url" type="text" placeholder="https://docs.google.com/spreadsheets/d/…" style="flex:1;background:var(--surf2);border:1px solid var(--b1);border-radius:var(--rsm);color:var(--t1);font:inherit;font-size:12px;padding:5px 8px">
+<button class="btn-sec" style="font-size:12px" onclick="saveNSGSheetUrl()">บันทึกลิงก์</button>
 </div>
 <textarea id="nsg-paste" placeholder="วางข้อมูลจากชีทที่นี่…" style="width:100%;height:220px;background:var(--surf2);border:1px solid var(--b1);border-radius:var(--rsm);color:var(--t1);font-family:monospace;font-size:12px;padding:10px;resize:vertical"></textarea>
 <div id="nsg-import-msg" style="font-size:13px;margin-top:10px;line-height:1.6"></div>
@@ -1218,7 +1225,7 @@ if(window._pendingLoad) window._pendingLoad();
 
 <script>
 // ═════════════ DATA ═════════════
-const APP_VERSION='v20260813a'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
+const APP_VERSION='v20260813b'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
 const STAGES=['Job Brief','Design','Production','Review','Approval Stage','On Hold','Complete'];
 const DONE_STAGE=STAGES[STAGES.length-1];
 const SKEY=s=>({
@@ -1593,7 +1600,11 @@ try{
   if(v==='calendar') renderCalendar();
   if(v==='activity') renderActivity();
   if(v==='worklog') renderWorklog();
-  if(v==='nsg') loadNSG();
+  if(v==='nsg') loadNSG().then(()=>{
+   // Pull the latest sheet once per session on opening the tab. Quietly — a
+   // failure leaves the stored list untouched and just shows in the status line.
+   if(!_nsgSyncedThisSession){_nsgSyncedThisSession=true;syncNSGFromSheet(true).then(()=>renderNSG());}
+  });
 }catch(e){
   console.warn('showView render error:',e);
   _showErr('Render error in view "'+v+'":\n'+e.message+'\n'+e.stack);
@@ -2420,7 +2431,8 @@ if(f==='pre')list=list.filter(s=>s.grand_date&&_nsgDaysBetween(today,s.grand_dat
 if(f==='open')list=list.filter(s=>s.grand_date&&_nsgDaysBetween(today,s.grand_date)<=0);
 if(f==='done')list=list.filter(s=>_nsgProgress(s).done===NSG_ALL_ITEMS.length);
 const cnt=document.getElementById('nsg-count');
-if(cnt)cnt.textContent=list.length+' / '+nsgStores.length+' สาขา';
+if(cnt)cnt.innerHTML=list.length+' / '+nsgStores.length+' สาขา'
+ +(_nsgSyncMsg?`<br><span style="font-size:11px;color:${/ไม่สำเร็จ/.test(_nsgSyncMsg)?'#f0655f':'var(--t4)'}">${esc(_nsgSyncMsg)}</span>`:'');
 if(!nsgStores.length){
  body.innerHTML=_nsgLoadErr
   ? '<div class="nsg-empty" style="color:#f0655f">โหลดรายชื่อสาขาไม่สำเร็จ — ข้อมูลไม่ได้หายไป<br><span style="font-size:12px;color:var(--t3)">'+esc(_nsgLoadErr)+'</span><br><br>กด Refresh อีกครั้ง</div>'
@@ -2593,10 +2605,96 @@ for(let i=hi+1;i<lines.length;i++){
 }
 return{rows,skipped};
 }
-function openNSGImport(){
+// ── Live sync from the published Google Sheet ───────────────────────────────
+// The sheet is public, so the page can read it straight from Google. Which of
+// Google's CSV endpoints answers with CORS headers varies, so both are tried in
+// turn and pasting stays available as a fallback — a sync that cannot reach the
+// sheet must never look like a sheet with no stores in it.
+const NSG_SHEET_DEFAULT='https://docs.google.com/spreadsheets/d/1XQ9smWkwMaZ4gBESlmHu5x1V6hDrZHSlg8w9JEDyclk/edit?gid=0#gid=0';
+let _nsgSheetUrl='',_nsgSyncMsg='',_nsgSyncedThisSession=false;
+function _nsgParseSheetUrl(u){
+const s=String(u||'');
+const id=(s.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/)||[])[1];
+if(!id)return null;
+const gid=(s.match(/[#&?]gid=(\d+)/)||[])[1]||'0';
+return{id,gid};
+}
+function _nsgCsvUrls(){
+const p=_nsgParseSheetUrl(_nsgSheetUrl||NSG_SHEET_DEFAULT);
+if(!p)return[];
+return['https://docs.google.com/spreadsheets/d/'+p.id+'/gviz/tq?tqx=out:csv&gid='+p.gid,
+       'https://docs.google.com/spreadsheets/d/'+p.id+'/export?format=csv&gid='+p.gid];
+}
+async function _nsgLoadSheetUrl(){
+if(_nsgSheetUrl)return _nsgSheetUrl;
+try{
+ const{data}=await window._sb.from('mkt_settings').select('value').eq('key','nsg_sheet_url').maybeSingle();
+ _nsgSheetUrl=(data&&data.value)||NSG_SHEET_DEFAULT;
+}catch(e){_nsgSheetUrl=NSG_SHEET_DEFAULT;}
+return _nsgSheetUrl;
+}
+async function fetchNSGSheet(){
+await _nsgLoadSheetUrl();
+const urls=_nsgCsvUrls();
+if(!urls.length)return{error:'ลิงก์ชีทไม่ถูกต้อง'};
+let last='';
+for(const url of urls){
+ try{
+  const r=await fetch(url,{credentials:'omit'});
+  if(!r.ok){last='HTTP '+r.status;continue;}
+  const txt=await r.text();
+  // A sheet that is not public returns Google's sign-in HTML, not CSV. Parsing
+  // that would find no header and could otherwise look like an empty sheet.
+  if(/^\s*<(!doctype|html)/i.test(txt)){last='ชีทยังไม่เปิดเป็นสาธารณะ (Google ส่งหน้า login กลับมา)';continue;}
+  if(!txt.trim()){last='ชีทว่างเปล่า';continue;}
+  return{text:txt};
+ }catch(e){last=(e&&e.message)||String(e);}
+}
+return{error:last||'เชื่อมต่อ Google Sheet ไม่สำเร็จ'};
+}
+// silent=true is the automatic sync when the tab opens; it must never pop a
+// dialog or wipe anything, only refresh quietly and record what happened.
+async function syncNSGFromSheet(silent){
+const res=await fetchNSGSheet();
+if(res.error){_nsgSyncMsg='sync ไม่สำเร็จ: '+res.error;if(!silent)renderNSG();return{error:res.error};}
+const p=parseNSGPaste(res.text);
+if(p.error){_nsgSyncMsg='sync ไม่สำเร็จ: '+p.error;if(!silent)renderNSG();return{error:p.error};}
+if(!p.rows.length){_nsgSyncMsg='ชีทไม่มีแถวที่ MKT = ซัน';if(!silent)renderNSG();return{error:'ไม่พบแถวที่ MKT = ซัน'};}
+try{
+ // `checks` stays out of the payload, so syncing never clears a tick.
+ const{error}=await window._sb.from('mkt_nsg_stores').upsert(p.rows,{onConflict:'storecode'});
+ if(error)throw error;
+}catch(e){const m=(e&&e.message)||String(e);_nsgSyncMsg='บันทึกไม่สำเร็จ: '+m;if(!silent)renderNSG();return{error:m};}
+_nsgSyncMsg='sync ล่าสุด '+new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit',timeZone:'Asia/Bangkok'})+' · '+p.rows.length+' สาขา';
+_nsgLoaded=false;
+await loadNSG(true);
+return{count:p.rows.length,skipped:p.skipped};
+}
+async function manualNSGSync(){
+const btn=document.getElementById('nsg-sync-btn');
+if(btn){btn.disabled=true;btn.textContent='กำลัง sync…';}
+const r=await syncNSGFromSheet(false);
+if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-cloud-download"></i>Sync จาก Sheet';}
+if(r.error)alert('Sync ไม่สำเร็จ\n\n'+r.error+'\n\nข้อมูลเดิมยังอยู่ครบ — ใช้ปุ่ม "วางข้อมูลเอง" แทนได้');
+else{renderNSG();alert('Sync สำเร็จ — '+r.count+' สาขา (MKT ซัน)\nข้าม '+r.skipped.other+' แถวของ MKT คนอื่น');}
+}
+async function openNSGImport(){
 document.getElementById('nsg-paste').value='';
 document.getElementById('nsg-import-msg').innerHTML='';
 document.getElementById('nsg-import-modal').classList.add('open');
+const u=document.getElementById('nsg-sheet-url');
+if(u)u.value=await _nsgLoadSheetUrl();
+}
+async function saveNSGSheetUrl(){
+const el=document.getElementById('nsg-sheet-url');if(!el)return;
+const v=el.value.trim();
+if(!_nsgParseSheetUrl(v)){alert('ลิงก์ไม่ถูกต้อง — ต้องเป็นลิงก์ Google Sheet');return;}
+try{
+ const{error}=await window._sb.from('mkt_settings').upsert([{key:'nsg_sheet_url',value:v}],{onConflict:'key'});
+ if(error)throw error;
+ _nsgSheetUrl=v;
+ document.getElementById('nsg-import-msg').innerHTML='<span style="color:#50d090">✓ บันทึกลิงก์แล้ว</span>';
+}catch(e){alert('บันทึกลิงก์ไม่สำเร็จ: '+((e&&e.message)||e));}
 }
 async function runNSGImport(){
 const msg=document.getElementById('nsg-import-msg');
