@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260813b -->
+<!-- v20260813c -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -622,6 +622,19 @@ button{font-family:'DBHeavent','Sarabun',sans-serif}
 .nsg-due.today{background:rgba(242,201,76,.16);color:#f2c94c}
 .nsg-due.ahead{color:var(--t4)}
 .nsg-kf{background:var(--surf2);border:1px solid var(--b1);border-radius:var(--rsm);color:var(--t1);font:inherit;font-size:13px;padding:3px 8px;width:190px;margin-top:4px}
+.nsg-kf.wide{width:100%;max-width:560px}
+.nsg-kf:focus{outline:none;border-color:var(--gold)}
+/* NSG summary dashboard */
+.nsg-dash{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0 16px}
+.nsg-kpi{flex:1 1 130px;min-width:130px;background:var(--surf);border:1px solid var(--b1);border-radius:var(--r);padding:11px 14px}
+.nsg-kpi b{display:block;font-family:'DBHeavent',monospace;font-size:24px;line-height:1.2}
+.nsg-kpi span{font-size:12px;color:var(--t3)}
+.nsg-ph-prog{background:var(--surf);border:1px solid var(--b1);border-radius:var(--r);padding:12px 14px;margin-bottom:16px}
+.nsg-ph-row{display:flex;align-items:center;gap:10px;margin-top:7px;font-size:13px}
+.nsg-ph-row .lbl{min-width:210px;color:var(--t2)}
+.nsg-ph-row .bar{flex:1;height:8px;background:var(--surf4);border-radius:4px;overflow:hidden}
+.nsg-ph-row .bar span{display:block;height:100%;background:var(--gold);border-radius:4px}
+.nsg-ph-row .num{min-width:70px;text-align:right;color:var(--t3);font-family:monospace;font-size:12px}
 .nsg-empty{text-align:center;color:var(--t3);padding:40px;font-size:14px;line-height:1.8}
 .nsg-brief-grp{margin-bottom:14px}
 .nsg-brief-grp h4{font-size:13px;margin-bottom:6px;letter-spacing:.03em}
@@ -1225,7 +1238,7 @@ if(window._pendingLoad) window._pendingLoad();
 
 <script>
 // ═════════════ DATA ═════════════
-const APP_VERSION='v20260813b'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
+const APP_VERSION='v20260813c'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
 const STAGES=['Job Brief','Design','Production','Review','Approval Stage','On Hold','Complete'];
 const DONE_STAGE=STAGES[STAGES.length-1];
 const SKEY=s=>({
@@ -2317,13 +2330,13 @@ const NSG_PHASES=[
 {key:'p2',no:'②',title:'ระบบทำงาน (ข้อมูลหน้างาน → SCM / Commercial MKT)',when:'D-15',df:'packgo_date',items:[
  {k:'p2_pr',t:'แผนประชาสัมพันธ์ (PR)'},
  {k:'p2_sign',t:'จุดปักป้าย'},
- {k:'p2_place',t:'สถานที่สำคัญ + พฤติกรรมลูกค้าในพื้นที่'},
- {k:'p2_hours',t:'เวลาเปิด-ปิดที่เหมาะสมของแต่ละสาขา'},
+ {k:'p2_place',t:'สถานที่สำคัญ + พฤติกรรมลูกค้าในพื้นที่',inp:'ระบุสถานที่สำคัญ / พฤติกรรมลูกค้า…'},
+ {k:'p2_hours',t:'เวลาเปิด-ปิดที่เหมาะสมของแต่ละสาขา',inp:'เช่น 06:00-21:00 พร้อมเหตุผล…'},
  {k:'p2_traffic',t:'เส้นทางสัญจรของลูกค้า'},
  {k:'p2_layout',t:'Layout ร้านค้าเช่า'},
  {k:'p2_scm',t:'นำเข้าหารือกับ SCM / Commercial MKT เรื่องสินค้าและราคาคู่แข่ง'},
- {k:'p2_out_price',t:'ผลลัพธ์: Price & Product',d:'ราคาและสินค้าให้เหมาะสมกับพื้นที่'},
- {k:'p2_out_layout',t:'ผลลัพธ์: Layout',d:'ต้องมี Bible คุยกับร้านค้าเช่า + Layout จัดกิจกรรมหน้างาน'}]},
+ {k:'p2_out_price',t:'ผลลัพธ์: Price & Product',d:'ราคาและสินค้าให้เหมาะสมกับพื้นที่',inp:'สรุปราคา/สินค้าที่ตกลง…'},
+ {k:'p2_out_layout',t:'ผลลัพธ์: Layout',d:'ต้องมี Bible คุยกับร้านค้าเช่า + Layout จัดกิจกรรมหน้างาน',inp:'สรุป Layout / Bible…'}]},
 {key:'act',no:'✓',title:'Action ก่อนเปิดร้าน',when:'D-7',df:'install_date',items:[
  {k:'a_download',t:'Download ข้อมูลส่งให้ทีมภาคสนาม'},
  {k:'a_log',t:'ระบบเก็บ Log ย้อนดูได้'},
@@ -2331,14 +2344,14 @@ const NSG_PHASES=[
 {key:'p3',no:'③',title:'วันเปิดสาขา (D-2 → D5) เก็บ Insight หน้างาน',when:'D-2 → D5',df:'grand_date',items:[
  {k:'p3_gmap',t:'Google Map (ก่อน D2)',d:'เตรียมวิดีโอ/รูปถ่ายเพื่อยืนยันตำแหน่งร้านใน Google Map ในระบบ',off:-2},
  {k:'p3_q1',t:'ลูกค้าในพื้นที่รู้จักร้านใหม่นี้หรือไม่ ได้รับการประชาสัมพันธ์ถึงหรือไม่',off:5},
- {k:'p3_q2',t:'สินค้าใดหมดสต๊อกเร็วที่สุด และมีลูกค้าถามหากี่คน',d:'ดูแนวโน้มสินค้าขายดี',off:5},
+ {k:'p3_q2',t:'สินค้าใดหมดสต๊อกเร็วที่สุด และมีลูกค้าถามหากี่คน',d:'ดูแนวโน้มสินค้าขายดี',off:5,inp:'สินค้า + จำนวนคนที่ถามหา…'},
  {k:'p3_q3',t:'ถ่ายภาพร้านค้าเช่า เพื่อเช็คว่าผังการจัดวางสมเหตุสมผลหรือไม่',off:5},
- {k:'p3_q4',t:'Layout การจัดกิจกรรม → สรุปผลสมมติฐาน เตรียมแผนทดลองงานครั้งถัดไป',off:5}]},
+ {k:'p3_q4',t:'Layout การจัดกิจกรรม → สรุปผลสมมติฐาน เตรียมแผนทดลองงานครั้งถัดไป',off:5,inp:'สรุปสมมติฐาน + แผนครั้งถัดไป…'}]},
 {key:'p4',no:'④',title:'ติดตามผลหลังเปิด D30 / D60 / D90 (วนรอบจนถึงเป้า 4,000 ราย)',when:'D30 → D90',df:'grand_date',items:[
- {k:'p4_d30',t:'Check 1 — Performance (D30)',d:'ตรวจผลการดำเนินงานเทียบเป้าหมาย (ยอดขาย / จำนวนสมาชิกใหม่)',off:30},
- {k:'p4_line',t:'Action เพิ่มเติมจาก MKT — Line Commerce',d:'ยิงคูปองผ่าน mini Line เพื่อเรียกลูกค้ากลับมาซื้อซ้ำ (รักษาฐานลูกค้าเดิม)',off:30},
- {k:'p4_d60',t:'Check 2 — ตั้งเป้าหมาย/กลยุทธ์รอบถัดไป (D60)',d:'โฟกัสแผนงาน/กิจกรรม และกลยุทธ์ที่จะทำ — When / What / How',off:60},
- {k:'p4_d90',t:'Check 3 / ทำซ้ำ (D90)',d:'วนรอบจัดกิจกรรมกระตุ้นยอดซ้ำ จนฐานลูกค้าสะสมถึง 4,000 ราย',off:90}]}];
+ {k:'p4_d30',t:'Check 1 — Performance (D30)',d:'ตรวจผลการดำเนินงานเทียบเป้าหมาย (ยอดขาย / จำนวนสมาชิกใหม่)',off:30,inp:'ยอดขาย / สมาชิกใหม่ เทียบเป้า…'},
+ {k:'p4_line',t:'Action เพิ่มเติมจาก MKT — Line Commerce',d:'ยิงคูปองผ่าน mini Line เพื่อเรียกลูกค้ากลับมาซื้อซ้ำ (รักษาฐานลูกค้าเดิม)',off:30,inp:'คูปองที่ยิง / ผลตอบรับ…'},
+ {k:'p4_d60',t:'Check 2 — ตั้งเป้าหมาย/กลยุทธ์รอบถัดไป (D60)',d:'โฟกัสแผนงาน/กิจกรรม และกลยุทธ์ที่จะทำ — When / What / How',off:60,inp:'When / What / How…'},
+ {k:'p4_d90',t:'Check 3 / ทำซ้ำ (D90)',d:'วนรอบจัดกิจกรรมกระตุ้นยอดซ้ำ จนฐานลูกค้าสะสมถึง 4,000 ราย',off:90,inp:'ผลรอบนี้ / ฐานลูกค้าสะสม…'}]}];
 const NSG_ALL_ITEMS=NSG_PHASES.reduce((a,p)=>a.concat(p.items.map(i=>i.k)),[]);
 let nsgStores=[],_nsgOpen={},_nsgLoaded=false,_nsgLoadErr='';
 
@@ -2384,6 +2397,26 @@ const p=iso.split('-');
 return p[2].replace(/^0/,'')+'/'+p[1].replace(/^0/,'')+'/'+p[0].slice(2);
 }
 function _nsgChecked(store,key){const c=store.checks&&store.checks[key];return !!(c&&c.done);}
+// One path for every free-text box on the board. Kissflow keeps its own column
+// because it is a first-class field that appears in the export; the rest live in
+// notes_items keyed by checklist item. Callers do not need to know which.
+function _nsgTextItems(){return NSG_PHASES.reduce((a,p)=>a.concat(p.items.filter(i=>i.kf||i.inp).map(i=>i.k)),[]);}
+function _nsgText(store,item){
+if(item.kf)return store.kissflow||'';
+return (store.notes_items&&store.notes_items[item.k])||'';
+}
+async function saveNSGText(code,key,isKf,val){
+const s=nsgStores.find(x=>x.storecode===code);if(!s)return;
+if(isKf)return saveNSGField(code,'kissflow',val);
+const prev=Object.assign({},s.notes_items||{});
+const next=Object.assign({},prev);
+if(val)next[key]=val;else delete next[key];
+s.notes_items=next;
+try{
+ const{error}=await window._sb.from('mkt_nsg_stores').update({notes_items:next}).eq('storecode',code);
+ if(error)throw error;
+}catch(e){s.notes_items=prev;alert('บันทึกไม่สำเร็จ');renderNSG();}
+}
 function _nsgProgress(store){
 const done=NSG_ALL_ITEMS.filter(k=>_nsgChecked(store,k)).length;
 return{done,total:NSG_ALL_ITEMS.length,pct:Math.round(done/NSG_ALL_ITEMS.length*100)};
@@ -2407,7 +2440,7 @@ if(_nsgLoaded&&!force)return;
 try{
 const{data,error}=await window._sb.from('mkt_nsg_stores').select('*').order('grand_date',{ascending:true,nullsFirst:false});
 if(error)throw error;
-nsgStores=(data||[]).map(s=>Object.assign({},s,{checks:s.checks||{}}));
+nsgStores=(data||[]).map(s=>Object.assign({},s,{checks:s.checks||{},notes_items:s.notes_items||{}}));
 _nsgLoaded=true;_nsgLoadErr='';
 }catch(e){
 // Keep whatever is already on screen. Blanking the list on a failed fetch would
@@ -2438,8 +2471,49 @@ if(!nsgStores.length){
   ? '<div class="nsg-empty" style="color:#f0655f">โหลดรายชื่อสาขาไม่สำเร็จ — ข้อมูลไม่ได้หายไป<br><span style="font-size:12px;color:var(--t3)">'+esc(_nsgLoadErr)+'</span><br><br>กด Refresh อีกครั้ง</div>'
   : '<div class="nsg-empty">ยังไม่มีรายชื่อสาขา<br><br>กด <b>Import จาก Sheet</b> แล้ววางข้อมูลจากชีท <b>NSG Plan_Store List</b><br>ระบบจะเก็บเฉพาะแถวที่ MKT = ซัน</div>';
  return;}
-if(!list.length){body.innerHTML='<div class="nsg-empty">ไม่พบสาขาที่ตรงกับเงื่อนไข</div>';return;}
-body.innerHTML=list.map(s=>{
+// The "no match" case is handled after the summary is built, so filtering the
+// list down to nothing still leaves the overview on screen.
+// Overview across every store, not just the filtered ones — the point of a
+// summary is the whole picture, so it deliberately ignores the search box.
+const tot=nsgStores.length;
+let done=0,items=0,late=0,dueNow=0,opened=0,finished=0;
+const soon7=[];
+nsgStores.forEach(s=>{
+ const pr=_nsgProgress(s);done+=pr.done;items+=pr.total;
+ if(pr.done===pr.total)finished++;
+ const a=_nsgActions(s,today);
+ late+=a.filter(x=>x.diff<0).length;dueNow+=a.filter(x=>x.diff===0).length;
+ const d=s.grand_date?_nsgDaysBetween(today,s.grand_date):null;
+ if(d!=null&&d<=0)opened++;
+ if(d!=null&&d>=0&&d<=7)soon7.push(s);
+});
+const overall=items?Math.round(done/items*100):0;
+const kpi=(v,l,c)=>`<div class="nsg-kpi"><b style="color:${c}">${v}</b><span>${l}</span></div>`;
+const phaseRows=NSG_PHASES.map(ph=>{
+ let d=0,t=0;
+ nsgStores.forEach(s=>ph.items.forEach(it=>{t++;if(_nsgChecked(s,it.k))d++;}));
+ const p=t?Math.round(d/t*100):0;
+ return `<div class="nsg-ph-row"><span class="lbl">${ph.no} ${esc(ph.when)}</span>
+  <span class="bar"><span style="width:${p}%"></span></span>
+  <span class="num">${d}/${t} · ${p}%</span></div>`;
+}).join('');
+const dash=`<div class="nsg-dash">
+ ${kpi(tot,'สาขาทั้งหมด','var(--t1)')}
+ ${kpi(opened,'เปิดแล้ว','#50d090')}
+ ${kpi(tot-opened,'ยังไม่เปิด','#5aaaf0')}
+ ${kpi(soon7.length,'เปิดใน 7 วัน','#f2c94c')}
+ ${kpi(overall+'%','ความคืบหน้ารวม','var(--gold)')}
+ ${kpi(late,'งานเลยกำหนด',late?'#f0655f':'var(--t3)')}
+ ${kpi(dueNow,'ถึงกำหนดวันนี้',dueNow?'#f2c94c':'var(--t3)')}
+ ${kpi(finished,'ครบทุกข้อ','#50d090')}
+</div>
+<div class="nsg-ph-prog">
+ <div style="font-size:13px;font-weight:700;color:var(--gold);margin-bottom:2px">ความคืบหน้าตาม Phase (ทุกสาขารวมกัน)</div>
+ ${phaseRows}
+ ${soon7.length?`<div style="margin-top:10px;font-size:12px;color:var(--t3)">ใกล้เปิด: ${soon7.map(s=>esc(s.name||s.storecode)+' (D-'+_nsgDaysBetween(today,s.grand_date)+')').join(' · ')}</div>`:''}
+</div>`;
+if(!list.length){body.innerHTML=dash+'<div class="nsg-empty">ไม่พบสาขาที่ตรงกับเงื่อนไข</div>';return;}
+body.innerHTML=dash+list.map(s=>{
  const pr=_nsgProgress(s);
  const dd=s.grand_date?_nsgDaysBetween(today,s.grand_date):null;
  let ddCls='pre',ddTxt='ยังไม่กำหนดวันเปิด';
@@ -2482,7 +2556,7 @@ body.innerHTML=list.map(s=>{
       <div style="flex:1">
        <div class="nsg-it-t">${esc(it.t)}</div>
        ${it.d?`<div class="nsg-it-d">${esc(it.d)}</div>`:''}
-       ${it.kf?`<input class="nsg-kf" type="text" placeholder="เลข Kissflow" value="${esc(s.kissflow||'')}" onchange="saveNSGField('${esc(s.storecode)}','kissflow',this.value)" onclick="event.stopPropagation()">`:''}
+       ${(it.kf||it.inp)?`<input class="nsg-kf${it.inp?' wide':''}" type="text" placeholder="${esc(it.kf?'เลข Kissflow':it.inp)}" value="${esc(_nsgText(s,it))}" onchange="saveNSGText('${esc(s.storecode)}','${it.k}',${it.kf?'true':'false'},this.value)" onclick="event.stopPropagation()">`:''}
        ${on&&c.by?`<div class="nsg-it-by">✓ ${esc(c.by)}${c.at?' · '+_nsgFmt(String(c.at).slice(0,10)):''}</div>`:''}
       </div>
       ${dtxt?`<span class="nsg-due ${dcls}">${dtxt}</span>`:''}
@@ -2719,12 +2793,15 @@ try{
 }finally{btn.disabled=false;btn.textContent='ตรวจและนำเข้า';}
 }
 function exportNSGCSV(){
-const head=['storecode','ชื่อสาขา','จังหวัด','วัน Grand','D-20','D-15','D-12','D-7','ผู้รับผิดชอบ','SMA','Kissflow','ความคืบหน้า','ค้าง','โน้ต'];
+const textKeys=_nsgTextItems().filter(k=>k!=='a_kissflow');
+const textLbl=k=>{for(const p of NSG_PHASES)for(const i of p.items)if(i.k===k)return i.t;return k;};
+const head=['storecode','ชื่อสาขา','จังหวัด','วัน Grand','D-20','D-15','D-12','D-7','ผู้รับผิดชอบ','SMA','Kissflow','ความคืบหน้า','ค้าง','โน้ต'].concat(textKeys.map(textLbl));
 const rows=nsgStores.map(s=>{
  const pr=_nsgProgress(s),acts=_nsgActions(s,_nsgToday());
  return[s.storecode,s.name||'',s.province||'',s.grand_date||'',s.alert_buy_date||'',s.packgo_date||'',
   s.final_aw_date||'',s.install_date||'',s.grand_owner||'',s.sma||'',s.kissflow||'',
-  pr.done+'/'+pr.total,acts.filter(a=>a.diff<0).length,(s.note||'').replace(/\n/g,' ')];
+  pr.done+'/'+pr.total,acts.filter(a=>a.diff<0).length,(s.note||'').replace(/\n/g,' ')]
+  .concat(textKeys.map(k=>((s.notes_items||{})[k]||'').replace(/\n/g,' ')));
 });
 const csv='﻿'+[head].concat(rows).map(r=>r.map(v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"').join(',')).join('\n');
 const a=document.createElement('a');
