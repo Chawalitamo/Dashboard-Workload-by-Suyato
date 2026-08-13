@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260807m -->
+<!-- v20260813a -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -591,6 +591,43 @@ button{font-family:'DBHeavent','Sarabun',sans-serif}
 .theme-ac{width:11px;height:11px;border-radius:50%}
 .theme-lbl{font-size:11px;color:var(--t2);white-space:nowrap}
 .bf-showall{background:none;border:none;padding:0;font:inherit;color:var(--gold);text-decoration:underline;cursor:pointer}
+/* ── NSG store-opening tracker ── */
+#view-nsg{flex-direction:column;overflow:hidden}
+.nsg-card{background:var(--surf);border:1px solid var(--b1);border-radius:var(--r);margin-bottom:12px;overflow:hidden}
+.nsg-hd{display:flex;align-items:center;gap:12px;padding:12px 16px;cursor:pointer;background:var(--surf2)}
+.nsg-hd:hover{background:var(--surf3)}
+.nsg-name{font-size:15px;font-weight:700;color:var(--t1)}
+.nsg-code{font-family:monospace;font-size:12px;color:var(--t3)}
+.nsg-meta{font-size:12px;color:var(--t3)}
+.nsg-dday{font-size:12px;font-weight:700;padding:2px 9px;border-radius:10px;white-space:nowrap}
+.nsg-dday.pre{background:rgba(90,170,240,.15);color:#5aaaf0}
+.nsg-dday.soon{background:rgba(242,201,76,.16);color:#f2c94c}
+.nsg-dday.open{background:rgba(47,158,68,.16);color:#50d090}
+.nsg-bar{flex:1;height:6px;background:var(--surf4);border-radius:3px;overflow:hidden;min-width:80px;max-width:220px}
+.nsg-bar span{display:block;height:100%;background:var(--gold);border-radius:3px;transition:width .3s}
+.nsg-pct{font-size:12px;color:var(--t3);font-family:monospace;min-width:56px;text-align:right}
+.nsg-body{padding:6px 16px 14px;border-top:1px solid var(--b0)}
+.nsg-phase{margin-top:12px}
+.nsg-ph-hd{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--gold);margin-bottom:6px}
+.nsg-ph-when{font-size:11px;font-weight:500;color:var(--t3);background:var(--surf3);border-radius:9px;padding:1px 8px}
+.nsg-item{display:flex;align-items:flex-start;gap:9px;padding:6px 8px;border-radius:var(--rsm)}
+.nsg-item:hover{background:var(--surf2)}
+.nsg-item input[type=checkbox]{width:16px;height:16px;flex:0 0 16px;margin-top:2px;padding:0;accent-color:var(--gold);cursor:pointer}
+.nsg-it-t{font-size:14px;color:var(--t1);line-height:1.5}
+.nsg-item.done .nsg-it-t{color:var(--t4);text-decoration:line-through}
+.nsg-it-d{font-size:12px;color:var(--t3);line-height:1.5;margin-top:2px}
+.nsg-it-by{font-size:11px;color:var(--t4);margin-top:2px}
+.nsg-due{font-size:11px;font-weight:600;padding:1px 7px;border-radius:9px;white-space:nowrap;margin-left:auto;flex-shrink:0}
+.nsg-due.late{background:rgba(240,101,95,.16);color:#f0655f}
+.nsg-due.today{background:rgba(242,201,76,.16);color:#f2c94c}
+.nsg-due.ahead{color:var(--t4)}
+.nsg-kf{background:var(--surf2);border:1px solid var(--b1);border-radius:var(--rsm);color:var(--t1);font:inherit;font-size:13px;padding:3px 8px;width:190px;margin-top:4px}
+.nsg-empty{text-align:center;color:var(--t3);padding:40px;font-size:14px;line-height:1.8}
+.nsg-brief-grp{margin-bottom:14px}
+.nsg-brief-grp h4{font-size:13px;margin-bottom:6px;letter-spacing:.03em}
+.nsg-brief-row{display:flex;gap:10px;align-items:baseline;padding:6px 10px;border-radius:var(--rsm);background:var(--surf2);margin-bottom:5px;font-size:13px}
+.nsg-brief-row b{color:var(--t1)}
+.nsg-brief-row span{color:var(--t3)}
 .preset-opt{aspect-ratio:1;border:1px solid var(--b1);background:var(--surf2);border-radius:10px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;overflow:hidden;padding:0}
 .preset-opt:hover{background:var(--surf3);border-color:var(--b2)}
 .preset-opt.sel{border-color:var(--gold);background:var(--gold3);box-shadow:0 0 0 2px var(--gold3)}
@@ -777,6 +814,7 @@ if(window._pendingLoad) window._pendingLoad();
 <button class="ptab" onclick="showView(&#39;calendar&#39;,this)"><i class="ti ti-calendar-time" aria-hidden="true"></i>PIC Calendar</button>
 <button id="activity-tab" class="ptab" onclick="showView(&#39;activity&#39;,this)" style="display:none"><i class="ti ti-history" aria-hidden="true"></i>Activity Log</button>
 <button id="worklog-tab" class="ptab" onclick="showView(&#39;worklog&#39;,this)" style="display:none"><i class="ti ti-clock-hour-4" aria-hidden="true"></i>Work Log</button>
+<button id="nsg-tab" class="ptab" onclick="showView(&#39;nsg&#39;,this)" title="NSG — ไทม์ไลน์เปิดสาขาใหม่" style="display:none"><i class="ti ti-building-store" aria-hidden="true"></i>NSG</button>
 <div style="flex:1"></div>
 <button class="ptab" onclick="openRecycleBin()" title="Recycle Bin — restore deleted tasks or projects" style="margin-right:6px"><span class="tab-emoji" aria-hidden="true">🗑️</span>Recycle Bin</button>
 <button id="notify-tab" class="ptab" onclick="openTeamEmailsModal()" title="Notification settings" style="margin-right:6px;display:none"><i class="ti ti-bell-ringing" aria-hidden="true"></i>Notify</button>
@@ -956,6 +994,55 @@ if(window._pendingLoad) window._pendingLoad();
 </div>
 <div style="flex:1;overflow-y:auto;padding:0 24px 24px" id="worklog-body"></div>
 </div>
+<!-- NSG — new-store opening timeline (Super Admin only) -->
+<div class="view" id="view-nsg">
+<div class="act-toolbar">
+<div style="font-size:15px;font-weight:700;color:var(--t1)"><i class="ti ti-building-store" style="color:var(--gold);vertical-align:-2px;margin-right:4px"></i>NSG — เตรียมความพร้อมเปิดสาขาใหม่ <span style="font-size:11px;font-weight:400;color:var(--t3)">(เฉพาะสาขาที่ MKT = ซัน · เป้าหมาย 4,000 ราย/สาขา)</span></div>
+<div style="flex:1"></div>
+<div class="bsearch-wrap"><i class="ti ti-search bsearch-ico" aria-hidden="true"></i>
+<input id="nsg-search" class="bsearch" type="text" placeholder="ค้นหาสาขา / storecode…" autocomplete="off" oninput="renderNSG()">
+</div>
+<select class="fsel" id="nsg-filter" onchange="renderNSG()">
+<option value="">ทุกสาขา</option>
+<option value="action">ต้องทำ (ค้าง/ถึงกำหนด)</option>
+<option value="pre">ก่อนเปิด</option>
+<option value="open">เปิดแล้ว</option>
+<option value="done">ครบทุกข้อ</option>
+</select>
+<span id="nsg-count" style="font-size:13px;color:var(--t3);white-space:nowrap"></span>
+<button class="act-export-btn" onclick="openNSGImport()"><i class="ti ti-table-import" aria-hidden="true"></i>Import จาก Sheet</button>
+<button class="act-export-btn" onclick="exportNSGCSV()"><i class="ti ti-file-spreadsheet" aria-hidden="true"></i>Export Excel</button>
+<button class="act-export-btn" onclick="loadNSG(true)" style="background:var(--surf3);border-color:var(--b2);color:var(--t2)"><i class="ti ti-refresh" aria-hidden="true"></i>Refresh</button>
+</div>
+<div style="flex:1;overflow-y:auto;padding:0 24px 24px" id="nsg-body"></div>
+</div>
+<!-- NSG import: paste straight from the Google Sheet -->
+<div class="modal-bg" id="nsg-import-modal">
+<div class="modal" style="width:760px">
+<div class="modal-head"><h3><i class="ti ti-table-import" style="vertical-align:-2px"></i> Import รายชื่อสาขาจาก Google Sheet</h3><button class="modal-close" onclick="closeModal('nsg-import-modal')">&#x2715;</button></div>
+<div style="font-size:13px;color:var(--t3);line-height:1.7;margin-bottom:10px">
+เปิดชีท <b>NSG Plan_Store List</b> → เลือกทั้งตาราง <b>รวมหัวตาราง</b> (Ctrl/Cmd + A) → Copy → วางในช่องด้านล่าง<br>
+ระบบจะเก็บเฉพาะแถวที่ <b>MKT = ซัน</b> และจะ <b>ไม่ลบเครื่องหมายถูกที่ติ๊กไว้แล้ว</b>
+</div>
+<textarea id="nsg-paste" placeholder="วางข้อมูลจากชีทที่นี่…" style="width:100%;height:220px;background:var(--surf2);border:1px solid var(--b1);border-radius:var(--rsm);color:var(--t1);font-family:monospace;font-size:12px;padding:10px;resize:vertical"></textarea>
+<div id="nsg-import-msg" style="font-size:13px;margin-top:10px;line-height:1.6"></div>
+<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px">
+<button class="btn-sec" onclick="closeModal('nsg-import-modal')">ยกเลิก</button>
+<button class="btn-pri" id="nsg-import-btn" onclick="runNSGImport()">ตรวจและนำเข้า</button>
+</div>
+</div>
+</div>
+<!-- NSG daily briefing on login -->
+<div class="modal-bg" id="nsg-brief-modal">
+<div class="modal" style="width:720px">
+<div class="modal-head"><h3><i class="ti ti-building-store" style="vertical-align:-2px;color:var(--gold)"></i> NSG — สิ่งที่ต้องทำวันนี้</h3><button class="modal-close" onclick="closeModal('nsg-brief-modal')">&#x2715;</button></div>
+<div id="nsg-brief-body" style="max-height:60vh;overflow-y:auto"></div>
+<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px">
+<button class="btn-sec" onclick="closeModal('nsg-brief-modal')">ปิด</button>
+<button class="btn-pri" onclick="closeModal('nsg-brief-modal');document.getElementById('nsg-tab').click()">เปิดหน้า NSG</button>
+</div>
+</div>
+</div>
 <div class="modal-bg" id="edit-modal">
 <div class="modal">
 <div class="modal-head"><h3>Edit task</h3><button class="modal-close" onclick="closeModal(&#39;edit-modal&#39;)"><i class="ti ti-x" aria-hidden="true"></i></button></div>
@@ -1131,7 +1218,7 @@ if(window._pendingLoad) window._pendingLoad();
 
 <script>
 // ═════════════ DATA ═════════════
-const APP_VERSION='v20260807m'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
+const APP_VERSION='v20260813a'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
 const STAGES=['Job Brief','Design','Production','Review','Approval Stage','On Hold','Complete'];
 const DONE_STAGE=STAGES[STAGES.length-1];
 const SKEY=s=>({
@@ -1492,7 +1579,7 @@ function _showErr(msg){
 function showView(v,el){
 // Overdue-tasks gate must be resolved first — block navigating anywhere else.
 if(document.getElementById('overdue-overlay').classList.contains('show')){_shakeOverdueToast();return;}
-if((v==='activity'||v==='worklog')&&!_isAdminUser()){return;} // Activity Log & Work Log: Super Admins only
+if((v==='activity'||v==='worklog'||v==='nsg')&&!_isAdminUser()){return;} // Activity Log, Work Log & NSG: Super Admins only
 document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
 document.querySelectorAll('.ptab').forEach(x=>x.classList.remove('active'));
 const _tgt=document.getElementById('view-'+v);
@@ -1506,6 +1593,7 @@ try{
   if(v==='calendar') renderCalendar();
   if(v==='activity') renderActivity();
   if(v==='worklog') renderWorklog();
+  if(v==='nsg') loadNSG();
 }catch(e){
   console.warn('showView render error:',e);
   _showErr('Render error in view "'+v+'":\n'+e.message+'\n'+e.stack);
@@ -2205,6 +2293,390 @@ function clearBoardSearch(){const el=document.getElementById('bf-search');if(el)
 // yanks the board back to your own tasks while you are looking at someone else's.
 // Super Admins are the exception: their job is the whole team's board, so they
 // start on "All members" and can filter down to one person from there.
+// ══════════════ NSG — new-store opening tracker (Super Admin only) ══════════
+// Phases transcribed from the Core Team slides. Each item's deadline comes from
+// the store's own dates in the sheet where the sheet has one, otherwise from an
+// offset off วัน Grand — so the checklist is driven by the real plan, not by a
+// generic template.
+const NSG_PHASES=[
+{key:'p1',no:'①',title:'ระบบดำเนินการ (Core Team ตรวจสอบ / Verify)',when:'D-20',df:'alert_buy_date',items:[
+ {k:'p1_sa',t:'Upload SA + ผังร้านค้าเช่าหน้าสาขา',d:'ตรวจสอบผู้เช่าที่ยืนยันแล้ว เทียบกับล็อคที่ยังว่าง เพื่อให้ Core Team ติดตามและปิด Gap การเช่า'},
+ {k:'p1_pr',t:'ระบบแสดงผลข้อมูลลูกค้า + แผนประชาสัมพันธ์อัตโนมัติ',d:'ระบบประมวลผลข้อมูลลูกค้าในพื้นที่และวางแผน PR เบื้องต้นให้อัตโนมัติ ให้ Core Team ตรวจทานยืนยัน (Verify)'},
+ {k:'p1_packgo',t:'Pack Go',d:'แพ็กเกจผลลัพธ์ส่งต่อทีมภาคสนาม ใช้วางแผนงาน และส่งฝ่ายจัดซื้อ/Supplier ดำเนินการติดตั้งป้าย'}]},
+{key:'p2',no:'②',title:'ระบบทำงาน (ข้อมูลหน้างาน → SCM / Commercial MKT)',when:'D-15',df:'packgo_date',items:[
+ {k:'p2_pr',t:'แผนประชาสัมพันธ์ (PR)'},
+ {k:'p2_sign',t:'จุดปักป้าย'},
+ {k:'p2_place',t:'สถานที่สำคัญ + พฤติกรรมลูกค้าในพื้นที่'},
+ {k:'p2_hours',t:'เวลาเปิด-ปิดที่เหมาะสมของแต่ละสาขา'},
+ {k:'p2_traffic',t:'เส้นทางสัญจรของลูกค้า'},
+ {k:'p2_layout',t:'Layout ร้านค้าเช่า'},
+ {k:'p2_scm',t:'นำเข้าหารือกับ SCM / Commercial MKT เรื่องสินค้าและราคาคู่แข่ง'},
+ {k:'p2_out_price',t:'ผลลัพธ์: Price & Product',d:'ราคาและสินค้าให้เหมาะสมกับพื้นที่'},
+ {k:'p2_out_layout',t:'ผลลัพธ์: Layout',d:'ต้องมี Bible คุยกับร้านค้าเช่า + Layout จัดกิจกรรมหน้างาน'}]},
+{key:'act',no:'✓',title:'Action ก่อนเปิดร้าน',when:'D-7',df:'install_date',items:[
+ {k:'a_download',t:'Download ข้อมูลส่งให้ทีมภาคสนาม'},
+ {k:'a_log',t:'ระบบเก็บ Log ย้อนดูได้'},
+ {k:'a_kissflow',t:'กรอกเลข Kissflow (ระบบอนุมัติ)',d:'เพื่อยืนยันว่าติดตั้งป้ายและเบิกงบเข้าระบบแล้ว',kf:true}]},
+{key:'p3',no:'③',title:'วันเปิดสาขา (D-2 → D5) เก็บ Insight หน้างาน',when:'D-2 → D5',df:'grand_date',items:[
+ {k:'p3_gmap',t:'Google Map (ก่อน D2)',d:'เตรียมวิดีโอ/รูปถ่ายเพื่อยืนยันตำแหน่งร้านใน Google Map ในระบบ',off:-2},
+ {k:'p3_q1',t:'ลูกค้าในพื้นที่รู้จักร้านใหม่นี้หรือไม่ ได้รับการประชาสัมพันธ์ถึงหรือไม่',off:5},
+ {k:'p3_q2',t:'สินค้าใดหมดสต๊อกเร็วที่สุด และมีลูกค้าถามหากี่คน',d:'ดูแนวโน้มสินค้าขายดี',off:5},
+ {k:'p3_q3',t:'ถ่ายภาพร้านค้าเช่า เพื่อเช็คว่าผังการจัดวางสมเหตุสมผลหรือไม่',off:5},
+ {k:'p3_q4',t:'Layout การจัดกิจกรรม → สรุปผลสมมติฐาน เตรียมแผนทดลองงานครั้งถัดไป',off:5}]},
+{key:'p4',no:'④',title:'ติดตามผลหลังเปิด D30 / D60 / D90 (วนรอบจนถึงเป้า 4,000 ราย)',when:'D30 → D90',df:'grand_date',items:[
+ {k:'p4_d30',t:'Check 1 — Performance (D30)',d:'ตรวจผลการดำเนินงานเทียบเป้าหมาย (ยอดขาย / จำนวนสมาชิกใหม่)',off:30},
+ {k:'p4_line',t:'Action เพิ่มเติมจาก MKT — Line Commerce',d:'ยิงคูปองผ่าน mini Line เพื่อเรียกลูกค้ากลับมาซื้อซ้ำ (รักษาฐานลูกค้าเดิม)',off:30},
+ {k:'p4_d60',t:'Check 2 — ตั้งเป้าหมาย/กลยุทธ์รอบถัดไป (D60)',d:'โฟกัสแผนงาน/กิจกรรม และกลยุทธ์ที่จะทำ — When / What / How',off:60},
+ {k:'p4_d90',t:'Check 3 / ทำซ้ำ (D90)',d:'วนรอบจัดกิจกรรมกระตุ้นยอดซ้ำ จนฐานลูกค้าสะสมถึง 4,000 ราย',off:90}]}];
+const NSG_ALL_ITEMS=NSG_PHASES.reduce((a,p)=>a.concat(p.items.map(i=>i.k)),[]);
+let nsgStores=[],_nsgOpen={},_nsgLoaded=false,_nsgLoadErr='';
+
+function _nsgIsAdmin(){return _isAdminUser();}
+// Sheet dates arrive as "24/6/26" or "14 Aug 2026"; "TBC", "/" and "X" are
+// placeholders meaning "no date yet", not dates.
+function _nsgDate(s){
+s=String(s==null?'':s).trim();
+if(!s||s==='/'||s==='-'||/^x$/i.test(s)||/^tbc$/i.test(s))return null;
+let m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
+if(m){let y=+m[3];if(y<100)y+=2000;const d=+m[1],mo=+m[2];
+ if(mo<1||mo>12||d<1||d>31)return null;
+ return y+'-'+String(mo).padStart(2,'0')+'-'+String(d).padStart(2,'0');}
+m=s.match(/^(\d{1,2})\s+([A-Za-z]{3,})\.?\s+(\d{4})$/);
+if(m){const MM={jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,oct:10,nov:11,dec:12};
+ const mo=MM[m[2].slice(0,3).toLowerCase()];if(!mo)return null;
+ return m[3]+'-'+String(mo).padStart(2,'0')+'-'+String(+m[1]).padStart(2,'0');}
+if(/^\d{4}-\d{2}-\d{2}$/.test(s))return s;
+return null;
+}
+function _nsgToday(){return new Date().toLocaleDateString('en-CA',{timeZone:'Asia/Bangkok'});}
+function _nsgShift(iso,days){
+if(!iso)return null;
+const p=iso.split('-').map(Number);
+const d=new Date(Date.UTC(p[0],p[1]-1,p[2]));
+d.setUTCDate(d.getUTCDate()+days);
+return d.toISOString().slice(0,10);
+}
+function _nsgDaysBetween(a,b){
+if(!a||!b)return null;
+const pa=a.split('-').map(Number),pb=b.split('-').map(Number);
+return Math.round((Date.UTC(pb[0],pb[1]-1,pb[2])-Date.UTC(pa[0],pa[1]-1,pa[2]))/86400000);
+}
+// Deadline for one checklist item on one store.
+function _nsgItemDue(store,phase,item){
+if(item.off!=null&&store.grand_date)return _nsgShift(store.grand_date,item.off);
+const base=phase.df?store[phase.df]:null;
+return base||null;
+}
+function _nsgFmt(iso){
+if(!iso)return '';
+const p=iso.split('-');
+return p[2].replace(/^0/,'')+'/'+p[1].replace(/^0/,'')+'/'+p[0].slice(2);
+}
+function _nsgChecked(store,key){const c=store.checks&&store.checks[key];return !!(c&&c.done);}
+function _nsgProgress(store){
+const done=NSG_ALL_ITEMS.filter(k=>_nsgChecked(store,k)).length;
+return{done,total:NSG_ALL_ITEMS.length,pct:Math.round(done/NSG_ALL_ITEMS.length*100)};
+}
+// Everything not ticked whose deadline has arrived. Drives both the board
+// badges and the login briefing, so the two can never disagree.
+function _nsgActions(store,today){
+const out=[];
+NSG_PHASES.forEach(ph=>ph.items.forEach(it=>{
+ if(_nsgChecked(store,it.k))return;
+ const due=_nsgItemDue(store,ph,it);
+ if(!due)return;
+ const diff=_nsgDaysBetween(today,due);
+ out.push({store,phase:ph,item:it,due,diff});
+}));
+return out;
+}
+async function loadNSG(force){
+if(!_nsgIsAdmin())return;
+if(_nsgLoaded&&!force)return;
+try{
+const{data,error}=await window._sb.from('mkt_nsg_stores').select('*').order('grand_date',{ascending:true,nullsFirst:false});
+if(error)throw error;
+nsgStores=(data||[]).map(s=>Object.assign({},s,{checks:s.checks||{}}));
+_nsgLoaded=true;_nsgLoadErr='';
+}catch(e){
+// Keep whatever is already on screen. Blanking the list on a failed fetch would
+// render as "there are no stores yet", which is a very different message from
+// "the list could not be loaded" — and the wrong one to act on.
+console.warn('NSG load failed',e);
+_nsgLoadErr=e.message||String(e);
+}
+renderNSG();
+}
+function renderNSG(){
+const body=document.getElementById('nsg-body');if(!body)return;
+const today=_nsgToday();
+const q=(document.getElementById('nsg-search')||{}).value||'';
+const f=(document.getElementById('nsg-filter')||{}).value||'';
+const qq=q.trim().toLowerCase();
+let list=nsgStores.slice();
+if(qq)list=list.filter(s=>((s.name||'')+' '+(s.storecode||'')+' '+(s.province||'')).toLowerCase().includes(qq));
+if(f==='action')list=list.filter(s=>_nsgActions(s,today).some(a=>a.diff<=0));
+if(f==='pre')list=list.filter(s=>s.grand_date&&_nsgDaysBetween(today,s.grand_date)>0);
+if(f==='open')list=list.filter(s=>s.grand_date&&_nsgDaysBetween(today,s.grand_date)<=0);
+if(f==='done')list=list.filter(s=>_nsgProgress(s).done===NSG_ALL_ITEMS.length);
+const cnt=document.getElementById('nsg-count');
+if(cnt)cnt.textContent=list.length+' / '+nsgStores.length+' สาขา';
+if(!nsgStores.length){
+ body.innerHTML=_nsgLoadErr
+  ? '<div class="nsg-empty" style="color:#f0655f">โหลดรายชื่อสาขาไม่สำเร็จ — ข้อมูลไม่ได้หายไป<br><span style="font-size:12px;color:var(--t3)">'+esc(_nsgLoadErr)+'</span><br><br>กด Refresh อีกครั้ง</div>'
+  : '<div class="nsg-empty">ยังไม่มีรายชื่อสาขา<br><br>กด <b>Import จาก Sheet</b> แล้ววางข้อมูลจากชีท <b>NSG Plan_Store List</b><br>ระบบจะเก็บเฉพาะแถวที่ MKT = ซัน</div>';
+ return;}
+if(!list.length){body.innerHTML='<div class="nsg-empty">ไม่พบสาขาที่ตรงกับเงื่อนไข</div>';return;}
+body.innerHTML=list.map(s=>{
+ const pr=_nsgProgress(s);
+ const dd=s.grand_date?_nsgDaysBetween(today,s.grand_date):null;
+ let ddCls='pre',ddTxt='ยังไม่กำหนดวันเปิด';
+ if(dd!=null){
+  if(dd>7){ddCls='pre';ddTxt='D-'+dd;}
+  else if(dd>0){ddCls='soon';ddTxt='D-'+dd;}
+  else if(dd===0){ddCls='soon';ddTxt='เปิดวันนี้';}
+  else{ddCls='open';ddTxt='D+'+Math.abs(dd);}
+ }
+ const acts=_nsgActions(s,today);
+ const late=acts.filter(a=>a.diff<0).length,todayN=acts.filter(a=>a.diff===0).length;
+ const open=!!_nsgOpen[s.storecode];
+ const badge=late?`<span class="nsg-due late">ค้าง ${late}</span>`:(todayN?`<span class="nsg-due today">วันนี้ ${todayN}</span>`:'');
+ return `<div class="nsg-card">
+ <div class="nsg-hd" onclick="toggleNSG('${esc(s.storecode)}')">
+  <i class="ti ti-chevron-${open?'down':'right'}" style="color:var(--t3)"></i>
+  <div style="min-width:220px">
+   <div class="nsg-name">${esc(s.name||'(ไม่มีชื่อ)')} ${s.gmap?`<a href="${esc(s.gmap)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="เปิด Google Map" style="color:var(--gold);font-size:13px">📍</a>`:''}</div>
+   <div class="nsg-meta"><span class="nsg-code">${esc(s.storecode)}</span> · ${esc(s.province||'—')}</div>
+  </div>
+  <span class="nsg-dday ${ddCls}">${ddTxt}</span>
+  <div class="nsg-meta">Grand ${s.grand_date?_nsgFmt(s.grand_date):'—'}${s.grand_owner?' · ผู้รับผิดชอบ '+esc(s.grand_owner):''}${s.sma?' · SMA '+esc(s.sma):''}</div>
+  ${badge}
+  <div style="flex:1"></div>
+  <div class="nsg-bar"><span style="width:${pr.pct}%"></span></div>
+  <span class="nsg-pct">${pr.done}/${pr.total}</span>
+ </div>
+ ${open?`<div class="nsg-body">${NSG_PHASES.map(ph=>`
+  <div class="nsg-phase">
+   <div class="nsg-ph-hd"><span>${ph.no}</span><span>${esc(ph.title)}</span><span class="nsg-ph-when">${esc(ph.when)}</span></div>
+   ${ph.items.map(it=>{
+     const on=_nsgChecked(s,it.k);
+     const c=(s.checks||{})[it.k]||{};
+     const due=_nsgItemDue(s,ph,it);
+     const diff=due?_nsgDaysBetween(today,due):null;
+     let dcls='ahead',dtxt=due?_nsgFmt(due):'';
+     if(!on&&diff!=null){if(diff<0){dcls='late';dtxt=_nsgFmt(due)+' · เกิน '+Math.abs(diff)+' วัน';}else if(diff===0){dcls='today';dtxt=_nsgFmt(due)+' · วันนี้';}}
+     return `<div class="nsg-item${on?' done':''}">
+      <input type="checkbox" ${on?'checked':''} onchange="toggleNSGItem('${esc(s.storecode)}','${it.k}',this.checked)">
+      <div style="flex:1">
+       <div class="nsg-it-t">${esc(it.t)}</div>
+       ${it.d?`<div class="nsg-it-d">${esc(it.d)}</div>`:''}
+       ${it.kf?`<input class="nsg-kf" type="text" placeholder="เลข Kissflow" value="${esc(s.kissflow||'')}" onchange="saveNSGField('${esc(s.storecode)}','kissflow',this.value)" onclick="event.stopPropagation()">`:''}
+       ${on&&c.by?`<div class="nsg-it-by">✓ ${esc(c.by)}${c.at?' · '+_nsgFmt(String(c.at).slice(0,10)):''}</div>`:''}
+      </div>
+      ${dtxt?`<span class="nsg-due ${dcls}">${dtxt}</span>`:''}
+     </div>`;}).join('')}
+  </div>`).join('')}
+  <div style="margin-top:14px;display:flex;gap:8px;align-items:center">
+   <input class="nsg-kf" style="flex:1;max-width:none" type="text" placeholder="โน้ตสาขานี้…" value="${esc(s.note||'')}" onchange="saveNSGField('${esc(s.storecode)}','note',this.value)">
+   <button class="btn-sec" style="font-size:12px" onclick="removeNSGStore('${esc(s.storecode)}')">ลบสาขานี้</button>
+  </div>
+ </div>`:''}
+ </div>`;}).join('');
+}
+function toggleNSG(code){_nsgOpen[code]=!_nsgOpen[code];renderNSG();}
+async function toggleNSGItem(code,key,on){
+const s=nsgStores.find(x=>x.storecode===code);if(!s)return;
+const checks=Object.assign({},s.checks||{});
+if(on)checks[key]={done:true,at:new Date().toISOString(),by:_currentUser||''};
+else delete checks[key];
+s.checks=checks;
+renderNSG();
+try{
+ const{error}=await window._sb.from('mkt_nsg_stores').update({checks}).eq('storecode',code);
+ if(error)throw error;
+}catch(e){
+ // Put the tick back where it was rather than showing a state the server rejected.
+ if(on)delete s.checks[key];else s.checks[key]={done:true};
+ renderNSG();
+ alert('บันทึกไม่สำเร็จ — ยังไม่มีการเปลี่ยนแปลง กรุณาลองใหม่');
+}
+}
+async function saveNSGField(code,field,val){
+const s=nsgStores.find(x=>x.storecode===code);if(!s)return;
+const prev=s[field];s[field]=val;
+try{
+ const{error}=await window._sb.from('mkt_nsg_stores').update({[field]:val}).eq('storecode',code);
+ if(error)throw error;
+}catch(e){s[field]=prev;alert('บันทึกไม่สำเร็จ');renderNSG();}
+}
+async function removeNSGStore(code){
+const s=nsgStores.find(x=>x.storecode===code);if(!s)return;
+if(!confirm('ลบสาขา "'+(s.name||code)+'" ออกจาก NSG?\n\nเครื่องหมายถูกทั้งหมดของสาขานี้จะหายไปด้วย และไม่มีถังขยะสำหรับหน้านี้'))return;
+try{
+ const{error}=await window._sb.from('mkt_nsg_stores').delete().eq('storecode',code);
+ if(error)throw error;
+ nsgStores=nsgStores.filter(x=>x.storecode!==code);renderNSG();
+}catch(e){alert('ลบไม่สำเร็จ');}
+}
+// ── Import from the sheet ────────────────────────────────────────────────────
+// Google Sheets puts TAB-separated text on the clipboard, which is what we want:
+// the map URLs contain commas, so splitting a pasted row on commas would tear
+// them apart. CSV is still accepted (with quote handling) for a saved export.
+function _nsgSplitLine(line,tabbed){
+if(tabbed)return line.split('\t');
+const out=[];let cur='',inQ=false;
+for(let i=0;i<line.length;i++){
+ const ch=line[i];
+ if(ch==='"'){ if(inQ&&line[i+1]==='"'){cur+='"';i++;} else inQ=!inQ; }
+ else if(ch===','&&!inQ){out.push(cur);cur='';}
+ else cur+=ch;
+}
+out.push(cur);return out;
+}
+const _NSG_COLS=[
+ ['storecode',h=>h==='storecode'],
+ ['seq',h=>h==='ลำดับ'],
+ ['name',h=>h.includes('ชื่อสาขา')],
+ ['province',h=>h.includes('จังหวัด')],
+ ['gmap',h=>h.includes('gg map')||h.includes('map')],
+ ['site_ex_docs',h=>h.includes('site ex')],
+ ['core_work_start',h=>h.includes('core work')],
+ ['grand_date',h=>h==='วัน grand'||(h.includes('grand')&&!h.includes('ผู้รับผิดชอบ'))],
+ ['packgo_date',h=>h.includes('วันส่ง')&&h.includes('pack go')],
+ ['final_aw_date',h=>h.includes('final aw')],
+ ['install_date',h=>h.includes('วันติดตั้ง')],
+ ['alert_buy_date',h=>h.includes('alert')],
+ ['survey_packgo',h=>h.includes('สำรวจ')],
+ ['grand_owner',h=>h.includes('ผู้รับผิดชอบ')],
+ ['sma',h=>h==='sma'],
+ ['mkt',h=>h==='mkt'],
+ ['loop_d6_90',h=>h.includes('loop')],
+ ['plan_visited',h=>h.includes('plan visited')],
+];
+const _NSG_DATE_FIELDS=['grand_date','packgo_date','final_aw_date','install_date','alert_buy_date'];
+function parseNSGPaste(text){
+const lines=String(text||'').split(/\r?\n/).filter(l=>l.trim()!=='');
+if(!lines.length)return{error:'ไม่พบข้อมูล'};
+// Find the header row and settle the separator from that row, not from the
+// first line: a stray title row pasted above the table would otherwise decide
+// tab-vs-comma for the whole sheet and break every row after it.
+let hi=-1,cols=null,tabbed=false;
+for(let i=0;i<Math.min(lines.length,8)&&hi<0;i++){
+ for(const tryTab of [true,false]){
+  const c=_nsgSplitLine(lines[i],tryTab).map(x=>x.trim().toLowerCase());
+  if(c.some(x=>x==='storecode')&&c.some(x=>x==='mkt')){hi=i;cols=c;tabbed=tryTab;break;}
+ }
+}
+if(hi<0)return{error:'ไม่พบหัวตาราง — ต้องมีคอลัมน์ storecode และ MKT (กรุณา copy ทั้งตารางรวมหัวตาราง)'};
+const map={};
+_NSG_COLS.forEach(([field,test])=>{
+ const idx=cols.findIndex(h=>test(h));
+ if(idx>=0&&map[field]===undefined)map[field]=idx;
+});
+if(map.storecode===undefined||map.mkt===undefined)return{error:'ไม่พบคอลัมน์ storecode หรือ MKT'};
+const rows=[],skipped={other:0,nocode:0};
+for(let i=hi+1;i<lines.length;i++){
+ const c=_nsgSplitLine(lines[i],tabbed).map(x=>x.trim());
+ const code=(c[map.storecode]||'').trim();
+ if(!code){skipped.nocode++;continue;}
+ const mkt=(c[map.mkt]||'').trim();
+ if(mkt!=='ซัน'){skipped.other++;continue;}   // the sheet is shared; keep only MKT ซัน
+ const r={storecode:code,mkt:mkt};
+ Object.keys(map).forEach(f=>{
+  if(f==='storecode'||f==='mkt')return;
+  let v=(c[map[f]]||'').trim();
+  if(_NSG_DATE_FIELDS.indexOf(f)>=0)r[f]=_nsgDate(v);
+  else if(f==='seq')r[f]=/^\d+$/.test(v)?parseInt(v,10):null;
+  else r[f]=v||null;
+ });
+ rows.push(r);
+}
+return{rows,skipped};
+}
+function openNSGImport(){
+document.getElementById('nsg-paste').value='';
+document.getElementById('nsg-import-msg').innerHTML='';
+document.getElementById('nsg-import-modal').classList.add('open');
+}
+async function runNSGImport(){
+const msg=document.getElementById('nsg-import-msg');
+const btn=document.getElementById('nsg-import-btn');
+const res=parseNSGPaste(document.getElementById('nsg-paste').value);
+if(res.error){msg.innerHTML='<span style="color:#f0655f">'+esc(res.error)+'</span>';return;}
+if(!res.rows.length){msg.innerHTML='<span style="color:#f0655f">ไม่พบแถวที่ MKT = ซัน ('+res.skipped.other+' แถวเป็นของ MKT คนอื่น)</span>';return;}
+btn.disabled=true;btn.textContent='กำลังนำเข้า…';
+try{
+ // `checks` is deliberately not part of the payload, so an import refreshes the
+ // plan without touching a single tick anyone has already made.
+ const{error}=await window._sb.from('mkt_nsg_stores').upsert(res.rows,{onConflict:'storecode'});
+ if(error)throw error;
+ const codes=res.rows.map(r=>r.storecode);
+ const stale=nsgStores.filter(s=>codes.indexOf(s.storecode)<0).length;
+ _nsgLoaded=false;await loadNSG(true);
+ msg.innerHTML='<span style="color:#50d090">✓ นำเข้า '+res.rows.length+' สาขา (MKT ซัน) เรียบร้อย</span>'
+  +'<br><span style="color:var(--t3)">ข้าม '+res.skipped.other+' แถวที่เป็นของ MKT คนอื่น'
+  +(stale?' · มี '+stale+' สาขาเดิมที่ไม่อยู่ในชีทรอบนี้ (ยังเก็บไว้ ไม่ได้ลบ)':'')+'</span>';
+}catch(e){
+ msg.innerHTML='<span style="color:#f0655f">นำเข้าไม่สำเร็จ: '+esc(e.message||String(e))+'</span>';
+}finally{btn.disabled=false;btn.textContent='ตรวจและนำเข้า';}
+}
+function exportNSGCSV(){
+const head=['storecode','ชื่อสาขา','จังหวัด','วัน Grand','D-20','D-15','D-12','D-7','ผู้รับผิดชอบ','SMA','Kissflow','ความคืบหน้า','ค้าง','โน้ต'];
+const rows=nsgStores.map(s=>{
+ const pr=_nsgProgress(s),acts=_nsgActions(s,_nsgToday());
+ return[s.storecode,s.name||'',s.province||'',s.grand_date||'',s.alert_buy_date||'',s.packgo_date||'',
+  s.final_aw_date||'',s.install_date||'',s.grand_owner||'',s.sma||'',s.kissflow||'',
+  pr.done+'/'+pr.total,acts.filter(a=>a.diff<0).length,(s.note||'').replace(/\n/g,' ')];
+});
+const csv='﻿'+[head].concat(rows).map(r=>r.map(v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"').join(',')).join('\n');
+const a=document.createElement('a');
+a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));
+a.download='NSG_'+_nsgToday()+'.csv';a.click();
+}
+// ── Login briefing ──────────────────────────────────────────────────────────
+// Queues behind the overdue gate and the due-today pop-up, so a Super Admin
+// never gets three dialogs stacked on top of each other at sign-in.
+let _nsgBriefPending=false,_nsgBriefTries=0;
+function queueNSGBrief(){
+if(!_nsgIsAdmin())return;
+_nsgBriefPending=true;_nsgBriefTries=0;_tryNSGBrief();
+}
+function _tryNSGBrief(){
+if(!_nsgBriefPending)return;
+const busy=['overdue-overlay','new-task-overlay','duetoday-overlay'].some(id=>{
+ const e=document.getElementById(id);return e&&e.classList.contains('show');});
+if(busy){
+ // Give up quietly after ~10 minutes rather than polling for the whole session.
+ if(++_nsgBriefTries>300){_nsgBriefPending=false;return;}
+ setTimeout(_tryNSGBrief,2000);return;
+}
+_nsgBriefPending=false;
+showNSGBrief();
+}
+async function showNSGBrief(){
+if(!_nsgIsAdmin())return;
+await loadNSG(true);
+if(!nsgStores.length)return;
+const today=_nsgToday();
+const all=[];
+nsgStores.forEach(s=>all.push(..._nsgActions(s,today)));
+const late=all.filter(a=>a.diff<0).sort((a,b)=>a.diff-b.diff);
+const now=all.filter(a=>a.diff===0);
+const soon=all.filter(a=>a.diff>0&&a.diff<=7).sort((a,b)=>a.diff-b.diff);
+const opening=nsgStores.filter(s=>{const d=s.grand_date?_nsgDaysBetween(today,s.grand_date):null;return d!=null&&d>=0&&d<=7;})
+ .sort((a,b)=>(a.grand_date||'').localeCompare(b.grand_date||''));
+if(!late.length&&!now.length&&!soon.length&&!opening.length)return;
+const row=a=>`<div class="nsg-brief-row"><b>${esc(a.store.name||a.store.storecode)}</b><span>${esc(a.item.t)}</span><span style="margin-left:auto;white-space:nowrap">${_nsgFmt(a.due)}</span></div>`;
+const grp=(title,color,arr,extra)=>arr.length?`<div class="nsg-brief-grp"><h4 style="color:${color}">${title} (${arr.length})</h4>${arr.slice(0,extra||8).map(row).join('')}${arr.length>(extra||8)?`<div style="font-size:12px;color:var(--t3);padding-left:10px">…และอีก ${arr.length-(extra||8)} รายการ</div>`:''}</div>`:'';
+let html='';
+html+=opening.length?`<div class="nsg-brief-grp"><h4 style="color:#50d090">สาขาที่จะเปิดใน 7 วัน (${opening.length})</h4>`
+ +opening.map(s=>`<div class="nsg-brief-row"><b>${esc(s.name||s.storecode)}</b><span>${esc(s.province||'')}</span><span style="margin-left:auto;white-space:nowrap">Grand ${_nsgFmt(s.grand_date)} · D-${_nsgDaysBetween(today,s.grand_date)}</span></div>`).join('')+'</div>':'';
+html+=grp('เลยกำหนดแล้ว','#f0655f',late);
+html+=grp('ถึงกำหนดวันนี้','#f2c94c',now);
+html+=grp('ใกล้ถึงกำหนด (ภายใน 7 วัน)','var(--t2)',soon,5);
+document.getElementById('nsg-brief-body').innerHTML=html;
+document.getElementById('nsg-brief-modal').classList.add('open');
+}
 function showAllMembers(){const sel=document.getElementById('bf-owner');if(sel)sel.value='';renderKanban();}
 let _boardFilterDefaulted=false;
 function applyDefaultBoardFilter(){
@@ -2677,7 +3149,9 @@ const wt=document.getElementById('worklog-tab');
 if(wt)wt.style.display=_isAdminUser()?'':'none';
 const nt=document.getElementById('notify-tab');
 if(nt)nt.style.display=_isAdminUser()?'':'none';
-if(name){setupPresence();recordLogin(name);loadUserTheme();syncUserTheme();initWorktime();initChat();setupStageNotify();applyDefaultBoardFilter();} else {teardownPresence();teardownChat();teardownStageNotify();_myAvatar='';renderMyAvatar();_workStart=null;updateWorktimeChip();_boardFilterDefaulted=false;}
+const gt=document.getElementById('nsg-tab');
+if(gt)gt.style.display=_isAdminUser()?'':'none';
+if(name){setupPresence();recordLogin(name);loadUserTheme();syncUserTheme();initWorktime();initChat();setupStageNotify();applyDefaultBoardFilter();queueNSGBrief();} else {teardownPresence();teardownChat();teardownStageNotify();_myAvatar='';renderMyAvatar();_workStart=null;updateWorktimeChip();_boardFilterDefaulted=false;}
 }
 // ── Profile picture (stored in Supabase user_metadata, shared live via presence) ──
 let _myAvatar='',_profileChoice='';
