@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260813k -->
+<!-- v20260813l -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -1287,7 +1287,7 @@ if(window._pendingLoad) window._pendingLoad();
 
 <script>
 // ═════════════ DATA ═════════════
-const APP_VERSION='v20260813k'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
+const APP_VERSION='v20260813l'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
 const STAGES=['Job Brief','Design','Production','Review','Approval Stage','On Hold','Complete'];
 const DONE_STAGE=STAGES[STAGES.length-1];
 const SKEY=s=>({
@@ -3152,23 +3152,23 @@ if(!_nsgIsAdmin())return;
 await loadNSG(true);
 if(!nsgStores.length)return;
 const today=_nsgToday();
-const all=[];
-nsgStores.forEach(s=>all.push(..._nsgActions(s,today)));
-const late=all.filter(a=>a.diff<0).sort((a,b)=>a.diff-b.diff);
-const now=all.filter(a=>a.diff===0);
-const soon=all.filter(a=>a.diff>0&&a.diff<=7).sort((a,b)=>a.diff-b.diff);
+// Only stores opening within the next 7 days. The overdue and due-today lists
+// live on the NSG page itself; on sign-in this pop-up answers one question.
 const opening=nsgStores.filter(s=>{const d=s.grand_date?_nsgDaysBetween(today,s.grand_date):null;return d!=null&&d>=0&&d<=7;})
  .sort((a,b)=>(a.grand_date||'').localeCompare(b.grand_date||''));
-if(!late.length&&!now.length&&!soon.length&&!opening.length)return;
-const row=a=>`<div class="nsg-brief-row"><b>${esc(a.store.name||a.store.storecode)}</b><span>${esc(a.item.t)}</span><span style="margin-left:auto;white-space:nowrap">${_nsgFmt(a.due)}</span></div>`;
-const grp=(title,color,arr,extra)=>arr.length?`<div class="nsg-brief-grp"><h4 style="color:${color}">${title} (${arr.length})</h4>${arr.slice(0,extra||8).map(row).join('')}${arr.length>(extra||8)?`<div style="font-size:12px;color:var(--t3);padding-left:10px">…และอีก ${arr.length-(extra||8)} รายการ</div>`:''}</div>`:'';
-let html='';
-html+=opening.length?`<div class="nsg-brief-grp"><h4 style="color:#50d090">สาขาที่จะเปิดใน 7 วัน (${opening.length})</h4>`
- +opening.map(s=>`<div class="nsg-brief-row"><b>${esc(s.name||s.storecode)}</b><span>${esc(s.province||'')}</span><span style="margin-left:auto;white-space:nowrap">Grand ${_nsgFmt(s.grand_date)} · D-${_nsgDaysBetween(today,s.grand_date)}</span></div>`).join('')+'</div>':'';
-html+=grp('เลยกำหนดแล้ว','#f0655f',late);
-html+=grp('ถึงกำหนดวันนี้','#f2c94c',now);
-html+=grp('ใกล้ถึงกำหนด (ภายใน 7 วัน)','var(--t2)',soon,5);
-document.getElementById('nsg-brief-body').innerHTML=html;
+if(!opening.length)return;
+document.getElementById('nsg-brief-body').innerHTML=
+ `<div class="nsg-brief-grp"><h4 style="color:#50d090">สาขาที่จะเปิดใน 7 วัน (${opening.length})</h4>`
+ +opening.map(s=>{
+  const d=_nsgDaysBetween(today,s.grand_date);
+  const pr=_nsgProgress(s);
+  const lateN=_nsgActions(s,today).filter(a=>a.diff<0).length;
+  return `<button type="button" class="nsg-brief-row" style="width:100%;border:1px solid transparent;font-family:inherit;cursor:pointer;text-align:left" onclick="closeModal('nsg-brief-modal');document.getElementById('nsg-tab').click();gotoNSGStore('${esc(s.storecode)}')">
+   <b>${esc(s.name||_nsgShowCode(s.storecode))}</b>
+   <span class="nsg-code"${_nsgIsPlaceholder(s.storecode)?' style="color:#f2c94c"':''}>${esc(_nsgShowCode(s.storecode))}</span>
+   <span>${esc(s.province||'')}</span>
+   <span style="margin-left:auto;white-space:nowrap">Grand ${_nsgFmt(s.grand_date)} · <b style="color:${d<=2?'#f0655f':'#f2c94c'}">${d===0?'เปิดวันนี้':'D-'+d}</b> · ${pr.done}/${pr.total}${lateN?` · <b style="color:#f0655f">ค้าง ${lateN}</b>`:''}</span>
+  </button>`;}).join('')+'</div>';
 document.getElementById('nsg-brief-modal').classList.add('open');
 }
 function showAllMembers(){const sel=document.getElementById('bf-owner');if(sel)sel.value='';renderKanban();}
