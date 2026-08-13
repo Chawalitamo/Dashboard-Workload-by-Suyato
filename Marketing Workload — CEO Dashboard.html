@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260813f -->
+<!-- v20260813g -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -1256,7 +1256,7 @@ if(window._pendingLoad) window._pendingLoad();
 
 <script>
 // ═════════════ DATA ═════════════
-const APP_VERSION='v20260813f'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
+const APP_VERSION='v20260813g'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
 const STAGES=['Job Brief','Design','Production','Review','Approval Stage','On Hold','Complete'];
 const DONE_STAGE=STAGES[STAGES.length-1];
 const SKEY=s=>({
@@ -2553,7 +2553,7 @@ body.innerHTML=dash+list.map(s=>{
    <div class="nsg-meta"><span class="nsg-code"${_nsgIsPlaceholder(s.storecode)?' style="color:#f2c94c"':''}>${esc(_nsgShowCode(s.storecode))}</span> · ${esc(s.province||'—')}</div>
   </div>
   <span class="nsg-dday ${ddCls}">${ddTxt}</span>
-  <div class="nsg-meta">Grand ${s.grand_date?_nsgFmt(s.grand_date):'—'}${s.grand_owner?' · ผู้รับผิดชอบ '+esc(s.grand_owner):''}${s.sma?' · SMA '+esc(s.sma):''}</div>
+  <div class="nsg-meta">Grand ${s.grand_date?_nsgFmt(s.grand_date):'—'}${s.grand_owner?' · ผู้รับผิดชอบ '+esc(s.grand_owner):''}${s.mkt?' · MKT '+esc(s.mkt):''}</div>
   ${badge}
   <div style="flex:1"></div>
   <div class="nsg-bar"><span style="width:${pr.pct}%"></span></div>
