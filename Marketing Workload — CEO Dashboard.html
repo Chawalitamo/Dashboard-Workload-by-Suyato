@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260813h -->
+<!-- v20260813i -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -645,7 +645,8 @@ button{font-family:'DBHeavent','Sarabun',sans-serif}
 .nsg-det-row .rt{margin-left:auto;white-space:nowrap;color:var(--t3);font-family:monospace;font-size:12px}
 .nsg-det-grp{font-size:12px;font-weight:700;color:var(--gold);margin:12px 0 6px;letter-spacing:.03em}
 .nsg-kpi b{display:block;font-family:'DBHeavent',monospace;font-size:24px;line-height:1.2}
-.nsg-kpi span{font-size:12px;color:var(--t3)}
+.nsg-kpi span{font-size:12px;color:var(--t3);display:block}
+.nsg-kpi em{display:block;font-size:10px;color:var(--t4);font-style:normal;margin-top:2px;line-height:1.35}
 .nsg-ph-prog{background:var(--surf);border:1px solid var(--b1);border-radius:var(--r);padding:12px 14px;margin-bottom:16px}
 .nsg-ph-row{display:flex;align-items:center;gap:10px;margin-top:7px;font-size:13px}
 .nsg-ph-row .lbl{min-width:210px;color:var(--t2)}
@@ -1265,7 +1266,7 @@ if(window._pendingLoad) window._pendingLoad();
 
 <script>
 // ═════════════ DATA ═════════════
-const APP_VERSION='v20260813h'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
+const APP_VERSION='v20260813i'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
 const STAGES=['Job Brief','Design','Production','Review','Approval Stage','On Hold','Complete'];
 const DONE_STAGE=STAGES[STAGES.length-1];
 const SKEY=s=>({
@@ -2519,7 +2520,10 @@ nsgStores.forEach(s=>{
  if(d!=null&&d>=0&&d<=7)soon7.push(s);
 });
 const overall=items?Math.round(done/items*100):0;
-const kpi=(v,l,c,kind)=>`<button type="button" class="nsg-kpi" onclick="openNSGDetail('${kind}')" title="กดเพื่อดูรายละเอียด"><b style="color:${c}">${v}</b><span>${l}</span></button>`;
+// Eight identical tiles side by side read as eight parts of one whole, so the
+// ones that overlap or count something else say so underneath. Only เปิดแล้ว and
+// ยังไม่เปิด actually partition the store count.
+const kpi=(v,l,c,kind,sub)=>`<button type="button" class="nsg-kpi" onclick="openNSGDetail('${kind}')" title="กดเพื่อดูรายละเอียด"><b style="color:${c}">${v}</b><span>${l}</span>${sub?`<em>${sub}</em>`:''}</button>`;
 const phaseRows=NSG_PHASES.map(ph=>{
  let d=0,t=0;
  nsgStores.forEach(s=>ph.items.forEach(it=>{t++;if(_nsgChecked(s,it.k))d++;}));
@@ -2529,14 +2533,17 @@ const phaseRows=NSG_PHASES.map(ph=>{
   <span class="num">${d}/${t} · ${p}%</span></div>`;
 }).join('');
 const dash=`<div class="nsg-dash">
- ${kpi(tot,'สาขาทั้งหมด','var(--t1)','all')}
+ ${kpi(tot,'สาขาทั้งหมด','var(--t1)','all','= เปิดแล้ว + ยังไม่เปิด')}
  ${kpi(opened,'เปิดแล้ว','#50d090','opened')}
  ${kpi(tot-opened,'ยังไม่เปิด','#5aaaf0','notopen')}
- ${kpi(soon7.length,'เปิดใน 7 วัน','#f2c94c','soon')}
- ${kpi(overall+'%','ความคืบหน้ารวม','var(--gold)','progress')}
- ${kpi(late,'งานเลยกำหนด',late?'#f0655f':'var(--t3)','late')}
- ${kpi(dueNow,'ถึงกำหนดวันนี้',dueNow?'#f2c94c':'var(--t3)','today')}
- ${kpi(finished,'ครบทุกข้อ','#50d090','done')}
+ ${kpi(soon7.length,'เปิดใน 7 วัน','#f2c94c','soon','ซ้ำกับช่องอื่น ไม่ต้องบวก')}
+ ${kpi(finished,'ครบทุกข้อ','#50d090','done','ส่วนหนึ่งของ '+tot+' สาขา')}
+</div>
+<div class="nsg-dash">
+ ${kpi(overall+'%','ความคืบหน้ารวม','var(--gold)','progress','จาก '+items.toLocaleString()+' ข้อ ('+NSG_ALL_ITEMS.length+' × '+tot+' สาขา)')}
+ ${kpi(done.toLocaleString(),'ข้อที่ทำแล้ว','#50d090','progress','นับเป็นข้อ ไม่ใช่สาขา')}
+ ${kpi(late.toLocaleString(),'งานเลยกำหนด',late?'#f0655f':'var(--t3)','late','นับเป็นข้อ ไม่ใช่สาขา')}
+ ${kpi(dueNow.toLocaleString(),'ถึงกำหนดวันนี้',dueNow?'#f2c94c':'var(--t3)','today','นับเป็นข้อ ไม่ใช่สาขา')}
 </div>
 <div class="nsg-ph-prog">
  <div style="font-size:13px;font-weight:700;color:var(--gold);margin-bottom:2px">ความคืบหน้าตาม Phase (ทุกสาขารวมกัน)</div>
