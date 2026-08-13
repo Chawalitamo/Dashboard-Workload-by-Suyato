@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260813e -->
+<!-- v20260813f -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -626,7 +626,15 @@ button{font-family:'DBHeavent','Sarabun',sans-serif}
 .nsg-kf:focus{outline:none;border-color:var(--gold)}
 /* NSG summary dashboard */
 .nsg-dash{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0 16px}
-.nsg-kpi{flex:1 1 130px;min-width:130px;background:var(--surf);border:1px solid var(--b1);border-radius:var(--r);padding:11px 14px}
+.nsg-kpi{flex:1 1 130px;min-width:130px;background:var(--surf);border:1px solid var(--b1);border-radius:var(--r);padding:11px 14px;text-align:left;font-family:inherit;cursor:pointer;transition:all .12s}
+.nsg-kpi:hover{background:var(--surf2);border-color:var(--b2);transform:translateY(-1px)}
+.nsg-kpi:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.nsg-det-row{display:flex;gap:10px;align-items:baseline;padding:8px 10px;border-radius:var(--rsm);background:var(--surf2);margin-bottom:5px;font-size:13px;width:100%;border:1px solid transparent;text-align:left;font-family:inherit;cursor:pointer}
+.nsg-det-row:hover{background:var(--surf3);border-color:var(--b1)}
+.nsg-det-row b{color:var(--t1)}
+.nsg-det-row .sub{color:var(--t3)}
+.nsg-det-row .rt{margin-left:auto;white-space:nowrap;color:var(--t3);font-family:monospace;font-size:12px}
+.nsg-det-grp{font-size:12px;font-weight:700;color:var(--gold);margin:12px 0 6px;letter-spacing:.03em}
 .nsg-kpi b{display:block;font-family:'DBHeavent',monospace;font-size:24px;line-height:1.2}
 .nsg-kpi span{font-size:12px;color:var(--t3)}
 .nsg-ph-prog{background:var(--surf);border:1px solid var(--b1);border-radius:var(--r);padding:12px 14px;margin-bottom:16px}
@@ -1052,6 +1060,16 @@ if(window._pendingLoad) window._pendingLoad();
 </div>
 </div>
 </div>
+<!-- NSG: detail behind each summary tile -->
+<div class="modal-bg" id="nsg-detail-modal">
+<div class="modal" style="width:780px">
+<div class="modal-head"><h3 id="nsg-detail-title">รายละเอียด</h3><button class="modal-close" onclick="closeModal('nsg-detail-modal')">&#x2715;</button></div>
+<div id="nsg-detail-body" style="max-height:60vh;overflow-y:auto"></div>
+<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px">
+<button class="btn-pri" onclick="closeModal('nsg-detail-modal')">ปิด</button>
+</div>
+</div>
+</div>
 <!-- NSG daily briefing on login -->
 <div class="modal-bg" id="nsg-brief-modal">
 <div class="modal" style="width:720px">
@@ -1238,7 +1256,7 @@ if(window._pendingLoad) window._pendingLoad();
 
 <script>
 // ═════════════ DATA ═════════════
-const APP_VERSION='v20260813e'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
+const APP_VERSION='v20260813f'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
 const STAGES=['Job Brief','Design','Production','Review','Approval Stage','On Hold','Complete'];
 const DONE_STAGE=STAGES[STAGES.length-1];
 const SKEY=s=>({
@@ -2488,7 +2506,7 @@ nsgStores.forEach(s=>{
  if(d!=null&&d>=0&&d<=7)soon7.push(s);
 });
 const overall=items?Math.round(done/items*100):0;
-const kpi=(v,l,c)=>`<div class="nsg-kpi"><b style="color:${c}">${v}</b><span>${l}</span></div>`;
+const kpi=(v,l,c,kind)=>`<button type="button" class="nsg-kpi" onclick="openNSGDetail('${kind}')" title="กดเพื่อดูรายละเอียด"><b style="color:${c}">${v}</b><span>${l}</span></button>`;
 const phaseRows=NSG_PHASES.map(ph=>{
  let d=0,t=0;
  nsgStores.forEach(s=>ph.items.forEach(it=>{t++;if(_nsgChecked(s,it.k))d++;}));
@@ -2498,14 +2516,14 @@ const phaseRows=NSG_PHASES.map(ph=>{
   <span class="num">${d}/${t} · ${p}%</span></div>`;
 }).join('');
 const dash=`<div class="nsg-dash">
- ${kpi(tot,'สาขาทั้งหมด','var(--t1)')}
- ${kpi(opened,'เปิดแล้ว','#50d090')}
- ${kpi(tot-opened,'ยังไม่เปิด','#5aaaf0')}
- ${kpi(soon7.length,'เปิดใน 7 วัน','#f2c94c')}
- ${kpi(overall+'%','ความคืบหน้ารวม','var(--gold)')}
- ${kpi(late,'งานเลยกำหนด',late?'#f0655f':'var(--t3)')}
- ${kpi(dueNow,'ถึงกำหนดวันนี้',dueNow?'#f2c94c':'var(--t3)')}
- ${kpi(finished,'ครบทุกข้อ','#50d090')}
+ ${kpi(tot,'สาขาทั้งหมด','var(--t1)','all')}
+ ${kpi(opened,'เปิดแล้ว','#50d090','opened')}
+ ${kpi(tot-opened,'ยังไม่เปิด','#5aaaf0','notopen')}
+ ${kpi(soon7.length,'เปิดใน 7 วัน','#f2c94c','soon')}
+ ${kpi(overall+'%','ความคืบหน้ารวม','var(--gold)','progress')}
+ ${kpi(late,'งานเลยกำหนด',late?'#f0655f':'var(--t3)','late')}
+ ${kpi(dueNow,'ถึงกำหนดวันนี้',dueNow?'#f2c94c':'var(--t3)','today')}
+ ${kpi(finished,'ครบทุกข้อ','#50d090','done')}
 </div>
 <div class="nsg-ph-prog">
  <div style="font-size:13px;font-weight:700;color:var(--gold);margin-bottom:2px">ความคืบหน้าตาม Phase (ทุกสาขารวมกัน)</div>
@@ -2570,6 +2588,78 @@ body.innerHTML=dash+list.map(s=>{
  </div>`;}).join('');
 }
 function toggleNSG(code){_nsgOpen[code]=!_nsgOpen[code];renderNSG();}
+// ── Detail behind each summary tile ─────────────────────────────────────────
+// Every number on the dashboard is derived from the same helpers the board uses,
+// so what a tile opens can never disagree with the count printed on it.
+const _NSG_DETAIL={
+all:      {t:'สาขาทั้งหมด',        kind:'store'},
+opened:   {t:'สาขาที่เปิดแล้ว',     kind:'store'},
+notopen:  {t:'สาขาที่ยังไม่เปิด',    kind:'store'},
+soon:     {t:'สาขาที่จะเปิดใน 7 วัน',kind:'store'},
+progress: {t:'ความคืบหน้ารายสาขา',  kind:'store'},
+done:     {t:'สาขาที่ทำครบทุกข้อ',  kind:'store'},
+late:     {t:'งานที่เลยกำหนดแล้ว',  kind:'item'},
+today:    {t:'งานที่ถึงกำหนดวันนี้', kind:'item'}};
+function _nsgDetailData(kind,today){
+const withD=s=>({s,d:s.grand_date?_nsgDaysBetween(today,s.grand_date):null});
+if(kind==='all')return nsgStores.slice().sort((a,b)=>(a.grand_date||'9999').localeCompare(b.grand_date||'9999'));
+if(kind==='opened')return nsgStores.filter(s=>{const d=withD(s).d;return d!=null&&d<=0;})
+ .sort((a,b)=>(b.grand_date||'').localeCompare(a.grand_date||''));
+if(kind==='notopen')return nsgStores.filter(s=>{const d=withD(s).d;return d==null||d>0;})
+ .sort((a,b)=>(a.grand_date||'9999').localeCompare(b.grand_date||'9999'));
+if(kind==='soon')return nsgStores.filter(s=>{const d=withD(s).d;return d!=null&&d>=0&&d<=7;})
+ .sort((a,b)=>(a.grand_date||'').localeCompare(b.grand_date||''));
+if(kind==='done')return nsgStores.filter(s=>_nsgProgress(s).done===NSG_ALL_ITEMS.length);
+if(kind==='progress')return nsgStores.slice().sort((a,b)=>_nsgProgress(a).pct-_nsgProgress(b).pct);
+const acts=[];nsgStores.forEach(s=>acts.push(..._nsgActions(s,today)));
+if(kind==='late')return acts.filter(a=>a.diff<0).sort((a,b)=>a.diff-b.diff);
+if(kind==='today')return acts.filter(a=>a.diff===0);
+return[];
+}
+function openNSGDetail(kind){
+const meta=_NSG_DETAIL[kind];if(!meta)return;
+const today=_nsgToday();
+const rows=_nsgDetailData(kind,today);
+document.getElementById('nsg-detail-title').textContent=meta.t+' ('+rows.length+')';
+const body=document.getElementById('nsg-detail-body');
+if(!rows.length){body.innerHTML='<div class="nsg-empty">ไม่มีรายการ</div>';}
+else if(meta.kind==='store'){
+ body.innerHTML=rows.map(s=>{
+  const pr=_nsgProgress(s);
+  const d=s.grand_date?_nsgDaysBetween(today,s.grand_date):null;
+  const dd=d==null?'ยังไม่กำหนดวันเปิด':(d>0?'D-'+d:(d===0?'เปิดวันนี้':'D+'+Math.abs(d)));
+  const acts=_nsgActions(s,today),lateN=acts.filter(a=>a.diff<0).length;
+  return `<button type="button" class="nsg-det-row" onclick="gotoNSGStore('${esc(s.storecode)}')">
+   <b>${esc(s.name||_nsgShowCode(s.storecode))}</b>
+   <span class="sub">${esc(_nsgShowCode(s.storecode))} · ${esc(s.province||'—')}${lateN?' · <span style="color:#f0655f">ค้าง '+lateN+'</span>':''}</span>
+   <span class="rt">${s.grand_date?_nsgFmt(s.grand_date):'—'} · ${dd} · ${pr.done}/${pr.total} (${pr.pct}%)</span>
+  </button>`;}).join('');
+}else{
+ // Item-level: group by store so a store with many overdue items reads as one block.
+ const byStore={};
+ rows.forEach(a=>{(byStore[a.store.storecode]=byStore[a.store.storecode]||{s:a.store,list:[]}).list.push(a);});
+ body.innerHTML=Object.keys(byStore).map(code=>{
+  const g=byStore[code];
+  return `<div class="nsg-det-grp">${esc(g.s.name||_nsgShowCode(code))} — ${g.list.length} รายการ</div>`
+   +g.list.map(a=>`<button type="button" class="nsg-det-row" onclick="gotoNSGStore('${esc(code)}')">
+     <span class="sub">${esc(a.phase.no)}</span><b>${esc(a.item.t)}</b>
+     <span class="rt">${_nsgFmt(a.due)}${a.diff<0?' · เกิน '+Math.abs(a.diff)+' วัน':''}</span></button>`).join('');
+ }).join('');
+}
+document.getElementById('nsg-detail-modal').classList.add('open');
+}
+// Jump from a detail row to the store itself, opened and scrolled into view.
+function gotoNSGStore(code){
+closeModal('nsg-detail-modal');
+const el=document.getElementById('nsg-search');if(el&&el.value){el.value='';}
+const fl=document.getElementById('nsg-filter');if(fl&&fl.value){fl.value='';}
+_nsgOpen[code]=true;
+renderNSG();
+setTimeout(()=>{
+ const card=document.querySelector('.nsg-hd[onclick*="'+code.replace(/"/g,'')+'"]');
+ if(card&&card.scrollIntoView)card.scrollIntoView({behavior:'smooth',block:'center'});
+},60);
+}
 async function toggleNSGItem(code,key,on){
 const s=nsgStores.find(x=>x.storecode===code);if(!s)return;
 const checks=Object.assign({},s.checks||{});
