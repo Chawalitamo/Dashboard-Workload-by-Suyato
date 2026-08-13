@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260813c -->
+<!-- v20260813d -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -1238,7 +1238,7 @@ if(window._pendingLoad) window._pendingLoad();
 
 <script>
 // ═════════════ DATA ═════════════
-const APP_VERSION='v20260813c'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
+const APP_VERSION='v20260813d'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
 const STAGES=['Job Brief','Design','Production','Review','Approval Stage','On Hold','Complete'];
 const DONE_STAGE=STAGES[STAGES.length-1];
 const SKEY=s=>({
@@ -2640,6 +2640,20 @@ const _NSG_COLS=[
  ['plan_visited',h=>h.includes('plan visited')],
 ];
 const _NSG_DATE_FIELDS=['grand_date','packgo_date','final_aw_date','install_date','alert_buy_date'];
+// Spreadsheet cells pick up invisible junk — non-breaking and zero-width spaces
+// pasted from elsewhere — which makes "ซัน" not equal "ซัน". Strip those before
+// comparing, otherwise a store silently belongs to nobody.
+function _nsgNormMkt(v){
+return String(v==null?'':v).replace(/[ ​‌‍﻿]/g,'').replace(/\s+/g,'');
+}
+// A cell may name more than one owner ("ซัน/จิ๋ว") when a store is shared; that
+// is still ซัน's store, so match on any of the names in the cell.
+function _nsgIsSun(v){
+const n=_nsgNormMkt(v);
+if(!n)return false;
+if(n==='ซัน')return true;
+return n.split(/[\/,+&|-]/).some(x=>x==='ซัน');
+}
 function parseNSGPaste(text){
 const lines=String(text||'').split(/\r?\n/).filter(l=>l.trim()!=='');
 if(!lines.length)return{error:'ไม่พบข้อมูล'};
@@ -2660,14 +2674,25 @@ _NSG_COLS.forEach(([field,test])=>{
  if(idx>=0&&map[field]===undefined)map[field]=idx;
 });
 if(map.storecode===undefined||map.mkt===undefined)return{error:'ไม่พบคอลัมน์ storecode หรือ MKT'};
-const rows=[],skipped={other:0,nocode:0};
+// Every skipped row is accounted for by name and reason, so "the sheet has 21
+// but only 19 arrived" is answerable from the screen instead of being a mystery.
+const rows=[],skipped={other:0,nocode:0,byMkt:{},noCodeRows:[],loose:[]};
 for(let i=hi+1;i<lines.length;i++){
  const c=_nsgSplitLine(lines[i],tabbed).map(x=>x.trim());
  const code=(c[map.storecode]||'').trim();
- if(!code){skipped.nocode++;continue;}
- const mkt=(c[map.mkt]||'').trim();
- if(mkt!=='ซัน'){skipped.other++;continue;}   // the sheet is shared; keep only MKT ซัน
- const r={storecode:code,mkt:mkt};
+ const mktRaw=(c[map.mkt]||'').trim();
+ const nameRaw=(c[map.name]||'').trim();
+ if(!code){
+  // A row with no storecode but with a name is a real row the user will miss.
+  if(nameRaw||mktRaw){skipped.nocode++;skipped.noCodeRows.push(nameRaw||'(ไม่มีชื่อ)');}
+  continue;}
+ if(!_nsgIsSun(mktRaw)){                       // the sheet is shared; keep only MKT ซัน
+  skipped.other++;
+  const k=mktRaw||'(ว่าง)';
+  skipped.byMkt[k]=(skipped.byMkt[k]||0)+1;
+  continue;}
+ if(_nsgNormMkt(mktRaw)!=='ซัน')skipped.loose.push(nameRaw+' ('+mktRaw+')');
+ const r={storecode:code,mkt:mktRaw};
  Object.keys(map).forEach(f=>{
   if(f==='storecode'||f==='mkt')return;
   let v=(c[map[f]]||'').trim();
@@ -2744,13 +2769,24 @@ _nsgLoaded=false;
 await loadNSG(true);
 return{count:p.rows.length,skipped:p.skipped};
 }
+// Turns the skip counts into something a person can act on: which MKT owns the
+// rows we left out, and any row that has a name but no storecode.
+function _nsgSkipReport(sk,br){
+if(!sk)return '';
+const parts=[];
+const byMkt=Object.keys(sk.byMkt||{}).sort((a,b)=>sk.byMkt[b]-sk.byMkt[a]);
+if(byMkt.length)parts.push('ข้าม '+sk.other+' แถวของ MKT อื่น: '+byMkt.map(k=>k+' '+sk.byMkt[k]).join(', '));
+if(sk.nocode)parts.push('⚠ '+sk.nocode+' แถวไม่มี storecode จึงนำเข้าไม่ได้: '+(sk.noCodeRows||[]).join(', '));
+if((sk.loose||[]).length)parts.push('รับเพิ่มจากช่อง MKT ที่เขียนรวมกัน: '+sk.loose.join(', '));
+return parts.join(br||' · ');
+}
 async function manualNSGSync(){
 const btn=document.getElementById('nsg-sync-btn');
 if(btn){btn.disabled=true;btn.textContent='กำลัง sync…';}
 const r=await syncNSGFromSheet(false);
 if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-cloud-download"></i>Sync จาก Sheet';}
 if(r.error)alert('Sync ไม่สำเร็จ\n\n'+r.error+'\n\nข้อมูลเดิมยังอยู่ครบ — ใช้ปุ่ม "วางข้อมูลเอง" แทนได้');
-else{renderNSG();alert('Sync สำเร็จ — '+r.count+' สาขา (MKT ซัน)\nข้าม '+r.skipped.other+' แถวของ MKT คนอื่น');}
+else{renderNSG();alert('Sync สำเร็จ — '+r.count+' สาขา (MKT ซัน)\n\n'+_nsgSkipReport(r.skipped,'\n'));}
 }
 async function openNSGImport(){
 document.getElementById('nsg-paste').value='';
@@ -2786,7 +2822,7 @@ try{
  const stale=nsgStores.filter(s=>codes.indexOf(s.storecode)<0).length;
  _nsgLoaded=false;await loadNSG(true);
  msg.innerHTML='<span style="color:#50d090">✓ นำเข้า '+res.rows.length+' สาขา (MKT ซัน) เรียบร้อย</span>'
-  +'<br><span style="color:var(--t3)">ข้าม '+res.skipped.other+' แถวที่เป็นของ MKT คนอื่น'
+  +'<br><span style="color:var(--t3)">'+esc(_nsgSkipReport(res.skipped))
   +(stale?' · มี '+stale+' สาขาเดิมที่ไม่อยู่ในชีทรอบนี้ (ยังเก็บไว้ ไม่ได้ลบ)':'')+'</span>';
 }catch(e){
  msg.innerHTML='<span style="color:#f0655f">นำเข้าไม่สำเร็จ: '+esc(e.message||String(e))+'</span>';
