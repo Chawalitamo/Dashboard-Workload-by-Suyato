@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260813d -->
+<!-- v20260813e -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -1238,7 +1238,7 @@ if(window._pendingLoad) window._pendingLoad();
 
 <script>
 // ═════════════ DATA ═════════════
-const APP_VERSION='v20260813d'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
+const APP_VERSION='v20260813e'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
 const STAGES=['Job Brief','Design','Production','Review','Approval Stage','On Hold','Complete'];
 const DONE_STAGE=STAGES[STAGES.length-1];
 const SKEY=s=>({
@@ -2458,7 +2458,7 @@ const q=(document.getElementById('nsg-search')||{}).value||'';
 const f=(document.getElementById('nsg-filter')||{}).value||'';
 const qq=q.trim().toLowerCase();
 let list=nsgStores.slice();
-if(qq)list=list.filter(s=>((s.name||'')+' '+(s.storecode||'')+' '+(s.province||'')).toLowerCase().includes(qq));
+if(qq)list=list.filter(s=>((s.name||'')+' '+_nsgShowCode(s.storecode)+' '+(s.province||'')).toLowerCase().includes(qq));
 if(f==='action')list=list.filter(s=>_nsgActions(s,today).some(a=>a.diff<=0));
 if(f==='pre')list=list.filter(s=>s.grand_date&&_nsgDaysBetween(today,s.grand_date)>0);
 if(f==='open')list=list.filter(s=>s.grand_date&&_nsgDaysBetween(today,s.grand_date)<=0);
@@ -2532,7 +2532,7 @@ body.innerHTML=dash+list.map(s=>{
   <i class="ti ti-chevron-${open?'down':'right'}" style="color:var(--t3)"></i>
   <div style="min-width:220px">
    <div class="nsg-name">${esc(s.name||'(ไม่มีชื่อ)')} ${s.gmap?`<a href="${esc(s.gmap)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="เปิด Google Map" style="color:var(--gold);font-size:13px">📍</a>`:''}</div>
-   <div class="nsg-meta"><span class="nsg-code">${esc(s.storecode)}</span> · ${esc(s.province||'—')}</div>
+   <div class="nsg-meta"><span class="nsg-code"${_nsgIsPlaceholder(s.storecode)?' style="color:#f2c94c"':''}>${esc(_nsgShowCode(s.storecode))}</span> · ${esc(s.province||'—')}</div>
   </div>
   <span class="nsg-dday ${ddCls}">${ddTxt}</span>
   <div class="nsg-meta">Grand ${s.grand_date?_nsgFmt(s.grand_date):'—'}${s.grand_owner?' · ผู้รับผิดชอบ '+esc(s.grand_owner):''}${s.sma?' · SMA '+esc(s.sma):''}</div>
@@ -2648,6 +2648,18 @@ return String(v==null?'':v).replace(/[ ​‌‍﻿]/g,'').replace(/\s+/g,'');
 }
 // A cell may name more than one owner ("ซัน/จิ๋ว") when a store is shared; that
 // is still ซัน's store, so match on any of the names in the cell.
+// storecode is the primary key, but the sheet legitimately has rows whose code
+// has not been issued yet. Those stores still need tracking, so they get a key
+// derived from the store name — stable across re-imports, so ticks survive.
+const _NSG_NOCODE='__NOCODE__';
+function _nsgRowKey(code,name){
+const c=String(code||'').trim();
+if(c)return c;
+const n=String(name||'').trim();
+return n?_NSG_NOCODE+n:'';        // no code AND no name is a genuinely empty row
+}
+function _nsgIsPlaceholder(code){return String(code||'').indexOf(_NSG_NOCODE)===0;}
+function _nsgShowCode(code){return _nsgIsPlaceholder(code)?'ยังไม่มีรหัสสาขา':String(code||'');}
 function _nsgIsSun(v){
 const n=_nsgNormMkt(v);
 if(!n)return false;
@@ -2682,9 +2694,9 @@ for(let i=hi+1;i<lines.length;i++){
  const code=(c[map.storecode]||'').trim();
  const mktRaw=(c[map.mkt]||'').trim();
  const nameRaw=(c[map.name]||'').trim();
- if(!code){
-  // A row with no storecode but with a name is a real row the user will miss.
-  if(nameRaw||mktRaw){skipped.nocode++;skipped.noCodeRows.push(nameRaw||'(ไม่มีชื่อ)');}
+ const key=_nsgRowKey(code,nameRaw);
+ if(!key){                                     // no code and no name: an empty row
+  if(mktRaw){skipped.nocode++;skipped.noCodeRows.push('(แถวว่าง)');}
   continue;}
  if(!_nsgIsSun(mktRaw)){                       // the sheet is shared; keep only MKT ซัน
   skipped.other++;
@@ -2692,7 +2704,8 @@ for(let i=hi+1;i<lines.length;i++){
   skipped.byMkt[k]=(skipped.byMkt[k]||0)+1;
   continue;}
  if(_nsgNormMkt(mktRaw)!=='ซัน')skipped.loose.push(nameRaw+' ('+mktRaw+')');
- const r={storecode:code,mkt:mktRaw};
+ if(!code)skipped.noCodeRows.push(nameRaw);    // imported, but flagged so it is visible
+ const r={storecode:key,mkt:mktRaw};
  Object.keys(map).forEach(f=>{
   if(f==='storecode'||f==='mkt')return;
   let v=(c[map[f]]||'').trim();
@@ -2763,11 +2776,37 @@ try{
  // `checks` stays out of the payload, so syncing never clears a tick.
  const{error}=await window._sb.from('mkt_nsg_stores').upsert(p.rows,{onConflict:'storecode'});
  if(error)throw error;
+ await _nsgAdoptPlaceholders(p.rows);
 }catch(e){const m=(e&&e.message)||String(e);_nsgSyncMsg='บันทึกไม่สำเร็จ: '+m;if(!silent)renderNSG();return{error:m};}
 _nsgSyncMsg='sync ล่าสุด '+new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit',timeZone:'Asia/Bangkok'})+' · '+p.rows.length+' สาขา';
 _nsgLoaded=false;
 await loadNSG(true);
 return{count:p.rows.length,skipped:p.skipped};
+}
+// When a store finally gets its storecode in the sheet, it arrives as a brand
+// new row while the name-keyed placeholder still holds all the ticks and notes.
+// Without this the store would appear twice and the work done on it would look
+// lost, so the placeholder's contents move across and the placeholder is removed.
+async function _nsgAdoptPlaceholders(rows){
+const real=rows.filter(r=>!_nsgIsPlaceholder(r.storecode)&&r.name);
+if(!real.length)return;
+for(const r of real){
+ const ph=nsgStores.find(s=>s.storecode===_NSG_NOCODE+r.name);
+ if(!ph)continue;
+ const hasWork=(ph.checks&&Object.keys(ph.checks).length)||(ph.notes_items&&Object.keys(ph.notes_items).length)||ph.kissflow||ph.note;
+ try{
+  if(hasWork){
+   const{data:cur}=await window._sb.from('mkt_nsg_stores').select('checks,notes_items,kissflow,note').eq('storecode',r.storecode).maybeSingle();
+   const patch={
+    checks:Object.assign({},ph.checks||{},(cur&&cur.checks)||{}),
+    notes_items:Object.assign({},ph.notes_items||{},(cur&&cur.notes_items)||{}),
+    kissflow:(cur&&cur.kissflow)||ph.kissflow||null,
+    note:(cur&&cur.note)||ph.note||null};
+   await window._sb.from('mkt_nsg_stores').update(patch).eq('storecode',r.storecode);
+  }
+  await window._sb.from('mkt_nsg_stores').delete().eq('storecode',ph.storecode);
+ }catch(e){console.warn('adopt placeholder failed',ph.storecode,e);}
+}
 }
 // Turns the skip counts into something a person can act on: which MKT owns the
 // rows we left out, and any row that has a name but no storecode.
@@ -2776,7 +2815,7 @@ if(!sk)return '';
 const parts=[];
 const byMkt=Object.keys(sk.byMkt||{}).sort((a,b)=>sk.byMkt[b]-sk.byMkt[a]);
 if(byMkt.length)parts.push('ข้าม '+sk.other+' แถวของ MKT อื่น: '+byMkt.map(k=>k+' '+sk.byMkt[k]).join(', '));
-if(sk.nocode)parts.push('⚠ '+sk.nocode+' แถวไม่มี storecode จึงนำเข้าไม่ได้: '+(sk.noCodeRows||[]).join(', '));
+if((sk.noCodeRows||[]).length)parts.push('รับเข้ามาแม้ยังไม่มี storecode: '+sk.noCodeRows.join(', '));
 if((sk.loose||[]).length)parts.push('รับเพิ่มจากช่อง MKT ที่เขียนรวมกัน: '+sk.loose.join(', '));
 return parts.join(br||' · ');
 }
@@ -2818,6 +2857,7 @@ try{
  // plan without touching a single tick anyone has already made.
  const{error}=await window._sb.from('mkt_nsg_stores').upsert(res.rows,{onConflict:'storecode'});
  if(error)throw error;
+ await _nsgAdoptPlaceholders(res.rows);
  const codes=res.rows.map(r=>r.storecode);
  const stale=nsgStores.filter(s=>codes.indexOf(s.storecode)<0).length;
  _nsgLoaded=false;await loadNSG(true);
@@ -2834,7 +2874,7 @@ const textLbl=k=>{for(const p of NSG_PHASES)for(const i of p.items)if(i.k===k)re
 const head=['storecode','ชื่อสาขา','จังหวัด','วัน Grand','D-20','D-15','D-12','D-7','ผู้รับผิดชอบ','SMA','Kissflow','ความคืบหน้า','ค้าง','โน้ต'].concat(textKeys.map(textLbl));
 const rows=nsgStores.map(s=>{
  const pr=_nsgProgress(s),acts=_nsgActions(s,_nsgToday());
- return[s.storecode,s.name||'',s.province||'',s.grand_date||'',s.alert_buy_date||'',s.packgo_date||'',
+ return[_nsgIsPlaceholder(s.storecode)?'':s.storecode,s.name||'',s.province||'',s.grand_date||'',s.alert_buy_date||'',s.packgo_date||'',
   s.final_aw_date||'',s.install_date||'',s.grand_owner||'',s.sma||'',s.kissflow||'',
   pr.done+'/'+pr.total,acts.filter(a=>a.diff<0).length,(s.note||'').replace(/\n/g,' ')]
   .concat(textKeys.map(k=>((s.notes_items||{})[k]||'').replace(/\n/g,' ')));
