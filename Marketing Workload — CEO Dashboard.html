@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260813g -->
+<!-- v20260813h -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -603,7 +603,16 @@ button{font-family:'DBHeavent','Sarabun',sans-serif}
 .nsg-dday.pre{background:rgba(90,170,240,.15);color:#5aaaf0}
 .nsg-dday.soon{background:rgba(242,201,76,.16);color:#f2c94c}
 .nsg-dday.open{background:rgba(47,158,68,.16);color:#50d090}
-.nsg-bar{flex:1;height:6px;background:var(--surf4);border-radius:3px;overflow:hidden;min-width:80px;max-width:220px}
+/* Always-visible note per store. Sits in the header so it reads at a glance even
+   when the card is collapsed; only looks like a field once you go near it, so an
+   empty one does not clutter the row. */
+.nsg-hdnote{flex:1 1 180px;min-width:120px;background:transparent;border:1px solid transparent;border-radius:var(--rsm);
+ color:var(--t3);font:inherit;font-size:13px;padding:4px 8px;transition:all .12s;text-overflow:ellipsis}
+.nsg-hdnote::placeholder{color:var(--t4);opacity:.65}
+.nsg-hdnote:hover{border-color:var(--b1);background:var(--surf3)}
+.nsg-hdnote:focus{outline:none;border-color:var(--gold);background:var(--surf3);color:var(--t1)}
+.nsg-hdnote.has{color:var(--gold);font-weight:600;background:var(--gold3);border-color:rgba(232,197,71,.25)}
+.nsg-bar{flex:0 0 auto;height:6px;background:var(--surf4);border-radius:3px;overflow:hidden;width:120px}
 .nsg-bar span{display:block;height:100%;background:var(--gold);border-radius:3px;transition:width .3s}
 .nsg-pct{font-size:12px;color:var(--t3);font-family:monospace;min-width:56px;text-align:right}
 .nsg-body{padding:6px 16px 14px;border-top:1px solid var(--b0)}
@@ -1256,7 +1265,7 @@ if(window._pendingLoad) window._pendingLoad();
 
 <script>
 // ═════════════ DATA ═════════════
-const APP_VERSION='v20260813g'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
+const APP_VERSION='v20260813h'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
 const STAGES=['Job Brief','Design','Production','Review','Approval Stage','On Hold','Complete'];
 const DONE_STAGE=STAGES[STAGES.length-1];
 const SKEY=s=>({
@@ -2342,7 +2351,11 @@ function clearBoardSearch(){const el=document.getElementById('bf-search');if(el)
 // generic template.
 const NSG_PHASES=[
 {key:'p1',no:'①',title:'ระบบดำเนินการ (Core Team ตรวจสอบ / Verify)',when:'D-20',df:'alert_buy_date',items:[
- {k:'p1_sa',t:'Upload SA + ผังร้านค้าเช่าหน้าสาขา',d:'ตรวจสอบผู้เช่าที่ยืนยันแล้ว เทียบกับล็อคที่ยังว่าง เพื่อให้ Core Team ติดตามและปิด Gap การเช่า'},
+ // Split into two. p1_sa deliberately keeps its key so the ticks already made
+ // against the combined item stay put; the ผัง half starts fresh, since nobody
+ // can say from a single tick whether that half was actually done.
+ {k:'p1_sa',t:'Upload SA',d:'อัปโหลด SA ของสาขาเข้าระบบ'},
+ {k:'p1_plan',t:'ผังร้านค้าเช่าหน้าสาขา',d:'ตรวจสอบผู้เช่าที่ยืนยันแล้ว เทียบกับล็อคที่ยังว่าง เพื่อให้ Core Team ติดตามและปิด Gap การเช่า'},
  {k:'p1_pr',t:'ระบบแสดงผลข้อมูลลูกค้า + แผนประชาสัมพันธ์อัตโนมัติ',d:'ระบบประมวลผลข้อมูลลูกค้าในพื้นที่และวางแผน PR เบื้องต้นให้อัตโนมัติ ให้ Core Team ตรวจทานยืนยัน (Verify)'},
  {k:'p1_packgo',t:'Pack Go',d:'แพ็กเกจผลลัพธ์ส่งต่อทีมภาคสนาม ใช้วางแผนงาน และส่งฝ่ายจัดซื้อ/Supplier ดำเนินการติดตั้งป้าย'}]},
 {key:'p2',no:'②',title:'ระบบทำงาน (ข้อมูลหน้างาน → SCM / Commercial MKT)',when:'D-15',df:'packgo_date',items:[
@@ -2555,7 +2568,11 @@ body.innerHTML=dash+list.map(s=>{
   <span class="nsg-dday ${ddCls}">${ddTxt}</span>
   <div class="nsg-meta">Grand ${s.grand_date?_nsgFmt(s.grand_date):'—'}${s.grand_owner?' · ผู้รับผิดชอบ '+esc(s.grand_owner):''}${s.mkt?' · MKT '+esc(s.mkt):''}</div>
   ${badge}
-  <div style="flex:1"></div>
+  <input class="nsg-hdnote${s.note?' has':''}" type="text" placeholder="＋ โน้ตสำคัญของสาขานี้…"
+   value="${esc(s.note||'')}" title="พิมพ์สิ่งที่อยากให้เห็นชัดตรงนี้"
+   onclick="event.stopPropagation()"
+   onkeydown="event.stopPropagation();if(event.key==='Enter')this.blur()"
+   onchange="saveNSGField('${esc(s.storecode)}','note',this.value,this)">
   <div class="nsg-bar"><span style="width:${pr.pct}%"></span></div>
   <span class="nsg-pct">${pr.done}/${pr.total}</span>
  </div>
@@ -2580,8 +2597,7 @@ body.innerHTML=dash+list.map(s=>{
       ${dtxt?`<span class="nsg-due ${dcls}">${dtxt}</span>`:''}
      </div>`;}).join('')}
   </div>`).join('')}
-  <div style="margin-top:14px;display:flex;gap:8px;align-items:center">
-   <input class="nsg-kf" style="flex:1;max-width:none" type="text" placeholder="โน้ตสาขานี้…" value="${esc(s.note||'')}" onchange="saveNSGField('${esc(s.storecode)}','note',this.value)">
+  <div style="margin-top:14px;display:flex;gap:8px;align-items:center;justify-content:flex-end">
    <button class="btn-sec" style="font-size:12px" onclick="removeNSGStore('${esc(s.storecode)}')">ลบสาขานี้</button>
   </div>
  </div>`:''}
@@ -2677,13 +2693,20 @@ try{
  alert('บันทึกไม่สำเร็จ — ยังไม่มีการเปลี่ยนแปลง กรุณาลองใหม่');
 }
 }
-async function saveNSGField(code,field,val){
+async function saveNSGField(code,field,val,el){
 const s=nsgStores.find(x=>x.storecode===code);if(!s)return;
 const prev=s[field];s[field]=val;
+// Update the highlight in place rather than re-rendering the whole board, which
+// would tear the field out from under someone tabbing to the next one.
+if(el&&el.classList)el.classList[val?'add':'remove']('has');
 try{
  const{error}=await window._sb.from('mkt_nsg_stores').update({[field]:val}).eq('storecode',code);
  if(error)throw error;
-}catch(e){s[field]=prev;alert('บันทึกไม่สำเร็จ');renderNSG();}
+}catch(e){
+ s[field]=prev;
+ if(el){el.value=prev||'';el.classList[prev?'add':'remove']('has');}
+ alert('บันทึกไม่สำเร็จ — ข้อความเดิมถูกนำกลับมาแล้ว');
+}
 }
 async function removeNSGStore(code){
 const s=nsgStores.find(x=>x.storecode===code);if(!s)return;
