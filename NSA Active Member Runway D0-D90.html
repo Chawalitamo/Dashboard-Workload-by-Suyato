@@ -1,0 +1,1004 @@
+<!doctype html>
+<!-- v20260817a -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NSA · Active Member Runway D0–D90</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0C1F19;
+  --ink2:#122A22;
+  --panel:#16352B;
+  --panel2:#1D4033;
+  --line:#2A5546;
+  --paper:#EFEBDE;
+  --paper-dim:#A9B7AF;
+  --gold:#D6A83C;
+  --jade:#48C79B;
+  --steel:#7FA8D9;
+  --alert:#E2564E;
+  --amber:#E39B3C;
+  --r:3px;
+  --sans:'IBM Plex Sans Thai','Noto Sans Thai',Tahoma,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,'Courier New',monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--ink);
+  color:var(--paper);
+  font-family:var(--sans);
+  font-size:14px;
+  line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1180px;margin:0 auto;padding:22px 18px 70px}
+
+/* ---------- masthead ---------- */
+.mast{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:space-between;padding-bottom:14px;border-bottom:1px solid var(--line)}
+.eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold)}
+h1{font-size:23px;font-weight:600;margin:3px 0 0;letter-spacing:-.01em}
+.sub{color:var(--paper-dim);font-size:12.5px;margin-top:3px}
+.ctrls{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+select,input[type=number]{
+  background:var(--panel);color:var(--paper);border:1px solid var(--line);
+  border-radius:var(--r);padding:7px 9px;font-family:var(--sans);font-size:13px;
+}
+input[type=number]{width:88px;font-family:var(--mono)}
+label.mini{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--paper-dim);display:block;margin-bottom:3px}
+
+/* ---------- runway (signature) ---------- */
+.runway{margin:20px 0 6px;background:linear-gradient(180deg,var(--ink2),var(--ink));border:1px solid var(--line);border-radius:var(--r);padding:14px 16px 8px}
+.runway-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+.runway-head b{font-size:13px;font-weight:600}
+.runway-head span{font-family:var(--mono);font-size:11px;color:var(--paper-dim)}
+
+/* ---------- tabs ---------- */
+.tabs{display:flex;gap:2px;margin:18px 0 16px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.tab{
+  background:none;border:0;border-bottom:2px solid transparent;color:var(--paper-dim);
+  padding:9px 13px;font-family:var(--sans);font-size:13.5px;cursor:pointer;
+}
+.tab:hover{color:var(--paper)}
+.tab[aria-selected=true]{color:var(--gold);border-bottom-color:var(--gold)}
+.tab:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.pane{display:none}
+.pane.on{display:block}
+
+/* ---------- cards ---------- */
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:13px 14px;position:relative;overflow:hidden}
+.kpi:before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--gold)}
+.kpi.j:before{background:var(--jade)}
+.kpi.s:before{background:var(--steel)}
+.kpi.a:before{background:var(--alert)}
+.kpi h4{margin:0 0 6px;font-size:11px;font-weight:500;color:var(--paper-dim);letter-spacing:.02em}
+.kpi .big{font-family:var(--mono);font-size:27px;font-weight:600;line-height:1.05;font-variant-numeric:tabular-nums}
+.kpi .foot{font-size:11.5px;color:var(--paper-dim);margin-top:5px}
+.kpi .foot em{font-style:normal;font-family:var(--mono)}
+
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:15px 16px;margin-bottom:14px}
+.panel > h3{margin:0 0 2px;font-size:14.5px;font-weight:600}
+.panel > .note{margin:0 0 12px;font-size:12px;color:var(--paper-dim)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+svg{display:block;width:100%;height:auto}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:11.5px;color:var(--paper-dim);margin-top:9px}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:baseline}
+
+/* ---------- tables ---------- */
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th,td{padding:8px 9px;text-align:right;border-bottom:1px solid var(--line)}
+th:first-child,td:first-child{text-align:left}
+thead th{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--paper-dim);font-weight:500;border-bottom-color:var(--gold)}
+tbody tr:hover{background:var(--panel2)}
+td.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.tag{display:inline-block;font-family:var(--mono);font-size:10px;padding:2px 6px;border-radius:2px;letter-spacing:.06em}
+.tag.ok{background:rgba(72,199,155,.16);color:var(--jade)}
+.tag.warn{background:rgba(227,155,60,.16);color:var(--amber)}
+.tag.bad{background:rgba(226,86,78,.16);color:var(--alert)}
+.tag.wed{background:rgba(214,168,60,.15);color:var(--gold)}
+.tag.fri{background:rgba(127,168,217,.15);color:var(--steel)}
+.heat{font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+/* ---------- definitions ---------- */
+.def dt{font-weight:600;margin-top:13px;font-size:13.5px}
+.def dd{margin:3px 0 0;color:var(--paper-dim);font-size:12.5px}
+.def dd code,code.inline{font-family:var(--mono);font-size:11.5px;background:var(--ink2);padding:1px 5px;border-radius:2px;color:var(--paper)}
+pre{background:var(--ink2);border:1px solid var(--line);border-radius:var(--r);padding:12px;overflow-x:auto;font-family:var(--mono);font-size:11.5px;color:var(--paper);line-height:1.6}
+.mockbar{background:rgba(214,168,60,.1);border:1px solid rgba(214,168,60,.35);border-radius:var(--r);padding:9px 12px;font-size:12px;color:var(--gold);margin-bottom:16px}
+
+@media (max-width:860px){
+  .kpis{grid-template-columns:repeat(2,1fr)}
+  .grid2{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="mast">
+    <div>
+      <div class="eyebrow">NSA · New Store &amp; Marketing Activities</div>
+      <h1>Active Member Runway — D0 ถึง D90</h1>
+      <div class="sub">ติดตามการสร้างฐานลูกค้า 4,000 Active Member ต่อสาขาใหม่ · วัดผลที่ D30 / D60 / D90</div>
+    </div>
+    <div class="ctrls">
+      <div>
+        <label class="mini" for="selBranch">สาขา</label>
+        <select id="selBranch"></select>
+      </div>
+      <div>
+        <label class="mini" for="inpTarget">เป้า Active</label>
+        <input id="inpTarget" type="number" value="4000" step="100" min="500">
+      </div>
+    </div>
+  </div>
+
+  <div class="runway">
+    <div class="runway-head">
+      <b id="rwTitle">เส้นทางเปิดสาขา</b>
+      <span id="rwMeta"></span>
+    </div>
+    <div id="runwaySvg"></div>
+  </div>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" data-p="p1" aria-selected="true">ภาพรวมสาขา</button>
+    <button class="tab" role="tab" data-p="p2" aria-selected="false">ใหม่ vs เดิม</button>
+    <button class="tab" role="tab" data-p="p3" aria-selected="false">Cohort กลับมาซื้อซ้ำ</button>
+    <button class="tab" role="tab" data-p="p4" aria-selected="false">ผลกิจกรรม</button>
+    <button class="tab" role="tab" data-p="p5" aria-selected="false">พุธ vs ศุกร์</button>
+    <button class="tab" role="tab" data-p="p6" aria-selected="false">นิยาม &amp; Data Schema</button>
+  </div>
+
+  <div class="mockbar" id="mockbar">ตัวเลขบนหน้านี้เป็นข้อมูลจำลอง (simulated) เพื่อทดสอบโครงการวัดผล — ต่อ Google Sheet จริงตามสคีมาในแท็บสุดท้ายแล้วตัวเลขจะเปลี่ยนเป็นของจริงทั้งหน้า</div>
+
+  <!-- P1 -->
+  <section class="pane on" id="p1">
+    <div class="kpis" id="kpiRow"></div>
+    <div class="panel">
+      <h3>Active Member (rolling 30 วัน) เทียบเส้น Pace</h3>
+      <p class="note">นับสมาชิกที่มีบิลอย่างน้อย 1 ใบใน 30 วันล่าสุด — ไม่ใช่ยอดสมัครสะสม เส้นทองคือ pace ที่ต้องเดิน ซึ่งไม่ใช่เส้นตรง: D30 ต้องได้เกินเป้าไว้ราว 118% เพราะจะหลุดออกเองระหว่างทาง</p>
+      <div id="chTraj"></div>
+      <div class="legend">
+        <span><i style="background:var(--paper)"></i>Active รวม</span>
+        <span><i style="background:var(--jade)"></i>มาจากลูกค้าใหม่</span>
+        <span><i style="background:var(--steel)"></i>มาจากลูกค้าเดิม</span>
+        <span><i style="background:var(--gold)"></i>เส้น Pace ถึงเป้า</span>
+        <span><i style="background:var(--amber)"></i>วันจัดกิจกรรม</span>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="panel">
+        <h3>ผลตัดยอด 3 ด่าน</h3>
+        <p class="note">ตัวเลข ณ วันที่ D30 / D60 / D90 พอดี</p>
+        <table><thead><tr><th>ตัวชี้วัด</th><th>D30</th><th>D60</th><th>D90</th></tr></thead><tbody id="tbGates"></tbody></table>
+      </div>
+      <div class="panel">
+        <h3>ขนาดตะกร้า (บาท/บิล)</h3>
+        <p class="note">ถ้า Active ขึ้นแต่ตะกร้าลง แปลว่าปัญหาอยู่ที่ของในร้าน ไม่ใช่จำนวนคน</p>
+        <div id="chBasket"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- P2 -->
+  <section class="pane" id="p2">
+    <div class="panel">
+      <h3>ฐานลูกค้าช่วงเปิดสาขา (D0–D4) กลับมากี่ %</h3>
+      <p class="note">ตั้งต้นจากคนที่ซื้อในช่วงงานเปิด D0–D4 แล้วดูว่ากี่ % กลับมาอย่างน้อย 1 ครั้งหลังงานเปิดจบ — บิลใบที่สองภายในงานเปิดไม่นับเป็นการกลับมา</p>
+      <div id="chReturn"></div>
+      <div class="legend">
+        <span><i style="background:var(--jade)"></i>ลูกค้าใหม่ (สมัครที่สาขานี้)</span>
+        <span><i style="background:var(--steel)"></i>ลูกค้าเดิม (เป็นสมาชิกอยู่แล้ว)</span>
+      </div>
+    </div>
+    <div class="panel">
+      <h3>ความถี่การกลับมาซื้อซ้ำ (ครั้ง/คน ในหน้าต่างนั้น)</h3>
+      <p class="note">นับเฉพาะคนที่กลับมาจริงในหน้าต่างนั้น ไม่รวมคนที่หายไปแล้ว</p>
+      <div id="chFreq"></div>
+      <div class="legend">
+        <span><i style="background:var(--jade)"></i>ลูกค้าใหม่</span>
+        <span><i style="background:var(--steel)"></i>ลูกค้าเดิม</span>
+      </div>
+    </div>
+    <div class="panel">
+      <h3>ตารางสรุป</h3>
+      <table><thead><tr><th>กลุ่ม</th><th>ฐานตั้งต้น</th><th>กลับ D5–30</th><th>ครั้ง/คน</th><th>กลับ D31–60</th><th>ครั้ง/คน</th><th>กลับ D61–90</th><th>ครั้ง/คน</th></tr></thead><tbody id="tbNvE"></tbody></table>
+    </div>
+  </section>
+
+  <!-- P3 -->
+  <section class="pane" id="p3">
+    <div class="panel">
+      <h3>Cohort Retention — แยกตามช่วงที่มาซื้อครั้งแรก</h3>
+      <p class="note">แต่ละแถวคือกลุ่มที่รู้จักสาขาคนละจังหวะ ถ้าแถวล่างๆ ร่วงเร็วกว่าแถวบน แปลว่ากิจกรรมช่วงหลังดึงคนที่ไม่ตรงกลุ่มเข้ามา</p>
+      <table><thead><tr><th>กลุ่มที่มาครั้งแรก</th><th>จำนวน</th><th>สัดส่วนใหม่</th><th>กลับใน D5–30</th><th>กลับใน D31–60</th><th>กลับใน D61–90</th><th>ยังอยู่ ณ D90</th></tr></thead><tbody id="tbCohort"></tbody></table>
+    </div>
+    <div class="panel">
+      <h3>เส้นการอยู่รอดของฐานลูกค้าช่วงเปิด</h3>
+      <p class="note">% ของฐาน D0–D4 ที่ยังมีบิลอยู่ในหน้าต่าง 30 วันล่าสุด ณ แต่ละวัน</p>
+      <div id="chSurv"></div>
+      <div class="legend">
+        <span><i style="background:var(--jade)"></i>ลูกค้าใหม่</span>
+        <span><i style="background:var(--steel)"></i>ลูกค้าเดิม</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- P4 -->
+  <section class="pane" id="p4">
+    <div class="panel">
+      <h3>ผลของกิจกรรมแต่ละครั้ง</h3>
+      <p class="note">ไม่ได้เทียบกับสัปดาห์ก่อนดิบๆ แต่หักแนวโน้มขาลงตามธรรมชาติออกก่อน (ประมาณจาก 2 สัปดาห์ก่อนหน้า) ส่วนที่เกินจากนั้นคือผลของกิจกรรมจริง แล้วหารด้วยค่าใช้จ่ายได้ต้นทุนต่อหัว</p>
+      <table><thead><tr><th>กิจกรรม</th><th>วัน</th><th>กลุ่มเป้าหมาย</th><th>ก่อน 7 วัน</th><th>ควรได้ถ้าไม่ทำ</th><th>ได้จริง 7 วัน</th><th>ส่วนเพิ่ม</th><th>%</th><th>ค่าใช้จ่าย</th><th>บาท/หัว</th><th>สรุป</th></tr></thead><tbody id="tbAct"></tbody></table>
+    </div>
+    <div class="panel">
+      <h3>ต้นทุนต่อหัวที่ดึงกลับมาได้ (บาท)</h3>
+      <p class="note">แท่งยิ่งสั้นยิ่งคุ้ม — ใช้เลือกว่ารอบหน้าจะลงเงินกับเครื่องมือไหน</p>
+      <div id="chCost"></div>
+    </div>
+  </section>
+
+  <!-- P5 -->
+  <section class="pane" id="p5">
+    <div class="panel">
+      <h3>เปิดวันพุธ เทียบ เปิดวันศุกร์</h3>
+      <p class="note">สาขาเปิดคนละวันในสัปดาห์ ทำให้ D30 ไปตกคนละวันของเดือน ตารางนี้จึงเทียบด้วยแกน D+n ไม่ใช่วันที่ปฏิทิน</p>
+      <table><thead><tr><th>สาขา</th><th>รอบ</th><th>วันเปิด</th><th>Active D30</th><th>D60</th><th>D90</th><th>% ถึงเป้า</th><th>ฐาน GO</th><th>กลับ D5–30</th><th>ตะกร้า D90</th></tr></thead><tbody id="tbWF"></tbody></table>
+    </div>
+    <div class="grid2">
+      <div class="panel">
+        <h3>เส้น Active ทุกสาขาซ้อนกัน</h3>
+        <p class="note">แกนนอนคือ D+n จาก GO ของแต่ละสาขาเอง</p>
+        <div id="chAll"></div>
+        <div class="legend">
+          <span><i style="background:var(--gold)"></i>รอบพุธ</span>
+          <span><i style="background:var(--steel)"></i>รอบศุกร์</span>
+          <span><i style="background:var(--paper)"></i>เป้า</span>
+        </div>
+      </div>
+      <div class="panel">
+        <h3>ค่าเฉลี่ยรายรอบ</h3>
+        <p class="note">ถ้าสองรอบต่างกันเกิน 10% อย่างต่อเนื่อง แปลว่าวันเปิดเป็นตัวแปรจริง ไม่ใช่ความบังเอิญของทีม</p>
+        <table><thead><tr><th>ตัวชี้วัด</th><th>รอบพุธ</th><th>รอบศุกร์</th><th>ต่าง</th></tr></thead><tbody id="tbWFsum"></tbody></table>
+      </div>
+    </div>
+  </section>
+
+  <!-- P6 -->
+  <section class="pane" id="p6">
+    <div class="panel">
+      <h3>นิยามที่ต้องล็อกก่อนเริ่มเก็บข้อมูล</h3>
+      <p class="note">ทุกสาขาต้องใช้นิยามเดียวกัน ไม่งั้นตัวเลขข้ามสาขาเทียบกันไม่ได้</p>
+      <dl class="def">
+        <dt>Active Member</dt>
+        <dd>สมาชิกที่มีบิลอย่างน้อย 1 ใบ ที่สาขานั้น ภายใน 30 วันล่าสุด (rolling) — ไม่ใช่ยอดสมัครสะสม เป้า 4,000 คนคือค่านี้ ณ D90</dd>
+
+        <dt>ลูกค้าใหม่ / ลูกค้าเดิม</dt>
+        <dd>ตัดสินสถานะ ณ วัน GO แล้วล็อกตลอด 90 วัน — <code>ลูกค้าเดิม</code> = มีรหัสสมาชิก CJ ก่อนวัน GO, <code>ลูกค้าใหม่</code> = สมัครตั้งแต่วัน GO เป็นต้นไป คนหนึ่งคนเปลี่ยนกลุ่มระหว่างทางไม่ได้</dd>
+
+        <dt>D+n</dt>
+        <dd>นับจากวัน GO ของสาขานั้นเอง D0 = วันแรกของงานเปิด เพราะเปิดพุธและศุกร์ D30 จะตกคนละวันปฏิทิน ทุกกราฟจึงใช้แกน D+n</dd>
+
+        <dt>หน้าต่างวัดผล</dt>
+        <dd>W1 = D5–D30 (สำหรับฐาน GO), W2 = D31–D60, W3 = D61–D90 (เป็นช่วง ไม่ใช่จุด) ส่วน "ผลตัดยอด" คือค่า ณ วัน D30/D60/D90 พอดี รายงานทั้งสองแบบคู่กันเสมอ</dd>
+
+        <dt>กลับมาซื้อซ้ำ (Return)</dt>
+        <dd>% ของฐานตั้งต้นที่มีบิลอย่างน้อย 1 ใบในหน้าต่างนั้น <b>หลังบิลใบแรกและหลังงานเปิดจบ (D5)</b> ฐานตั้งต้นหลักคือคนที่ซื้อช่วง D0–D4 หน้าต่างแรกจึงเป็น D5–D30</dd>
+
+        <dt>ความถี่ (Repeat frequency)</dt>
+        <dd>จำนวนวันที่มีบิลเฉลี่ยต่อคน เฉพาะในกลุ่มที่กลับมาจริงในหน้าต่างนั้น รายงานคู่กับ % return เสมอ เพราะ % สูงแต่ความถี่ต่ำ กับ % ต่ำแต่ความถี่สูง ต้องแก้คนละทาง</dd>
+
+        <dt>เส้น Pace</dt>
+        <dd>ไม่ใช่เส้นตรงจาก 0 ถึง 4,000 ฐานลูกค้าใหม่จะพีคราว D30 แล้วหลุดออกตามธรรมชาติ เกณฑ์ที่ใช้คือ D30 ต้องได้ <code>118%</code> ของเป้า D60 ต้องเหลือ <code>108%</code> จึงจะเหลือ <code>100%</code> ที่ D90 — ถ้า D30 ได้แค่พอดีเป้า แปลว่าพลาดแน่แล้ว ต้องแก้ตั้งแต่ตอนนั้น ไม่ใช่รอ D90</dd>
+
+        <dt>ผลกิจกรรม</dt>
+        <dd>Active 7 วันหลัง ลบ <b>ค่าที่ควรจะเป็นถ้าไม่ทำอะไรเลย</b> (= Active 7 วันก่อน คูณอัตราการลดของ 2 สัปดาห์ก่อนหน้า) ที่ต้องหักแนวโน้มออกเพราะฐานลูกค้าใหม่ลดเองอยู่แล้ว ถ้าเทียบดิบๆ กิจกรรมทุกตัวจะดูเหมือนไม่ได้ผล ต้องบันทึกค่าใช้จ่ายทุกกิจกรรมตั้งแต่วันจัด ไม่ใช่ย้อนหาทีหลัง</dd>
+      </dl>
+    </div>
+
+    <div class="panel">
+      <h3>โครงชีต 4 แผ่นที่ต้องมี</h3>
+      <p class="note">ทั้งหน้านี้คำนวณจาก 4 แผ่นนี้ได้ทั้งหมด — ที่เหลือเป็นค่าที่ derive เอา ไม่ต้องให้คนกรอกซ้ำ</p>
+      <pre id="schema"></pre>
+    </div>
+
+    <div class="panel">
+      <h3>สิ่งที่ต้องตัดสินใจก่อน</h3>
+      <table><thead><tr><th>ประเด็น</th><th>ทางเลือก</th><th>ผลถ้าเลือกผิด</th></tr></thead>
+      <tbody>
+        <tr><td>เป้า 4,000 คือ rolling 30 วัน หรือ สะสม 90 วัน</td><td class="num">rolling 30</td><td>ถ้าใช้สะสม จะถึงเป้าโดยที่ลูกค้าหายไปหมดแล้ว</td></tr>
+        <tr><td>สาขาที่รัศมีทับกับสาขาเดิม</td><td class="num">แยกนับ transfer</td><td>ยอดขึ้นเพราะย้ายลูกค้ามา ไม่ใช่ได้ลูกค้าเพิ่ม</td></tr>
+        <tr><td>บิลที่ไม่ผูกรหัสสมาชิก</td><td class="num">รายงานแยก</td><td>ถ้า capture rate ต่ำ ตัวเลขทั้งหน้าจะต่ำกว่าจริงโดยไม่รู้ตัว</td></tr>
+        <tr><td>ที่อยู่สมาชิกที่เป็นค่า default</td><td class="num">ตัดออกก่อนใช้</td><td>ยิงสื่อผิดพื้นที่ ต้นทุนต่อหัวพุ่งโดยไม่มีผล</td></tr>
+      </tbody></table>
+    </div>
+  </section>
+
+</div>
+
+<script>
+/* ============================================================
+   NSA Active Member Runway — prototype
+   เขียนแบบไม่ใช้ template literal เพื่อให้ยกไปวางใน GAS HtmlService ได้ตรงๆ
+   ============================================================ */
+
+var DAYS = 91;                 // D0..D90
+var W = [[1,30],[31,60],[61,90]];
+var WNAME = ['D5–30','D31–60','D61–90'];
+/* การ "กลับมา" ต้องเกิดหลังบิลใบแรก และหลังงานเปิดจบ (D5) เท่านั้น
+   ไม่งั้นคนที่เดินงานเปิดสองวันจะถูกนับเป็นลูกค้าประจำทันที */
+function retStart(first, w){
+  return Math.max(W[w][0], first + 1, (first <= 4 ? 5 : 0));
+}
+
+var BRANCHES = [
+  {code:'CJX00128', name:'ลาดพร้าว 93',   go:'2026-05-06', dow:'พุธ',  seed:128, newN:2665, existN:3055, goSign:640, decay:0.86, basket0:174, basket1:128},
+  {code:'CJX00141', name:'บางบัวทอง 12',  go:'2026-05-15', dow:'ศุกร์', seed:141, newN:3600, existN:3225, goSign:705, decay:0.94, basket0:168, basket1:149},
+  {code:'CJX00147', name:'หนองจอก คลอง 9',go:'2026-05-20', dow:'พุธ',  seed:147, newN:3340, existN:3040, goSign:560, decay:0.80, basket0:181, basket1:126},
+  {code:'CJX00153', name:'ศรีราชา ทุ่งสุขลา',go:'2026-05-29',dow:'ศุกร์',seed:153, newN:3694, existN:3497, goSign:760, decay:0.97, basket0:172, basket1:158},
+  {code:'CJX00160', name:'ปากช่อง กม.7',  go:'2026-06-03', dow:'พุธ',  seed:160, newN:3784, existN:2858, goSign:585, decay:0.83, basket0:166, basket1:131},
+  {code:'CJX00166', name:'ลำลูกกา คลอง 7',go:'2026-06-12', dow:'ศุกร์', seed:166, newN:3352, existN:2969, goSign:690, decay:0.90, basket0:175, basket1:145}
+];
+
+var ACTS = [
+  {d:0,  len:5, name:'Grand Opening 5 วัน',      to:'all',      boost:5.2, cost:265000},
+  {d:14, len:3, name:'แฟร์ย้ำ ครั้งที่ 1',        to:'all',      boost:1.9, cost:38000},
+  {d:31, len:5, name:'Win-back SMS/LINE รอบ 1',  to:'lapsed',   boost:3.4, cost:9500},
+  {d:45, len:3, name:'แฟร์ย้ำ ครั้งที่ 2',        to:'all',      boost:1.5, cost:38000},
+  {d:61, len:5, name:'Win-back SMS/LINE รอบ 2',  to:'lapsed',   boost:3.0, cost:9500},
+  {d:75, len:4, name:'PR ชุมชน/โรงเรียน',        to:'new',      boost:1.6, cost:22000}
+];
+
+var TARGET = 4000;
+var CACHE = {};
+
+/* เส้น Pace ไม่ใช่เส้นตรง — ฐานลูกค้าใหม่จะพีคราว D30 แล้วหลุดออกเรื่อยๆ
+   ถ้าไม่สร้างเผื่อไว้ตั้งแต่ต้น จะไม่มีทางเหลือถึงเป้าที่ D90
+   D30 ต้องได้ 118% ของเป้า, D60 ต้องเหลือ 108%, D90 เหลือ 100% */
+function paceFactor(d){
+  if (d <= 30) return 1.18 * Math.pow(d/30, 0.55);
+  if (d <= 60) return 1.18 + (1.08 - 1.18) * ((d-30)/30);
+  return 1.08 + (1.00 - 1.08) * ((d-60)/30);
+}
+
+/* ---------- utils ---------- */
+function rngFrom(seed){
+  var t = seed >>> 0;
+  return function(){
+    t += 0x6D2B79F5;
+    var r = Math.imul(t ^ (t >>> 15), 1 | t);
+    r ^= r + Math.imul(r ^ (r >>> 7), 61 | r);
+    return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function fmt(n){ return Math.round(n).toLocaleString('en-US'); }
+function pct(n){ return (n*100).toFixed(1) + '%'; }
+function dateOf(goStr, d){
+  var p = goStr.split('-');
+  var dt = new Date(+p[0], +p[1]-1, +p[2]);
+  dt.setDate(dt.getDate() + d);
+  return dt;
+}
+function thDate(dt){
+  var m = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  return dt.getDate() + ' ' + m[dt.getMonth()] + ' ' + (dt.getFullYear()+543).toString().slice(2);
+}
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+/* ---------- simulation ---------- */
+function simulate(b){
+  if (CACHE[b.code]) return CACHE[b.code];
+  var rnd = rngFrom(b.seed * 7919);
+  var mem = [];
+  var i, d;
+
+  for (i=0;i<b.existN;i++){
+    var fa = Math.floor(Math.pow(rnd(),1.9) * 40);
+    mem.push({t:1, first:fa, lam:0.45 + Math.pow(rnd(),1.7)*5.2, hl:(14 + Math.pow(rnd(),1.3)*104) * b.decay});
+  }
+  for (i=0;i<b.newN;i++){
+    var fb = (i < b.goSign) ? Math.floor(rnd()*5) : 5 + Math.floor(Math.pow(rnd(),1.4)*82);
+    mem.push({t:0, first:fb, lam:0.10 + Math.pow(rnd(),2.5)*4.8, hl:(5 + Math.pow(rnd(),1.7)*76) * b.decay});
+  }
+
+  // daily multipliers: weekend + payday + activities
+  var mult = new Array(DAYS), amul = new Array(DAYS);
+  for (d=0;d<DAYS;d++){
+    var dt = dateOf(b.go, d);
+    var wd = dt.getDay(), dom = dt.getDate();
+    var m = 1;
+    if (wd===0 || wd===6) m *= 1.26;
+    if (wd===5) m *= 1.10;
+    if (dom<=3 || dom>=26) m *= 1.30;
+    mult[d] = m; amul[d] = {all:1, lapsed:1, nw:1};
+  }
+  for (i=0;i<ACTS.length;i++){
+    var a = ACTS[i];
+    for (var k=0;k<a.len;k++){
+      var dd = a.d + k;
+      if (dd>=DAYS) break;
+      var fade = 1 - (k / (a.len + 2)) * 0.35;
+      var val = 1 + (a.boost - 1) * fade;
+      if (a.to==='all'){ amul[dd].all *= val; }
+      else if (a.to==='lapsed'){ amul[dd].lapsed *= val; }
+      else { amul[dd].nw *= val; }
+      // afterglow 3 days
+      for (var g=1; g<=3; g++){
+        var d2 = dd + g;
+        if (d2 < DAYS){
+          var gv = 1 + (val-1) * (0.4 / g);
+          if (a.to==='all'){ amul[d2].all *= gv; }
+          else if (a.to==='lapsed'){ amul[d2].lapsed *= gv; }
+          else { amul[d2].nw *= gv; }
+        }
+      }
+    }
+  }
+
+  // visit matrix
+  var visits = [];
+  for (i=0;i<mem.length;i++){
+    var mm = mem[i], v = [];
+    if (mm.first < DAYS) v.push(mm.first);
+    var lastSeen = mm.first;
+    for (d=mm.first+1; d<DAYS; d++){
+      var base = (mm.lam/30) * Math.pow(0.5, (d-mm.first)/mm.hl) * mult[d];
+      var mu = amul[d].all;
+      if (d - lastSeen >= 14) mu *= amul[d].lapsed;
+      if (mm.t===0) mu *= amul[d].nw;
+      if (rnd() < Math.min(0.92, base*mu)) { v.push(d); lastSeen = d; }
+    }
+    visits.push(v);
+  }
+
+  // daily aggregates
+  var dayNew = new Array(DAYS), dayEx = new Array(DAYS), daySales = new Array(DAYS), dayBills = new Array(DAYS);
+  for (d=0;d<DAYS;d++){ dayNew[d]=0; dayEx[d]=0; daySales[d]=0; dayBills[d]=0; }
+  for (i=0;i<mem.length;i++){
+    var vv = visits[i];
+    for (var j=0;j<vv.length;j++){
+      var dd2 = vv[j];
+      if (mem[i].t===0) dayNew[dd2]++; else dayEx[dd2]++;
+      var bmean = b.basket0 + (b.basket1 - b.basket0) * Math.min(1, dd2/60);
+      var amt = bmean * (0.55 + rnd()*0.95);
+      daySales[dd2] += amt; dayBills[dd2]++;
+    }
+  }
+
+  // rolling 30-day active
+  var actAll = new Array(DAYS), actNew = new Array(DAYS), actEx = new Array(DAYS);
+  var lastIdx = new Array(mem.length);
+  for (i=0;i<mem.length;i++) lastIdx[i] = -1;
+  for (d=0;d<DAYS;d++){
+    var lo = Math.max(0, d-29), cA=0, cN=0, cE=0;
+    for (i=0;i<mem.length;i++){
+      var vs = visits[i], hit = false;
+      for (var q=vs.length-1;q>=0;q--){
+        if (vs[q] > d) continue;
+        if (vs[q] < lo) break;
+        hit = true; break;
+      }
+      if (hit){ cA++; if (mem[i].t===0) cN++; else cE++; }
+    }
+    actAll[d]=cA; actNew[d]=cN; actEx[d]=cE;
+  }
+
+  var out = {b:b, mem:mem, visits:visits, actAll:actAll, actNew:actNew, actEx:actEx,
+             dayNew:dayNew, dayEx:dayEx, daySales:daySales, dayBills:dayBills};
+  CACHE[b.code] = out;
+  return out;
+}
+
+/* ---------- derived metrics ---------- */
+function inWindow(v, a, b2){ for (var i=0;i<v.length;i++) if (v[i]>=a && v[i]<=b2) return true; return false; }
+function countWindow(v, a, b2){ var c=0; for (var i=0;i<v.length;i++) if (v[i]>=a && v[i]<=b2) c++; return c; }
+
+function goCohortStats(S){
+  var res = {0:{base:0,ret:[0,0,0],cnt:[0,0,0]}, 1:{base:0,ret:[0,0,0],cnt:[0,0,0]}};
+  for (var i=0;i<S.mem.length;i++){
+    var f = S.mem[i].first;
+    if (f > 4) continue;
+    var t = S.mem[i].t, v = S.visits[i];
+    res[t].base++;
+    for (var w=0;w<3;w++){
+      var st0 = retStart(f, w);
+      if (st0 > W[w][1]) continue;
+      var n = countWindow(v, st0, W[w][1]);
+      if (n>0){ res[t].ret[w]++; res[t].cnt[w]+=n; }
+    }
+  }
+  return res;
+}
+
+function cohortRows(S){
+  var buckets = [[0,4,'ช่วงงานเปิด D0–D4'],[5,14,'D5–D14'],[15,30,'D15–D30'],[31,60,'D31–D60'],[61,90,'D61–D90']];
+  var rows = [];
+  for (var bi=0;bi<buckets.length;bi++){
+    var lo=buckets[bi][0], hi=buckets[bi][1];
+    var n=0, nw=0, r=[0,0,0], alive=0, elig=[0,0,0];
+    for (var i=0;i<S.mem.length;i++){
+      var f=S.mem[i].first;
+      if (f<lo || f>hi) continue;
+      n++; if (S.mem[i].t===0) nw++;
+      var v=S.visits[i];
+      for (var w=0;w<3;w++){
+        var st = retStart(f, w);
+        if (st > W[w][1]) continue;
+        elig[w]++;
+        if (inWindow(v, st, W[w][1])) r[w]++;
+      }
+      if (inWindow(v, 61, 90)) alive++;
+    }
+    rows.push({label:buckets[bi][2], n:n, nw:nw, r:r, elig:elig, alive:alive});
+  }
+  return rows;
+}
+
+function survivalCurve(S){
+  var sn=[], se=[], baseN=0, baseE=0, idx=[];
+  for (var i=0;i<S.mem.length;i++) if (S.mem[i].first<=4){ idx.push(i); if (S.mem[i].t===0) baseN++; else baseE++; }
+  for (var d=0;d<DAYS;d++){
+    var lo=Math.max(0,d-29), cn=0, ce=0;
+    for (var j=0;j<idx.length;j++){
+      var i2=idx[j];
+      if (inWindow(S.visits[i2], lo, d)){ if (S.mem[i2].t===0) cn++; else ce++; }
+    }
+    sn.push(baseN? cn/baseN : 0); se.push(baseE? ce/baseE : 0);
+  }
+  return {n:sn, e:se, baseN:baseN, baseE:baseE};
+}
+
+/* เทียบกับ "เส้นที่ควรจะเป็นถ้าไม่ทำอะไรเลย" ไม่ใช่สัปดาห์ก่อนดิบๆ
+   เพราะฐานลูกค้าใหม่มีแนวโน้มลดตามธรรมชาติอยู่แล้ว ถ้าไม่หักแนวโน้มออก
+   กิจกรรมทุกตัวจะดูเหมือนไม่ได้ผลทั้งที่จริงช่วยชะลอการหลุด */
+function activityImpact(S){
+  var out=[];
+  for (var i=0;i<ACTS.length;i++){
+    var a=ACTS[i];
+    if (a.d===0) { out.push({a:a, pre:null, exp:null, post:uniqActive(S,0,6), inc:null, cost:a.cost, cph:null}); continue; }
+    var w2 = uniqActive(S, a.d-14, a.d-8);
+    var w1 = uniqActive(S, a.d-7, a.d-1);
+    var trend = w2 ? Math.min(1.08, Math.max(0.88, w1/w2)) : 1;
+    var expd = w1 * trend;
+    var post = uniqActive(S, a.d, a.d+6);
+    var inc = post - expd;
+    out.push({a:a, pre:w1, exp:expd, post:post, inc:inc, cost:a.cost, cph: inc>0 ? a.cost/inc : null});
+  }
+  return out;
+}
+function uniqActive(S, lo, hi){
+  var c=0;
+  for (var i=0;i<S.mem.length;i++) if (inWindow(S.visits[i], Math.max(0,lo), Math.min(DAYS-1,hi))) c++;
+  return c;
+}
+
+/* ---------- svg helpers ---------- */
+function svgOpen(w,h){ return '<svg viewBox="0 0 '+w+' '+h+'" xmlns="http://www.w3.org/2000/svg" role="img">'; }
+function txt(x,y,s,cls,anchor,size,fill){
+  return '<text x="'+x+'" y="'+y+'" text-anchor="'+(anchor||'start')+'" '+
+    'font-family="IBM Plex Mono, monospace" font-size="'+(size||10)+'" fill="'+(fill||'#A9B7AF')+'">'+esc(s)+'</text>';
+}
+function tlabel(x,y,s,anchor,size,fill,weight){
+  return '<text x="'+x+'" y="'+y+'" text-anchor="'+(anchor||'start')+'" '+
+    'font-family="IBM Plex Sans Thai, Tahoma, sans-serif" font-weight="'+(weight||400)+'" font-size="'+(size||11)+'" fill="'+(fill||'#EFEBDE')+'">'+esc(s)+'</text>';
+}
+function path(pts, color, wdt, dash, op){
+  var d='', i;
+  for (i=0;i<pts.length;i++) d += (i?'L':'M') + pts[i][0].toFixed(1) + ' ' + pts[i][1].toFixed(1);
+  return '<path d="'+d+'" fill="none" stroke="'+color+'" stroke-width="'+(wdt||1.6)+'" '+
+    (dash?'stroke-dasharray="'+dash+'" ':'') + (op?'opacity="'+op+'" ':'') + 'stroke-linejoin="round"/>';
+}
+function rect(x,y,w,h,fill,op,rx){
+  return '<rect x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+Math.max(0,w).toFixed(1)+'" height="'+Math.max(0,h).toFixed(1)+
+    '" fill="'+fill+'"'+(op?' opacity="'+op+'"':'')+(rx?' rx="'+rx+'"':'')+'/>';
+}
+
+/* ---------- runway (signature strip) ---------- */
+function drawRunway(S){
+  var b=S.b, Wd=1000, H=104, L=44, R=26, T=34;
+  var x = function(d){ return L + (d/90)*(Wd-L-R); };
+  var s = svgOpen(Wd,H);
+  s += rect(L, T+22, Wd-L-R, 4, '#2A5546', 1, 2);
+  // gates
+  var gates=[30,60,90];
+  for (var i=0;i<gates.length;i++){
+    var gx=x(gates[i]);
+    s += '<line x1="'+gx.toFixed(1)+'" y1="'+(T+6)+'" x2="'+gx.toFixed(1)+'" y2="'+(T+40)+'" stroke="#D6A83C" stroke-width="1.4"/>';
+    s += txt(gx, T+56, 'D'+gates[i], null, 'middle', 11, '#D6A83C');
+    s += tlabel(gx, T+70, thDate(dateOf(b.go, gates[i])), 'middle', 10, '#A9B7AF');
+  }
+  // GO block
+  s += rect(x(0), T+16, x(5)-x(0), 16, '#D6A83C', 0.85, 2);
+  s += txt(x(0), T+8, 'GO', 'start', 11, '#D6A83C');
+  s += tlabel(x(0), T-8, 'เปิดวัน' + b.dow + ' · ' + thDate(dateOf(b.go,0)), 'start', 11, '#EFEBDE', 600);
+  // activity flags — stagger label rows so close-together activities don't overlap
+  for (i=1;i<ACTS.length;i++){
+    var a=ACTS[i], ax=x(a.d);
+    s += '<line x1="'+ax.toFixed(1)+'" y1="'+(T+24)+'" x2="'+ax.toFixed(1)+'" y2="'+(T+2)+'" stroke="#E39B3C" stroke-width="1.2"/>';
+    s += '<circle cx="'+ax.toFixed(1)+'" cy="'+(T+2)+'" r="3" fill="#E39B3C"/>';
+    var anch = a.d > 72 ? 'end' : 'start';
+    var row = (i % 2 === 0) ? 1 : 0;
+    s += tlabel(ax + (anch==='end'?-6:6), T-4-row*13, a.name, anch, 10, '#A9B7AF');
+  }
+  s += tlabel(L, H-6, 'ส่งมอบให้ OPER', 'start', 10, '#A9B7AF');
+  s += tlabel(Wd-R, H-6, 'D90 · ปิดรอบวัดผล', 'end', 10, '#A9B7AF');
+  s += '</svg>';
+  return s;
+}
+
+/* ---------- trajectory chart ---------- */
+function drawTrajectory(S){
+  var Wd=1000,H=340,L=52,R=18,T=16,B=34;
+  var maxY = Math.max(TARGET*1.12, Math.max.apply(null,S.actAll)*1.1);
+  var x=function(d){ return L+(d/90)*(Wd-L-R); };
+  var y=function(v){ return H-B-(v/maxY)*(H-T-B); };
+  var s=svgOpen(Wd,H), i;
+  // grid
+  for (i=0;i<=5;i++){
+    var gv=maxY*i/5, gy=y(gv);
+    s += '<line x1="'+L+'" y1="'+gy.toFixed(1)+'" x2="'+(Wd-R)+'" y2="'+gy.toFixed(1)+'" stroke="#2A5546" stroke-width="0.7"/>';
+    s += txt(L-8, gy+3, fmt(gv), null, 'end', 10);
+  }
+  // activity bands
+  for (i=0;i<ACTS.length;i++){
+    var a=ACTS[i];
+    s += rect(x(a.d), T, x(Math.min(90,a.d+a.len))-x(a.d), H-T-B, '#E39B3C', 0.10);
+  }
+  // gates
+  var gts=[30,60,90];
+  for (i=0;i<gts.length;i++){
+    s += '<line x1="'+x(gts[i]).toFixed(1)+'" y1="'+T+'" x2="'+x(gts[i]).toFixed(1)+'" y2="'+(H-B)+'" stroke="#D6A83C" stroke-width="0.9" stroke-dasharray="2 4"/>';
+  }
+  // target line + pace
+  s += path([[L,y(TARGET)],[Wd-R,y(TARGET)]], '#D6A83C', 1.2, '6 4');
+  s += txt(Wd-R, y(TARGET)-6, 'เป้า ' + fmt(TARGET), null, 'end', 10, '#D6A83C');
+  var pace=[]; for (i=0;i<=90;i++) pace.push([x(i), y(TARGET*paceFactor(i))]);
+  s += path(pace, '#D6A83C', 1.3, '3 5', 0.8);
+  s += txt(x(30)+6, y(TARGET*paceFactor(30))-7, 'pace', null, 'start', 10, '#D6A83C');
+  // series
+  var pAll=[],pN=[],pE=[];
+  for (i=0;i<DAYS;i++){ pAll.push([x(i),y(S.actAll[i])]); pN.push([x(i),y(S.actNew[i])]); pE.push([x(i),y(S.actEx[i])]); }
+  s += path(pE, '#7FA8D9', 1.5);
+  s += path(pN, '#48C79B', 1.5);
+  s += path(pAll, '#EFEBDE', 2.2);
+  // gate dots
+  for (i=0;i<gts.length;i++){
+    var g=gts[i];
+    s += '<circle cx="'+x(g).toFixed(1)+'" cy="'+y(S.actAll[g]).toFixed(1)+'" r="4" fill="#0C1F19" stroke="#EFEBDE" stroke-width="1.6"/>';
+    s += txt(x(g), y(S.actAll[g])-11, fmt(S.actAll[g]), null, 'middle', 11, '#EFEBDE');
+  }
+  // x axis
+  for (i=0;i<=90;i+=15) s += txt(x(i), H-12, 'D'+i, null, 'middle', 10);
+  s += '</svg>';
+  return s;
+}
+
+/* ---------- basket chart ---------- */
+function drawBasket(S){
+  var Wd=520,H=230,L=48,R=14,T=14,B=30;
+  var vals=[];
+  for (var d=0;d<DAYS;d++) vals.push(S.dayBills[d] ? S.daySales[d]/S.dayBills[d] : null);
+  var sm=[];
+  for (d=0;d<DAYS;d++){
+    var lo=Math.max(0,d-6), sum=0, n=0;
+    for (var k=lo;k<=d;k++) if (vals[k]!==null){ sum+=vals[k]; n++; }
+    sm.push(n?sum/n:0);
+  }
+  var maxY=Math.max.apply(null,sm)*1.15, minY=0;
+  var x=function(d){ return L+(d/90)*(Wd-L-R); };
+  var y=function(v){ return H-B-((v-minY)/(maxY-minY))*(H-T-B); };
+  var s=svgOpen(Wd,H), i;
+  for (i=0;i<=4;i++){
+    var gv=maxY*i/4, gy=y(gv);
+    s += '<line x1="'+L+'" y1="'+gy.toFixed(1)+'" x2="'+(Wd-R)+'" y2="'+gy.toFixed(1)+'" stroke="#2A5546" stroke-width="0.7"/>';
+    s += txt(L-7, gy+3, Math.round(gv), null, 'end', 10);
+  }
+  var pts=[]; for (i=0;i<DAYS;i++) pts.push([x(i),y(sm[i])]);
+  s += path(pts, '#E39B3C', 1.9);
+  var gts=[30,60,90];
+  for (i=0;i<gts.length;i++){
+    s += '<line x1="'+x(gts[i]).toFixed(1)+'" y1="'+T+'" x2="'+x(gts[i]).toFixed(1)+'" y2="'+(H-B)+'" stroke="#D6A83C" stroke-width="0.8" stroke-dasharray="2 4"/>';
+    s += txt(x(gts[i]), y(sm[gts[i]])-9, Math.round(sm[gts[i]]), null, 'middle', 10, '#EFEBDE');
+  }
+  for (i=0;i<=90;i+=30) s += txt(x(i), H-10, 'D'+i, null, 'middle', 10);
+  s += '</svg>';
+  return s;
+}
+
+/* ---------- grouped bars ---------- */
+function drawGrouped(series, labels, maxOverride, suffix){
+  var Wd=1000,H=210,L=52,R=18,T=14,B=40;
+  var groups=labels.length;
+  var gw=(Wd-L-R)/groups;
+  var maxY = maxOverride || Math.max(0.0001, Math.max.apply(null, series[0].v.concat(series[1].v)))*1.25;
+  var y=function(v){ return H-B-(v/maxY)*(H-T-B); };
+  var s=svgOpen(Wd,H), i, g;
+  for (i=0;i<=4;i++){
+    var gv=maxY*i/4, gy=y(gv);
+    s += '<line x1="'+L+'" y1="'+gy.toFixed(1)+'" x2="'+(Wd-R)+'" y2="'+gy.toFixed(1)+'" stroke="#2A5546" stroke-width="0.7"/>';
+    s += txt(L-8, gy+3, suffix==='%' ? Math.round(gv*100)+'%' : gv.toFixed(1), null, 'end', 10);
+  }
+  for (g=0;g<groups;g++){
+    var cx=L+gw*g+gw/2, bw=Math.min(64, gw*0.24);
+    for (var si=0;si<2;si++){
+      var v=series[si].v[g];
+      var bx=cx + (si===0 ? -bw-5 : 5);
+      s += rect(bx, y(v), bw, (H-B)-y(v), series[si].c, 0.92, 2);
+      s += txt(bx+bw/2, y(v)-6, suffix==='%' ? (v*100).toFixed(1)+'%' : v.toFixed(2), null, 'middle', 11, series[si].c);
+    }
+    s += tlabel(cx, H-14, labels[g], 'middle', 12, '#EFEBDE', 500);
+  }
+  s += '</svg>';
+  return s;
+}
+
+/* ---------- survival ---------- */
+function drawSurvival(S){
+  var sv=survivalCurve(S);
+  var Wd=1000,H=250,L=52,R=18,T=14,B=32;
+  var x=function(d){ return L+(d/90)*(Wd-L-R); };
+  var y=function(v){ return H-B-v*(H-T-B); };
+  var s=svgOpen(Wd,H), i;
+  for (i=0;i<=5;i++){
+    var gy=y(i/5);
+    s += '<line x1="'+L+'" y1="'+gy.toFixed(1)+'" x2="'+(Wd-R)+'" y2="'+gy.toFixed(1)+'" stroke="#2A5546" stroke-width="0.7"/>';
+    s += txt(L-8, gy+3, (i*20)+'%', null, 'end', 10);
+  }
+  var pn=[],pe=[];
+  for (i=0;i<DAYS;i++){ pn.push([x(i),y(sv.n[i])]); pe.push([x(i),y(sv.e[i])]); }
+  s += path(pe,'#7FA8D9',1.8); s += path(pn,'#48C79B',1.8);
+  var gts=[30,60,90];
+  for (i=0;i<gts.length;i++){
+    var g=gts[i];
+    s += '<line x1="'+x(g).toFixed(1)+'" y1="'+T+'" x2="'+x(g).toFixed(1)+'" y2="'+(H-B)+'" stroke="#D6A83C" stroke-width="0.8" stroke-dasharray="2 4"/>';
+    s += txt(x(g), y(sv.n[g])-8, (sv.n[g]*100).toFixed(0)+'%', null, 'middle', 10, '#48C79B');
+    s += txt(x(g), y(sv.e[g])-8, (sv.e[g]*100).toFixed(0)+'%', null, 'middle', 10, '#7FA8D9');
+  }
+  for (i=0;i<=90;i+=15) s += txt(x(i), H-10, 'D'+i, null, 'middle', 10);
+  s += '</svg>';
+  return s;
+}
+
+/* ---------- cost bars ---------- */
+function drawCost(rows){
+  var use=[]; for (var i=0;i<rows.length;i++) if (rows[i].cph!==null && isFinite(rows[i].cph)) use.push(rows[i]);
+  if (!use.length) return '<p class="note">ยังไม่มีกิจกรรมที่วัดผลได้ในช่วงนี้</p>';
+  var Wd=1000,H=40+use.length*38,L=230,R=70;
+  var maxV=Math.max.apply(null, use.map(function(r){return r.cph;}))*1.12;
+  var s=svgOpen(Wd,H);
+  for (i=0;i<use.length;i++){
+    var r=use[i], yy=18+i*38, bw=(r.cph/maxV)*(Wd-L-R);
+    var col = r.cph<60 ? '#48C79B' : (r.cph<250 ? '#E39B3C' : '#E2564E');
+    s += tlabel(L-12, yy+14, r.a.name, 'end', 12, '#EFEBDE', 500);
+    s += rect(L, yy, bw, 20, col, 0.9, 2);
+    s += txt(L+bw+8, yy+14, fmt(r.cph)+' บ./หัว', null, 'start', 11, col);
+  }
+  s += '</svg>';
+  return s;
+}
+
+/* ---------- all branches overlay ---------- */
+function drawAll(){
+  var Wd=520,H=290,L=50,R=16,T=14,B=32;
+  var x=function(d){ return L+(d/90)*(Wd-L-R); };
+  var maxY=TARGET*1.25;
+  var y=function(v){ return H-B-(v/maxY)*(H-T-B); };
+  var s=svgOpen(Wd,H), i, j;
+  for (i=0;i<=5;i++){
+    var gy=y(maxY*i/5);
+    s += '<line x1="'+L+'" y1="'+gy.toFixed(1)+'" x2="'+(Wd-R)+'" y2="'+gy.toFixed(1)+'" stroke="#2A5546" stroke-width="0.7"/>';
+    s += txt(L-7, gy+3, fmt(maxY*i/5), null, 'end', 9);
+  }
+  s += path([[L,y(TARGET)],[Wd-R,y(TARGET)]], '#EFEBDE', 1.2, '5 4');
+  for (j=0;j<BRANCHES.length;j++){
+    var S=simulate(BRANCHES[j]), pts=[];
+    for (i=0;i<DAYS;i++) pts.push([x(i),y(S.actAll[i])]);
+    s += path(pts, BRANCHES[j].dow==='พุธ' ? '#D6A83C' : '#7FA8D9', 1.5, null, 0.85);
+  }
+  for (i=0;i<=90;i+=30) s += txt(x(i), H-10, 'D'+i, null, 'middle', 10);
+  s += '</svg>';
+  return s;
+}
+
+/* ---------- renderers ---------- */
+function verdict(v, good, ok){
+  if (v>=good) return '<span class="tag ok">ผ่าน</span>';
+  if (v>=ok)   return '<span class="tag warn">เฝ้าดู</span>';
+  return '<span class="tag bad">ต่ำกว่าเกณฑ์</span>';
+}
+
+function render(){
+  var b = BRANCHES[document.getElementById('selBranch').selectedIndex];
+  TARGET = Math.max(500, +document.getElementById('inpTarget').value || 4000);
+  var S = simulate(b);
+
+  document.getElementById('rwTitle').textContent = b.code + ' · ' + b.name;
+  document.getElementById('rwMeta').textContent = 'GO ' + thDate(dateOf(b.go,0)) + '  ·  รอบวัน' + b.dow + '  ·  ปิดรอบ ' + thDate(dateOf(b.go,90));
+  document.getElementById('runwaySvg').innerHTML = drawRunway(S);
+
+  /* KPI */
+  var a90=S.actAll[90], gap=TARGET-a90, share=a90?S.actNew[90]/a90:0;
+  var basket90=0, bl=0, bs=0;
+  for (var d=84;d<=90;d++){ bs+=S.daySales[d]; bl+=S.dayBills[d]; }
+  basket90 = bl? bs/bl : 0;
+  var gc=goCohortStats(S);
+  var retNew = gc[0].base ? gc[0].ret[2]/gc[0].base : 0;
+
+  var k='';
+  k += '<div class="kpi"><h4>Active Member ณ D90</h4><div class="big">'+fmt(a90)+'</div>'+
+       '<div class="foot">เป้า <em>'+fmt(TARGET)+'</em> · '+(gap>0?'ขาดอีก <em>'+fmt(gap)+'</em>':'เกินเป้า <em>'+fmt(-gap)+'</em>')+'</div></div>';
+  k += '<div class="kpi j"><h4>สัดส่วนที่มาจากลูกค้าใหม่</h4><div class="big">'+(share*100).toFixed(0)+'%</div>'+
+       '<div class="foot">ใหม่ <em>'+fmt(S.actNew[90])+'</em> · เดิม <em>'+fmt(S.actEx[90])+'</em></div></div>';
+  k += '<div class="kpi s"><h4>ฐาน GO ที่ยังกลับมาใน D61–90</h4><div class="big">'+(retNew*100).toFixed(0)+'%</div>'+
+       '<div class="foot">ฐานลูกค้าใหม่ <em>'+fmt(gc[0].base)+'</em> คน</div></div>';
+  k += '<div class="kpi '+(basket90 < b.basket0*0.85 ? 'a' : '')+'"><h4>ตะกร้าเฉลี่ย 7 วันสุดท้าย</h4><div class="big">'+Math.round(basket90)+'</div>'+
+       '<div class="foot">ช่วงเปิด <em>'+Math.round(b.basket0)+'</em> บาท/บิล</div></div>';
+  document.getElementById('kpiRow').innerHTML = k;
+
+  document.getElementById('chTraj').innerHTML = drawTrajectory(S);
+  document.getElementById('chBasket').innerHTML = drawBasket(S);
+
+  /* gates table */
+  var g='', gts=[30,60,90];
+  function row(label, fn, fmtr){
+    var r='<tr><td>'+label+'</td>';
+    for (var i=0;i<3;i++) r += '<td class="num">'+fmtr(fn(gts[i]))+'</td>';
+    return r+'</tr>';
+  }
+  g += row('Active Member (rolling 30)', function(d){return S.actAll[d];}, fmt);
+  g += row('— ลูกค้าใหม่', function(d){return S.actNew[d];}, fmt);
+  g += row('— ลูกค้าเดิม', function(d){return S.actEx[d];}, fmt);
+  g += row('ต้องได้ตาม Pace', function(d){return TARGET*paceFactor(d);}, fmt);
+  g += row('% ของ Pace', function(d){return S.actAll[d]/(TARGET*paceFactor(d));}, function(v){return (v*100).toFixed(0)+'%';});
+  g += row('ยอดขายสะสม (ลบ.)', function(d){var s2=0;for(var i=0;i<=d;i++)s2+=S.daySales[i];return s2/1e6;}, function(v){return v.toFixed(2);});
+  g += '<tr><td>สถานะ</td>';
+  for (var i=0;i<3;i++){ var p=S.actAll[gts[i]]/(TARGET*paceFactor(gts[i])); g += '<td>'+verdict(p,1.0,0.88)+'</td>'; }
+  g += '</tr>';
+  document.getElementById('tbGates').innerHTML = g;
+
+  /* P2 */
+  var rn=[],re=[],fn2=[],fe=[];
+  for (i=0;i<3;i++){
+    rn.push(gc[0].base? gc[0].ret[i]/gc[0].base : 0);
+    re.push(gc[1].base? gc[1].ret[i]/gc[1].base : 0);
+    fn2.push(gc[0].ret[i]? gc[0].cnt[i]/gc[0].ret[i] : 0);
+    fe.push(gc[1].ret[i]? gc[1].cnt[i]/gc[1].ret[i] : 0);
+  }
+  document.getElementById('chReturn').innerHTML = drawGrouped(
+    [{v:rn,c:'#48C79B'},{v:re,c:'#7FA8D9'}], WNAME, 1.0, '%');
+  document.getElementById('chFreq').innerHTML = drawGrouped(
+    [{v:fn2,c:'#48C79B'},{v:fe,c:'#7FA8D9'}], WNAME, null, '');
+
+  var t2='';
+  function nvRow(name, base, r, f, col){
+    var s2='<tr><td><span class="tag" style="background:'+col+'22;color:'+col+'">'+name+'</span></td><td class="num">'+fmt(base)+'</td>';
+    for (var i=0;i<3;i++){ s2+='<td class="num">'+(r[i]*100).toFixed(1)+'%</td><td class="num">'+f[i].toFixed(2)+'</td>'; }
+    return s2+'</tr>';
+  }
+  t2 += nvRow('ลูกค้าใหม่', gc[0].base, rn, fn2, '#48C79B');
+  t2 += nvRow('ลูกค้าเดิม', gc[1].base, re, fe, '#7FA8D9');
+  document.getElementById('tbNvE').innerHTML = t2;
+
+  /* P3 */
+  var cr=cohortRows(S), t3='';
+  for (i=0;i<cr.length;i++){
+    var r2=cr[i];
+    t3 += '<tr><td>'+r2.label+'</td><td class="num">'+fmt(r2.n)+'</td><td class="num">'+(r2.n?(r2.nw/r2.n*100).toFixed(0):'0')+'%</td>';
+    for (var w=0;w<3;w++){
+      t3 += '<td class="num heat">' + (r2.elig[w] ? (r2.r[w]/r2.elig[w]*100).toFixed(1)+'%' : '—') + '</td>';
+    }
+    t3 += '<td class="num">'+(r2.n?(r2.alive/r2.n*100).toFixed(1)+'%':'—')+'</td></tr>';
+  }
+  document.getElementById('tbCohort').innerHTML = t3;
+  document.getElementById('chSurv').innerHTML = drawSurvival(S);
+
+  /* P4 */
+  var ai=activityImpact(S), t4='';
+  var toName={all:'ทุกกลุ่ม', lapsed:'คนที่หายไป 14 วัน+', new:'ลูกค้าใหม่'};
+  for (i=0;i<ai.length;i++){
+    var r3=ai[i];
+    var vd = r3.cph===null ? '<span class="tag wed">ฐานตั้งต้น</span>'
+           : (r3.cph<60 ? '<span class="tag ok">คุ้ม</span>' : (r3.cph<250 ? '<span class="tag warn">พอได้</span>' : '<span class="tag bad">ไม่คุ้ม</span>'));
+    t4 += '<tr><td>'+r3.a.name+'</td><td class="num">D'+r3.a.d+'</td><td>'+toName[r3.a.to]+'</td>'+
+          '<td class="num">'+(r3.pre===null?'—':fmt(r3.pre))+'</td>'+
+          '<td class="num">'+(r3.exp===null?'—':fmt(r3.exp))+'</td>'+
+          '<td class="num">'+fmt(r3.post)+'</td>'+
+          '<td class="num">'+(r3.inc===null?'—':(r3.inc>0?'+':'')+fmt(r3.inc))+'</td>'+
+          '<td class="num">'+(r3.exp?((r3.inc/r3.exp)*100).toFixed(1)+'%':'—')+'</td>'+
+          '<td class="num">'+fmt(r3.cost)+'</td>'+
+          '<td class="num">'+(r3.cph===null?'—':fmt(r3.cph))+'</td><td>'+vd+'</td></tr>';
+  }
+  document.getElementById('tbAct').innerHTML = t4;
+  document.getElementById('chCost').innerHTML = drawCost(ai);
+
+  /* P5 */
+  var t5='', sums={'พุธ':{n:0,a30:0,a60:0,a90:0,ret:0,bk:0},'ศุกร์':{n:0,a30:0,a60:0,a90:0,ret:0,bk:0}};
+  for (var j=0;j<BRANCHES.length;j++){
+    var bb=BRANCHES[j], SS=simulate(bb), gg=goCohortStats(SS);
+    var base=gg[0].base+gg[1].base, ret=base? (gg[0].ret[0]+gg[1].ret[0])/base : 0;
+    var s2=0,l2=0; for (d=84;d<=90;d++){ s2+=SS.daySales[d]; l2+=SS.dayBills[d]; }
+    var bk=l2?s2/l2:0;
+    var tg=sums[bb.dow]; tg.n++; tg.a30+=SS.actAll[30]; tg.a60+=SS.actAll[60]; tg.a90+=SS.actAll[90]; tg.ret+=ret; tg.bk+=bk;
+    t5 += '<tr><td>'+bb.code+' '+bb.name+'</td>'+
+          '<td><span class="tag '+(bb.dow==='พุธ'?'wed':'fri')+'">'+bb.dow+'</span></td>'+
+          '<td class="num">'+thDate(dateOf(bb.go,0))+'</td>'+
+          '<td class="num">'+fmt(SS.actAll[30])+'</td><td class="num">'+fmt(SS.actAll[60])+'</td><td class="num">'+fmt(SS.actAll[90])+'</td>'+
+          '<td class="num">'+(SS.actAll[90]/TARGET*100).toFixed(0)+'%</td>'+
+          '<td class="num">'+fmt(base)+'</td><td class="num">'+(ret*100).toFixed(1)+'%</td>'+
+          '<td class="num">'+Math.round(bk)+'</td></tr>';
+  }
+  document.getElementById('tbWF').innerHTML = t5;
+
+  var wd=sums['พุธ'], fr=sums['ศุกร์'], t6='';
+  function cmp(label, a, c, isPct){
+    var dv = c? (a-c)/c : 0;
+    var col = Math.abs(dv)<0.05 ? '#A9B7AF' : (dv>0 ? '#48C79B' : '#E2564E');
+    return '<tr><td>'+label+'</td><td class="num">'+(isPct?(a*100).toFixed(1)+'%':fmt(a))+'</td>'+
+           '<td class="num">'+(isPct?(c*100).toFixed(1)+'%':fmt(c))+'</td>'+
+           '<td class="num" style="color:'+col+'">'+(dv>0?'+':'')+(dv*100).toFixed(1)+'%</td></tr>';
+  }
+  t6 += cmp('Active D30', wd.a30/wd.n, fr.a30/fr.n, false);
+  t6 += cmp('Active D60', wd.a60/wd.n, fr.a60/fr.n, false);
+  t6 += cmp('Active D90', wd.a90/wd.n, fr.a90/fr.n, false);
+  t6 += cmp('ฐาน GO กลับมาใน D5–30', wd.ret/wd.n, fr.ret/fr.n, true);
+  t6 += cmp('ตะกร้า D90 (บาท/บิล)', wd.bk/wd.n, fr.bk/fr.n, false);
+  document.getElementById('tbWFsum').innerHTML = t6;
+
+  document.getElementById('chAll').innerHTML = drawAll();
+}
+
+/* ---------- schema text ---------- */
+var SCHEMA = [
+'Branch            สาขาและวันเปิด — 1 แถว/สาขา',
+'  branch_code | branch_name | go_date | go_dow (พุธ/ศุกร์) | target_active | area_owner | handover_date',
+'',
+'MemberBase        สถานะสมาชิก ตัดสิน ณ วัน GO แล้วล็อก — 1 แถว/สมาชิก/สาขา',
+'  branch_code | member_id | member_type (new/existing) | signup_date | signup_channel | first_visit_date | first_visit_dplus',
+'',
+'TxnDaily          ธุรกรรมรายวันระดับสมาชิก — 1 แถว/สมาชิก/วันที่มีบิล',
+'  branch_code | member_id | txn_date | dplus | bills | items | net_amount',
+'',
+'Activity          กิจกรรมและค่าใช้จ่าย — 1 แถว/กิจกรรม',
+'  branch_code | activity_name | start_dplus | duration_days | target_group (all/lapsed/new) | cost_thb | owner',
+'',
+'ค่าที่ derive เอง ไม่ต้องกรอก:',
+'  active_rolling30(d) = COUNT DISTINCT member_id ที่มี txn ใน [d-29, d]',
+'  return_rate(w, type) = ฐาน GO ประเภทนั้นที่มี txn ในหน้าต่าง w (เริ่มนับหลังบิลแรกและหลัง D5) / ฐาน GO ประเภทนั้น',
+'  repeat_freq(w, type) = SUM(วันที่มีบิล ในหน้าต่าง w) / จำนวนคนที่กลับมาในหน้าต่าง w',
+'  cost_per_head = cost_thb / (active 7 วันหลัง − active 7 วันก่อน × อัตราแนวโน้ม)'
+].join('\n');
+
+/* ---------- boot ---------- */
+(function init(){
+  var sel=document.getElementById('selBranch'), i;
+  for (i=0;i<BRANCHES.length;i++){
+    var o=document.createElement('option');
+    o.textContent = BRANCHES[i].code + ' · ' + BRANCHES[i].name + ' (' + BRANCHES[i].dow + ')';
+    sel.appendChild(o);
+  }
+  document.getElementById('schema').textContent = SCHEMA;
+  sel.addEventListener('change', render);
+  document.getElementById('inpTarget').addEventListener('change', render);
+
+  var tabs=document.querySelectorAll('.tab');
+  for (i=0;i<tabs.length;i++){
+    tabs[i].addEventListener('click', function(e){
+      var all=document.querySelectorAll('.tab'), p=document.querySelectorAll('.pane'), k;
+      for (k=0;k<all.length;k++) all[k].setAttribute('aria-selected','false');
+      for (k=0;k<p.length;k++) p[k].classList.remove('on');
+      e.currentTarget.setAttribute('aria-selected','true');
+      document.getElementById(e.currentTarget.getAttribute('data-p')).classList.add('on');
+    });
+  }
+  render();
+})();
+</script>
+</body>
+</html>

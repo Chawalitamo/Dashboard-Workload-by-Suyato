@@ -107,3 +107,11 @@ fresh session pick up instantly. Current version: **v20260623p** (`version-A` ta
   Resend — DNS records need to be added in Squarespace by the user; not finished).
 - Activity Log is unfiltered beyond the admin-only gate (shows all tasks to admins).
 - Task List note URLs are still plain (chips only added to Kanban so far).
+
+## Other files in this repo
+
+- **`NSA Active Member Runway D0-D90.html`** — a separate, unrelated single-file
+  dashboard (NSA new-store Active Member runway tracker vs. the 4,000-member D90
+  target). Not linked from `index.html`; open it directly. Runs on simulated
+  per-branch data (`BRANCHES`/`ACTS` arrays in its `<script>`) — the last tab
+  ("นิยาม & Data Schema") documents the 4-sheet schema to wire in real data.
