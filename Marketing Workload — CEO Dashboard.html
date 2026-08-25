@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260819a -->
+<!-- v20260819b -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -1289,7 +1289,7 @@ if(window._pendingLoad) window._pendingLoad();
 
 <script>
 // ═════════════ DATA ═════════════
-const APP_VERSION='v20260819a'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
+const APP_VERSION='v20260819b'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
 const STAGES=['Job Brief','Design','Production','Review','Approval Stage','On Hold','Complete'];
 const DONE_STAGE=STAGES[STAGES.length-1];
 const SKEY=s=>({
@@ -3467,7 +3467,17 @@ async function makeThumb(file){
   if(!_canThumb(file.type))return null;
   let src=null,objUrl=null;
   try{
-    if(window.createImageBitmap){try{src=await createImageBitmap(file);}catch(e){}}
+    if(window.createImageBitmap){
+      try{src=await createImageBitmap(file);}
+      catch(e){
+        // Presentation exports and panoramas are flat graphics that compress
+        // hard: a 2 MB PNG can decode to tens of megapixels and blow past what
+        // the browser will allocate. Asking it to resize *while* decoding never
+        // materialises the full-size bitmap. Width alone keeps the aspect ratio,
+        // and the scaling below still trims a tall result to its long edge.
+        try{src=await createImageBitmap(file,{resizeWidth:THUMB_MAX,resizeQuality:'high'});}catch(e2){}
+      }
+    }
     if(!src){objUrl=URL.createObjectURL(file);const img=new Image();img.src=objUrl;await img.decode();src=img;}
     const iw=src.width||src.naturalWidth,ih=src.height||src.naturalHeight;
     if(!iw||!ih)return null;
@@ -3556,29 +3566,46 @@ async function backfillThumbs(){
   if(!confirm(`Build ${todo.length} missing thumbnails?\n\nEach original has to be downloaded once to shrink it — about ${mb} MB in total, one time only. After that the board serves the small copies instead, which is the whole point.\n\nKeep this tab open and awake. You can stop at any point and run it again later; it picks up where it left off.`))return;
   _bfRunning=true;_bfStop=false;_bfBtnLabel();
   let built=0,skipped=0,failed=0,saved=0,n=0;
+  // Why anything was left behind. Without this the run just reports a count and
+  // the only way to learn more is to open the console — which is how two files
+  // sat unexplained after the first pass.
+  const reasons=[];
+  const note=(item,why)=>{if(reasons.length<3)reasons.push((item.name||item.path)+' — '+why);};
   for(const item of todo){
     if(_bfStop)break;
     n++;
     _bfLog(`${n} / ${todo.length} — ${item.name||item.path}`);
     try{
-      const res=await fetch(pubUrl(item.path));
-      if(!res.ok)throw new Error('HTTP '+res.status);
+      // One retry: a single dropped request should not cost a file its thumbnail.
+      let res=null;
+      for(let attempt=0;attempt<2&&!(res&&res.ok);attempt++){
+        if(attempt)await new Promise(r=>setTimeout(r,700));
+        try{res=await fetch(pubUrl(item.path));}catch(e){res=null;}
+      }
+      if(!res||!res.ok)throw new Error(res?'download failed (HTTP '+res.status+')':'download failed (no response)');
       const blob=await res.blob();
       const file=new File([blob],item.name||'image',{type:item.type||blob.type});
       const tb=await makeThumb(file);
-      if(!tb){skipped++;continue;}            // already small, or a format canvas cannot read
+      if(!tb){
+        // Either genuinely not worth it, or the browser could not read it. Those
+        // are very different outcomes, so don't report them as the same thing.
+        skipped++;
+        if(blob.size>60*1024)note(item,'could not be shrunk — the browser could not read this image');
+        continue;
+      }
       const tp=_thumbPath(item.path,tb.type);
       const{error}=await window._sb.storage.from('task-files')
         .upload(tp,tb,{upsert:true,cacheControl:CACHE_FOREVER,contentType:tb.type});
       if(error)throw error;
-      if(!await _bfLink(item,tp,tb.size)){failed++;continue;}
+      if(!await _bfLink(item,tp,tb.size)){failed++;note(item,'the thumbnail was made but could not be saved to the task');continue;}
       built++;saved+=Math.max(0,(item.size||blob.size)-tb.size);
-    }catch(e){console.warn('[backfill] failed',item.path,e);failed++;}
+    }catch(e){console.warn('[backfill] failed',item.path,e);failed++;note(item,(e&&e.message)||String(e));}
   }
   _bfRunning=false;_bfBtnLabel();
   renderKanban();
   _bfLog(`${built} built · ${skipped} left as they were · ${failed} failed — the board now sends about ${Math.round(saved/1048576)} MB less each time somebody browses it.`
-    +(_bfStop?` Stopped early: ${todo.length-n} still to do, press the button again to finish.`:''));
+    +(_bfStop?` Stopped early: ${todo.length-n} still to do, press the button again to finish.`:'')
+    +(reasons.length?'  Left behind: '+reasons.join(' · ')+'.':''));
 }
 // Wallpapers are full-screen backgrounds uploaded straight from a phone or a
 // web search, so several are megabytes of PNG. Re-encoding them to WebP at
