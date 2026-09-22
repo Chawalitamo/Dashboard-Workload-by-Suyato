@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260922a -->
+<!-- v20260922b -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -1289,7 +1289,7 @@ if(window._pendingLoad) window._pendingLoad();
 
 <script>
 // ═════════════ DATA ═════════════
-const APP_VERSION='v20260922a'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
+const APP_VERSION='v20260922b'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
 const STAGES=['Job Brief','Design','Production','Review','Approval Stage','On Hold','Complete'];
 const DONE_STAGE=STAGES[STAGES.length-1];
 const SKEY=s=>({
@@ -3512,6 +3512,52 @@ async function uploadOne(path,file){
   }
   return{rec};
 }
+// ═════ Freeing storage ═════
+// Storage is a point-in-time quota, so unlike egress it does not reset with the
+// billing period — it has to be brought down deliberately. Supabase blocks
+// deleting storage rows from SQL on purpose, so the database picks the
+// candidates and this deletes them through the Storage API.
+const PURGE_BATCH=100;
+const PURGE_KINDS={
+  orphan:{label:'Unreferenced leftovers',
+    note:'Files no task, proof or chat message points at any more — usually an attachment somebody removed. Nothing in the app can reach them.'},
+  done_original:{label:'Full-size originals of completed work',
+    note:'Only where a thumbnail already exists. Cards keep their preview; the full-size copy can no longer be opened. Recycle Bin items are left alone.'},
+};
+async function _purgeList(kind){
+  const{data,error}=await window._sb.rpc('mkt_storage_candidates',{p_kind:kind});
+  if(error)throw error;
+  return data||[];
+}
+async function freeUpStorage(kind){
+  if(!_isAdminUser()){alert('Only a Super Admin can free up storage.');return;}
+  const meta=PURGE_KINDS[kind];if(!meta)return;
+  _bfLog('Checking what can be freed…');
+  let list;
+  try{list=await _purgeList(kind);}catch(e){_bfLog('Could not read the storage list: '+(e.message||e));return;}
+  if(!list.length){_bfLog('Nothing to free under "'+meta.label+'".');return;}
+  const bytes=list.reduce((s,r)=>s+Number(r.size_bytes||0),0);
+  const mb=Math.round(bytes/1048576);
+  if(!confirm(`Delete ${list.length} files and free about ${mb} MB?\n\n${meta.label}\n${meta.note}\n\nThis cannot be undone. Keep this tab open.`))return;
+  let done=0,failed=0,freed=0;
+  for(let i=0;i<list.length;i+=PURGE_BATCH){
+    const batch=list.slice(i,i+PURGE_BATCH);
+    _bfLog(`Deleting ${i+1}–${Math.min(i+batch.length,list.length)} of ${list.length}…`);
+    try{
+      const{error}=await window._sb.storage.from('task-files').remove(batch.map(r=>r.name));
+      if(error)throw error;
+      // Record that the original is gone, so the attachment list offers the
+      // thumbnail instead of a download link that would 404.
+      if(kind==='done_original'){
+        try{await window._sb.rpc('mkt_mark_originals_purged',{p_paths:batch.map(r=>r.name)});}
+        catch(e){console.warn('[purge] could not mark records',e);}
+      }
+      done+=batch.length;freed+=batch.reduce((s,r)=>s+Number(r.size_bytes||0),0);
+    }catch(e){console.warn('[purge] batch failed',e);failed+=batch.length;}
+  }
+  _bfLog(`${done} files deleted, about ${Math.round(freed/1048576)} MB freed${failed?` · ${failed} could not be deleted`:''}. Supabase usage can take up to an hour to catch up.`);
+  loadFromSupabase();
+}
 // What to *display*. Older attachments have no thumbnail, so they keep serving
 // the original — correct, just not cheap.
 function thumbUrl(a){return pubUrl(a.thumb||a.path);}
@@ -3649,10 +3695,15 @@ function renderAttachList(t){
   if(!list.length){el.innerHTML=`<div class="attach-empty">${attachKind==='proof'?'No proof of completed work attached yet':'No files attached yet'}</div>`;return;}
   el.innerHTML=list.map((a,i)=>{
     const d=new Date(a.uploaded_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+    // Once the full-size original has been cleared to save space, offering a
+    // download link would just 404. Point at the preview and say what happened.
+    const link=a.orig_purged
+      ? (a.thumb?`<a href="${pubUrl(a.thumb)}" target="_blank" class="cta" style="text-decoration:none;flex-shrink:0" title="Only the small preview is kept — the full-size original was cleared to save storage">&#128065;</a>`:'')
+      : `<a href="${pubUrl(a.path)}" target="_blank" class="cta" style="text-decoration:none;flex-shrink:0" title="Download">&#11015;</a>`;
     return `<div class="attach-item">
       <div class="attach-icon">${fileIcon(a.type)}</div>
-      <div class="attach-info"><div class="attach-name" title="${esc(a.name)}">${esc(a.name)}</div><div class="attach-meta">${fmtSize(a.size)} · ${d}</div></div>
-      <a href="${pubUrl(a.path)}" target="_blank" class="cta" style="text-decoration:none;flex-shrink:0" title="Download">&#11015;</a>
+      <div class="attach-info"><div class="attach-name" title="${esc(a.name)}">${esc(a.name)}</div><div class="attach-meta">${fmtSize(a.size)} · ${d}${a.orig_purged?' · preview only':''}</div></div>
+      ${link}
       <button class="cta del" style="flex-shrink:0" onclick="deleteAttachment(${i})" title="Remove">&#x2715;</button>
     </div>`;
   }).join('');
@@ -5318,6 +5369,11 @@ setTimeout(()=>{el.style.transition='opacity .3s,transform .3s';el.style.opacity
 <div style="display:flex;gap:8px;flex-wrap:wrap">
 <button class="profile-btn ghost" id="bf-btn" onclick="backfillThumbs()">Generate missing thumbnails</button>
 <button class="profile-btn ghost" onclick="optimiseWallpapers()">Re-compress wallpapers</button>
+</div>
+<div style="font-size:11px;color:var(--t3);margin:12px 0 6px;text-align:left;line-height:1.55"><b style="color:var(--t2)">Free up storage.</b> Storage is a standing limit, so unlike bandwidth it does not reset each month — it has to be brought down on purpose. Start with the leftovers; they cost nothing to lose.</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<button class="profile-btn ghost" onclick="freeUpStorage('orphan')">Delete unreferenced leftovers</button>
+<button class="profile-btn ghost" onclick="freeUpStorage('done_original')">Clear originals of completed work</button>
 </div>
 <div id="bf-status" style="font-size:11px;color:var(--t2);margin-top:8px;text-align:left;line-height:1.5;word-break:break-word"></div>
 </div>
