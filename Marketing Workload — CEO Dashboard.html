@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260819b -->
+<!-- v20260922a -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -1289,7 +1289,7 @@ if(window._pendingLoad) window._pendingLoad();
 
 <script>
 // ═════════════ DATA ═════════════
-const APP_VERSION='v20260819b'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
+const APP_VERSION='v20260922a'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
 const STAGES=['Job Brief','Design','Production','Review','Approval Stage','On Hold','Complete'];
 const DONE_STAGE=STAGES[STAGES.length-1];
 const SKEY=s=>({
@@ -3892,10 +3892,23 @@ try{const{data}=await window._sb.from('mkt_owners').select('name,avatar');_owner
 }
 // ── Engagement tracking: last login (dashboard open) + last action per member ──
 let _lastLogin={},_lastAction={},_worklogRows=[];
+// Set by the pulse check in loadFromSupabase; see the comment there.
+let _pulseSig=null,_lastFullLoad=0,_ownersFetchedAt=0;
+const FULL_REFRESH_MS=600000;   // pull everything at least this often regardless
+const OWNERS_TTL_MS=600000;     // avatars are base64 and change almost never
 async function loadEngagementData(){
-try{const{data}=await window._sb.from('mkt_owners').select('name,avatar,last_login');_lastLogin={};(data||[]).forEach(o=>{if(o.avatar)_ownerAvatars[o.name]=o.avatar;if(o.last_login)_lastLogin[o.name]=o.last_login;});}catch(e){}
-try{const{data}=await window._sb.from('mkt_activity_log').select('changed_by,created_at').order('created_at',{ascending:false}).limit(3000);_lastAction={};(data||[]).forEach(r=>{if(r.changed_by&&!_lastAction[r.changed_by])_lastAction[r.changed_by]=r.created_at;});}catch(e){}
-try{const{data}=await window._sb.from('mkt_worklog').select('*');_worklogRows=data||[];}catch(e){_worklogRows=[];}
+// Avatars are stored as data URLs, so this is ~31 kB. It only changes when
+// somebody edits their profile — rare enough not to refetch twice a minute.
+if(Date.now()-_ownersFetchedAt>OWNERS_TTL_MS){
+try{const{data}=await window._sb.from('mkt_owners').select('name,avatar,last_login');_lastLogin={};(data||[]).forEach(o=>{if(o.avatar)_ownerAvatars[o.name]=o.avatar;if(o.last_login)_lastLogin[o.name]=o.last_login;});_ownersFetchedAt=Date.now();}catch(e){}
+}
+// Only the newest action per person is used (the inactive-members card), so let
+// the database reduce it: 15 rows instead of the 3000 log rows this used to pull.
+try{const{data}=await window._sb.rpc('mkt_last_actions');_lastAction={};(data||[]).forEach(r=>{if(r.changed_by)_lastAction[r.changed_by]=r.last_at;});}catch(e){}
+// The work-log rows feed one Super-Admin dashboard card; everyone else was
+// downloading 78 kB they are never shown.
+if(_isAdminUser()){try{const{data}=await window._sb.from('mkt_worklog').select('*');_worklogRows=data||[];}catch(e){_worklogRows=[];}}
+else _worklogRows=[];
 }
 // Record that the current user opened the dashboard (works with persisted 30-day sessions).
 async function recordLogin(name){
@@ -4554,10 +4567,20 @@ function _safeRender(name,fn,hostId){
 }
 async function loadFromSupabase(){
   if(!window._sb){_sync('err','Client not ready'); return;}
+  // ── 0. Cheap change check ──
+  // Refetching every task twice a minute moved ~490 kB per tab per poll, all
+  // day, for everyone — that, far more than the images, is what exhausted the
+  // egress quota. mkt_pulse() answers "has anything moved?" in ~150 bytes, and
+  // the expensive fetch below only runs when it has. Every FULL_REFRESH_MS we
+  // pull anyway, so a change the fingerprint somehow missed still heals itself.
+  let _pulse=null;
+  try{
+    const{data,error}=await window._sb.rpc('mkt_pulse');
+    if(!error&&data)_pulse=data;
+  }catch(e){}
   // Auto-refresh stale/long-open tabs when a newer version has shipped.
   try{
-    const{data:_vv}=await window._sb.from('mkt_settings').select('value').eq('key','app_version').maybeSingle();
-    const _sv=_vv&&_vv.value;
+    const _sv=_pulse?_pulse.v:(await window._sb.from('mkt_settings').select('value').eq('key','app_version').maybeSingle()).data?.value;
     if(_sv&&_sv!==APP_VERSION){
       const alreadyTried=_ss('get','_verReload')===_sv;
       const urlTried=(location.search||'').indexOf('v='+encodeURIComponent(_sv))>=0; // fallback when storage is blocked
@@ -4571,15 +4594,29 @@ async function loadFromSupabase(){
     } else { _bannerNewVer=false; }
     _renderBanner();
   }catch(e){}
+  if(_pulse){
+    const sig=JSON.stringify([_pulse.tn,_pulse.tu,_pulse.td,_pulse.ps]);
+    if(sig===_pulseSig&&Date.now()-_lastFullLoad<FULL_REFRESH_MS){
+      _sync('ok','● Live · '+new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}));
+      _bannerOffline=false;_renderBanner();
+      return;                       // nothing changed — 150 bytes instead of 490 kB
+    }
+    _pulseSig=sig;
+  }
   _sync('busy','Loading…');
   // ── 1. Data fetch — only this can cause ⚠ Offline ──
   try{
     const [{data:projs,error:e1},{data:tks,error:e2}]=await Promise.all([
       window._sb.from('mkt_projects').select('*').is('deleted_at',null).order('sort_order'),
-      window._sb.from('mkt_tasks').select('*').is('deleted_at',null).order('created_at')
+      // Named columns, not '*': sort_order/deleted_* are never read here and
+      // simply cost bandwidth on every refresh.
+      window._sb.from('mkt_tasks')
+        .select('id,title,owner,pics,lead,project,stage,due,note,attachments,proof,created_at,updated_at')
+        .is('deleted_at',null).order('created_at')
     ]);
     if(e1) throw e1;
     if(e2) throw e2;
+    _lastFullLoad=Date.now();
     projects=projs.map(p=>({name:p.name,color:p.color,id:p.id}));
     const _all=tks.map(t=>({id:t.id,title:t.title||'(untitled)',owner:t.owner||'',pics:(Array.isArray(t.pics)&&t.pics.length?t.pics.filter(Boolean):(t.owner?[t.owner]:[])),lead:t.lead||'',project:t.project||'',stage:t.stage||'Job Brief',due:t.due||'',note:t.note||'',attachments:t.attachments||[],proof:t.proof||[],created_at:t.created_at||'',updated_at:t.updated_at||t.created_at||''}));
     tasks=applyUserFilter(_all);
@@ -4936,7 +4973,11 @@ window._pendingLoad = async function(){
   window._sb.auth.onAuthStateChange((event)=>{ if(event==='PASSWORD_RECOVERY') _enterRecovery(); });
   if(/type=recovery/.test(location.hash)){ _enterRecovery(); return; }
   loadFromSupabase();
-  setInterval(loadFromSupabase,30000);
+  // A backgrounded tab has nobody looking at it, so polling it is pure cost —
+  // and tabs left open overnight and over weekends were doing exactly that.
+  // Catch up as soon as it comes back to the foreground instead.
+  setInterval(()=>{if(!document.hidden)loadFromSupabase();},30000);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)loadFromSupabase();});
   setInterval(()=>{heartbeat();_tickActive();updateWorktimeChip();},60000);
   // Require a fresh login each day: only restore the session if the last
   // login happened on today's (Bangkok) calendar date.
