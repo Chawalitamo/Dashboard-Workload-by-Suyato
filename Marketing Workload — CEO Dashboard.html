@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v20260922b -->
+<!-- v20260923a -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -1289,7 +1289,7 @@ if(window._pendingLoad) window._pendingLoad();
 
 <script>
 // ═════════════ DATA ═════════════
-const APP_VERSION='v20260922b'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
+const APP_VERSION='v20260923a'; // bump on each deploy; mirrored in mkt_settings.app_version to auto-refresh open tabs
 const STAGES=['Job Brief','Design','Production','Review','Approval Stage','On Hold','Complete'];
 const DONE_STAGE=STAGES[STAGES.length-1];
 const SKEY=s=>({
@@ -3539,7 +3539,7 @@ async function freeUpStorage(kind){
   const bytes=list.reduce((s,r)=>s+Number(r.size_bytes||0),0);
   const mb=Math.round(bytes/1048576);
   if(!confirm(`Delete ${list.length} files and free about ${mb} MB?\n\n${meta.label}\n${meta.note}\n\nThis cannot be undone. Keep this tab open.`))return;
-  let done=0,failed=0,freed=0;
+  let done=0,failed=0,freed=0,unmarked=0;
   for(let i=0;i<list.length;i+=PURGE_BATCH){
     const batch=list.slice(i,i+PURGE_BATCH);
     _bfLog(`Deleting ${i+1}–${Math.min(i+batch.length,list.length)} of ${list.length}…`);
@@ -3548,14 +3548,19 @@ async function freeUpStorage(kind){
       if(error)throw error;
       // Record that the original is gone, so the attachment list offers the
       // thumbnail instead of a download link that would 404.
+      // supabase-js RESOLVES with {error} rather than throwing, so a try/catch
+      // around this saw nothing: the files went and the records never said so,
+      // leaving links that 404. Check the error explicitly and report it.
       if(kind==='done_original'){
-        try{await window._sb.rpc('mkt_mark_originals_purged',{p_paths:batch.map(r=>r.name)});}
-        catch(e){console.warn('[purge] could not mark records',e);}
+        const{error:me}=await window._sb.rpc('mkt_mark_originals_purged',{p_paths:batch.map(r=>r.name)});
+        if(me){console.warn('[purge] could not mark records',me);unmarked+=batch.length;}
       }
       done+=batch.length;freed+=batch.reduce((s,r)=>s+Number(r.size_bytes||0),0);
     }catch(e){console.warn('[purge] batch failed',e);failed+=batch.length;}
   }
-  _bfLog(`${done} files deleted, about ${Math.round(freed/1048576)} MB freed${failed?` · ${failed} could not be deleted`:''}. Supabase usage can take up to an hour to catch up.`);
+  _bfLog(`${done} files deleted, about ${Math.round(freed/1048576)} MB freed${failed?` · ${failed} could not be deleted`:''}.`
+    +(unmarked?` ⚠ ${unmarked} were deleted but their task records could not be updated — tell Claude, those rows still show a download link that will fail.`:'')
+    +' Supabase usage can take up to an hour to catch up.');
   loadFromSupabase();
 }
 // What to *display*. Older attachments have no thumbnail, so they keep serving
